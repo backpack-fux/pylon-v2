@@ -1,5 +1,4 @@
 import { Type as t } from '@sinclair/typebox';
-import { AddressType } from '@prisma/client/edge';
 
 export const CreateMerchantInput = {
   body: t.Object({
@@ -10,7 +9,6 @@ export const CreateMerchantInput = {
     companyJurisdiction: t.Optional(t.String()),
     walletAddress: t.String(),
     registeredAddress: t.Object({
-      type: t.Enum(AddressType),
       street1: t.String(),
       street2: t.Optional(t.String()),
       city: t.String(),

@@ -1,3 +1,5 @@
+import { AddressType } from '@prisma/client/edge';
+
 import { FastifyRequestTypebox, FastifyReplyTypebox } from '@/v1/fastifyTypes';
 import { prisma } from '@/db/index';
 import { ERRORS } from '@/helpers/errors';
@@ -19,7 +21,7 @@ export async function createMerchantHandler(
     registeredAddress,
   } = req.body;
 
-  const { type, street1, street2, city, postcode, state, country } =
+  const { street1, street2, city, postcode, state, country } =
     registeredAddress;
 
   try {
@@ -33,7 +35,7 @@ export async function createMerchantHandler(
         walletAddress,
         registeredAddress: {
           create: {
-            type,
+            type: AddressType.REGISTERED,
             street1,
             street2,
             city,
