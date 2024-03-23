@@ -36,7 +36,7 @@ export async function createMerchantHandler(
       rep.code(ERROR404.statusCode).send({ msg: ERRORS.merchant.exists });
     else rep.code(STANDARD.SUCCESS).send({ data: merchant });
   } catch (error) {
-    console.error('Error creating user at sign up:', error);
+    console.error('Error creating merchant:', error);
     rep.code(ERROR500.statusCode).send({ msg: ERROR500.message });
   }
 }
