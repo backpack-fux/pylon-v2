@@ -15,6 +15,7 @@ export const Config = {
   port: Number(loadEnvironmentVariable('PORT', 5000)),
   jwtSecret: loadEnvironmentVariable('JWT_SECRET'),
   jwtExpires: Number(loadEnvironmentVariable('JWT_EXPIRES', 24)),
+  serverApiKey: loadEnvironmentVariable('SERVER_API_KEY'),
   bridgeApiKey: loadEnvironmentVariable('BRIDGE_API_KEY'),
   bridgeApiURI: loadEnvironmentVariable('BRIDGE_API_URI'),
   isProduction: process.env.NODE_ENV === 'production',

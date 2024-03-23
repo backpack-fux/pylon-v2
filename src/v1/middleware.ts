@@ -1,13 +1,8 @@
+import { Config } from '@/config';
+import { ERROR401 } from '@/helpers/constants';
 import { FastifyRequest, FastifyReply } from 'fastify';
 
-// @notes: I cant use the signature to authenticate because
-// 1) Each message that is signed has a unique nonce, I would need to send in the stored user nonce for each HTTP request
-// and we are currently not storing and updating the nonce in db or cookies
-// 2) I would need to call createMessage() and pass in the stored nonce,
-// but we are already using the createMessage() to generate random nonce,
-// or I would need to duplicate the function or adjust the function to also handle an already-generated and user-stored nonce
-// 3) this is because I would need to use the siweMessage.verify({ signature });
-export const authenticationMiddleware = async (
+export const authenticate = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
@@ -17,7 +12,9 @@ export const authenticationMiddleware = async (
   console.log(process.env.JWT_SECRET, 'secret & token:', token);
 
   if (!token) {
-    return reply.code(401).send({ error: 'Unauthorized request' });
+    return reply
+      .code(ERROR401.statusCode)
+      .send({ error: 'Unauthorized: Missing or invalid authorization header' });
   }
   try {
     // Verify the JWT token using the Fastify JWT plugin
@@ -25,6 +22,28 @@ export const authenticationMiddleware = async (
     // If the token is valid, continue with the request
     return;
   } catch (err) {
-    return reply.code(401).send({ error: 'Unauthorized' });
+    return reply.code(ERROR401.statusCode).send({ error: 'Unauthorized' });
+  }
+};
+
+export const validateAPIKey = async (
+  request: FastifyRequest,
+  reply: FastifyReply
+) => {
+  const authHeader = request.headers.authorization;
+  const apiKey = authHeader && authHeader.split(' ')[1];
+
+  if (!apiKey) {
+    return reply
+      .code(ERROR401.statusCode)
+      .send({ error: 'Unauthorized: Missing or invalid authorization header' });
+  }
+
+  if (apiKey !== Config.serverApiKey) {
+    return reply
+      .code(ERROR401.statusCode)
+      .send({ error: 'Unauthorized: Invalid API key' });
+  } else {
+    return;
   }
 };
