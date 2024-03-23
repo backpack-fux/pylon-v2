@@ -1,8 +1,8 @@
 export const ERRORS = {
   auth: {
-    invalidToken: 'Token is invalid.',
-    credError: 'Invalid credential',
-    tokenError: 'Invalid Token',
+    invalidJWT: 'Invalid JWT',
+    invalidAPIKey: 'Invalid API key',
+    missingAuthorizationHeader: 'Missing or invalid authorization header',
   },
   methods: {
     missingPostBody: 'Body is required for POST requests',
