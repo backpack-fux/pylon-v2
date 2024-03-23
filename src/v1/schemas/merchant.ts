@@ -5,10 +5,10 @@ export const CreateMerchantInput = {
     name: t.String({ maxLength: 255 }),
     surname: t.String({ maxLength: 255 }),
     email: t.String({ format: 'email' }),
-    phoneNumber: t.String(),
+    phoneNumber: t.Optional(t.String()),
     companyNumber: t.Optional(t.String()),
     companyJurisdiction: t.Optional(t.String({ minLength: 2, maxLength: 2 })),
-    fee: t.Optional(t.Number({ minimum: 6.5, maximum: 100 })),
+    fee: t.Optional(t.Number({ minimum: 3, maximum: 100 })),
     walletAddress: t.String({ pattern: '^(0x)?[0-9a-fA-F]{40}$' }),
     registeredAddress: t.Object({
       street1: t.String({ maxLength: 50 }),
