@@ -2,7 +2,7 @@ import { FastifyReply, FastifyRequest, FastifyInstance } from 'fastify';
 import { utils } from '@/helpers/utils';
 import { ERROR500, STANDARD } from '@/helpers/constants';
 
-import User from './user';
+import Merchant from './merchant';
 
 const Home = async (app: FastifyInstance) => {
   app.all('/', async (req: FastifyRequest, rep: FastifyReply) => {
@@ -19,4 +19,4 @@ const Home = async (app: FastifyInstance) => {
   });
 };
 
-export { Home, User };
+export { Home, Merchant };

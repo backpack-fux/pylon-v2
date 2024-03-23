@@ -5,3 +5,7 @@ export const methods: Record<string, HTTPMethods> = {
   POST: 'POST',
   PUT: 'PUT',
 };
+
+export const headers = {
+  'Content-Type': 'application/json',
+};

@@ -11,22 +11,20 @@ export const authenticationMiddleware = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
-  if (process.env.JWT_SECRET) {
-    const authHeader = request.headers.authorization;
-    const token = authHeader && authHeader.split(' ')[1];
+  const authHeader = request.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1];
 
-    console.log(process.env.JWT_SECRET, 'secret & token:', token);
+  console.log(process.env.JWT_SECRET, 'secret & token:', token);
 
-    if (!token) {
-      return reply.code(401).send({ error: 'Unauthorized request' });
-    }
-    try {
-      // Verify the JWT token using the Fastify JWT plugin
-      await request.jwtVerify();
-      // If the token is valid, continue with the request
-      return;
-    } catch (err) {
-      return reply.code(401).send({ error: 'Unauthorized' });
-    }
-  } else reply.code(500).send({ error: 'No JWT Secret found' });
+  if (!token) {
+    return reply.code(401).send({ error: 'Unauthorized request' });
+  }
+  try {
+    // Verify the JWT token using the Fastify JWT plugin
+    await request.jwtVerify();
+    // If the token is valid, continue with the request
+    return;
+  } catch (err) {
+    return reply.code(401).send({ error: 'Unauthorized' });
+  }
 };
