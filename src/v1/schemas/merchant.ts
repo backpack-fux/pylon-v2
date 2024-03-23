@@ -7,7 +7,7 @@ export const CreateMerchantInput = {
     email: t.String(),
     phoneNumber: t.String(),
     companyNumber: t.Optional(t.String()),
-    companyJurisidiction: t.Optional(t.String()),
+    companyJurisdiction: t.Optional(t.String()),
     walletAddress: t.String(),
     registeredAddress: t.Object({
       type: t.Enum(AddressType),

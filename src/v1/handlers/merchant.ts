@@ -14,7 +14,7 @@ export async function createMerchantHandler(
     email,
     phoneNumber,
     companyNumber,
-    companyJurisidiction,
+    companyJurisdiction,
     walletAddress,
     registeredAddress,
   } = req.body;
@@ -29,7 +29,7 @@ export async function createMerchantHandler(
         email,
         phoneNumber,
         companyNumber,
-        companyJurisidiction,
+        companyJurisdiction,
         walletAddress,
         registeredAddress: {
           create: {
