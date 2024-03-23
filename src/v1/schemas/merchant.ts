@@ -3,6 +3,7 @@ import { Type as t } from '@sinclair/typebox';
 export const CreateMerchantInput = {
   body: t.Object({
     name: t.String(),
+    surname: t.String(),
     email: t.String(),
     phoneNumber: t.String(),
     companyNumber: t.Optional(t.String()),

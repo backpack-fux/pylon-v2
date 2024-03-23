@@ -1,26 +1,38 @@
 import { Config } from '@/config';
 import { headers, methods } from '@/helpers/api';
 import { ERRORS } from '@/helpers/errors';
+import { UUID } from 'crypto';
+import { ComplianceType } from '../types/bridge';
 
 export class BridgeService {
+  private static instance: BridgeService;
   private baseUrl: string;
   private apiKey: string;
 
   private endpoints = {
     createTos: '/customers/tos_links',
     createCustomer: '/customers',
-    createKycLink: '/kyc_links',
+    createComplianceLinks: '/kyc_links',
     createKycUrl: (customerId: string, redirectUri: string) =>
       `/customers/${customerId}/id_verification_link?redirect_uri=${redirectUri}`,
     getCustomer: (customerId: string) => `/customers/${customerId}`,
-    getKycLink: (kycLinkId: string) => `/kyc_links/${kycLinkId}`,
+    getKycLinks: (kycLinkId: string) => `/kyc_links/${kycLinkId}`,
   };
 
-  constructor() {
+  private constructor() {
     this.baseUrl = Config.bridgeApiURI;
     this.apiKey = Config.bridgeApiKey;
   }
 
+  /** @dev avoid multiple instances; allow one global, reusable instance */
+  public static getInstance(): BridgeService {
+    if (!BridgeService.instance) {
+      BridgeService.instance = new BridgeService();
+    }
+    return BridgeService.instance;
+  }
+
+  /** @dev build the request */
   private async sendRequest(
     url: string,
     options: RequestInit
@@ -63,6 +75,7 @@ export class BridgeService {
     return data.url;
   }
 
+  /** @docs https://apidocs.bridge.xyz/reference/get_customers-customerid */
   async createCustomer(data: any, uuid: string) {
     const response = await this.sendRequest(this.endpoints.createCustomer, {
       method: methods.POST,
@@ -95,37 +108,49 @@ export class BridgeService {
     return await response.json();
   }
 
-  async createKycLink({
-    idempotencyKey,
-    name,
-    type,
-    email,
-  }: {
-    idempotencyKey: string;
-    name: string;
-    type: 'individual' | 'business';
-    email: string;
-  }) {
-    const response = await this.sendRequest(this.endpoints.createKycLink, {
-      method: methods.POST,
-      headers,
-      body: JSON.stringify({
-        full_name: name,
-        email,
-        type,
-      }),
+  /** @docs https://apidocs.bridge.xyz/docs/kyc-links  */
+  async createComplianceLinks(
+    idempotencyKey: UUID,
+    fullName: string,
+    type: ComplianceType,
+    email: string
+  ) {
+    const headers = this.buildRequestHeaders({
+      'Idempotency-Key': idempotencyKey,
     });
+
+    const response = await this.sendRequest(
+      this.endpoints.createComplianceLinks,
+      {
+        method: methods.POST,
+        headers: headers,
+        body: JSON.stringify({
+          full_name: fullName,
+          email,
+          type,
+        }),
+      }
+    );
     return await response.json();
   }
 
-  async getKycLink(kycLinkId: string): Promise<any> {
+  async getKycLinks(kycLinkId: string): Promise<any> {
     const response = await this.sendRequest(
-      this.endpoints.getKycLink(kycLinkId),
+      this.endpoints.getKycLinks(kycLinkId),
       {
         method: methods.GET,
         headers,
       }
     );
     return await response.json();
+  }
+
+  private buildRequestHeaders(
+    customHeaders: Record<string, string>
+  ): Record<string, string> {
+    return {
+      ...headers,
+      ...customHeaders,
+    };
   }
 }

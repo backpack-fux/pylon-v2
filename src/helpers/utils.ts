@@ -1,4 +1,5 @@
 import { prisma } from '@/db';
+import { UUID } from 'crypto';
 
 export const utils = {
   isJSON: (data: string) => {
@@ -24,5 +25,11 @@ export const utils = {
           reject(e);
         });
     });
+  },
+  generateUUID: (): UUID => {
+    return crypto.randomUUID();
+  },
+  getFullName: (name: string, surname: string) => {
+    return name + ' ' + surname;
   },
 };

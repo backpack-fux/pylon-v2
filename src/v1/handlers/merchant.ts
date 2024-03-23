@@ -1,11 +1,18 @@
 import { AddressType } from '@prisma/client/edge';
 
-import { FastifyRequestTypebox, FastifyReplyTypebox } from '@/v1/fastifyTypes';
+import {
+  FastifyRequestTypebox,
+  FastifyReplyTypebox,
+} from '@/v1/types/fastifyTypes';
 import { prisma } from '@/db/index';
 import { ERRORS } from '@/helpers/errors';
 import { CreateMerchantInput } from '../schemas/merchant';
 import { ERROR404, ERROR500, STANDARD } from '@/helpers/constants';
 import { BridgeService } from '../services/bridgeService';
+import { ComplianceTypeEnum } from '@/v1/types/bridge';
+import { utils } from '@/helpers/utils';
+
+const bridgeService = BridgeService.getInstance();
 
 export async function createMerchantHandler(
   req: FastifyRequestTypebox<typeof CreateMerchantInput>,
@@ -13,6 +20,7 @@ export async function createMerchantHandler(
 ): Promise<void> {
   const {
     name,
+    surname,
     email,
     phoneNumber,
     companyNumber,
@@ -24,10 +32,19 @@ export async function createMerchantHandler(
   const { street1, street2, city, postcode, state, country } =
     registeredAddress;
 
+  /**
+   * @TODO
+   * 1. create partner
+   * 2. do kyb via bridge.xyz
+   * 3. store to db
+   * 4. return bridge.xyz response
+   */
+
   try {
     const merchant = await prisma.merchant.create({
       data: {
         name,
+        surname,
         email,
         phoneNumber,
         companyNumber,
@@ -48,6 +65,16 @@ export async function createMerchantHandler(
     });
 
     console.log(`merchant details: ${merchant}`);
+
+    const merchantUuid = utils.generateUUID();
+    const fullName = utils.getFullName(name, surname);
+
+    bridgeService.createComplianceLinks(
+      merchantUuid,
+      fullName,
+      ComplianceTypeEnum.Business,
+      email
+    );
 
     if (!merchant)
       rep.code(ERROR404.statusCode).send({ msg: ERRORS.merchant.exists });
