@@ -1,0 +1,155 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+generator client {
+    provider      = "prisma-client-js"
+    binaryTargets = ["native", "linux-musl"]
+}
+
+model Merchant {
+    id          Int     @id @default(autoincrement())
+    name        String  @db.VarChar(255)
+    email       String  @unique
+    tokenAuth   String
+    phoneNumber String? @unique
+
+    companyNumber        String?
+    companyJurisidiction String? @db.Char(2) // ISO 3166-1 alpha-2
+
+    fee           Decimal @default(6.50) @db.Decimal(4, 2) // pct 100.00% to 0.00%
+    walletAddress String  @unique
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt()
+
+    registeredAddress PhysicalAddress @relation(fields: [addressId], references: [id])
+    addressId         BigInt
+
+    Buyer      Buyer[]
+    Compliance Compliance[]
+    Order      Transaction[]
+
+    @@unique([companyNumber, companyJurisidiction])
+}
+
+model Buyer {
+    id BigInt @id @default(autoincrement())
+
+    name          String  @db.VarChar(255)
+    email         String  @unique
+    tokenAuth     String
+    phoneNumber   String? @unique
+    walletAddress String? @unique
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt()
+
+    merchant   Merchant @relation(fields: [merchantId], references: [id])
+    merchantId Int
+
+    billingAddress PhysicalAddress? @relation(fields: [addressId], references: [id])
+    addressId      BigInt?
+
+    Compliance Compliance[]
+    Order      Transaction[]
+}
+
+model Compliance {
+    id   BigInt      @id @default(autoincrement())
+    type AccountType
+
+    verificationDocumentLink String @unique
+    termsOfServiceLink       String @unique
+
+    verificatonStatus    VerificationStatus @default(INCOMPLETE)
+    termsOfServiceStatus TosStatus @default(INCOMPLETE)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt()
+
+    buyer   Buyer?  @relation(fields: [buyerId], references: [id])
+    buyerId BigInt?
+
+    merchant   Merchant? @relation(fields: [merchantId], references: [id])
+    merchantId Int?
+}
+
+model Transaction {
+    id     String          @id @default(uuid())
+    status TransactionStatus
+
+    partnerTokenId   String
+    partnerRequestId String
+
+    currency String   @db.Char(3) // ISO 4217
+    amount   BigInt // store in cents
+    tip      Decimal? @default(0.00) @db.Decimal(4, 2) // pct
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt()
+
+    buyer   Buyer  @relation(fields: [buyerId], references: [id])
+    buyerId BigInt
+
+    merchant   Merchant @relation(fields: [merchantId], references: [id])
+    merchantId Int
+
+    shippingAddress PhysicalAddress? @relation(fields: [addressId], references: [id])
+    addressId       BigInt?
+}
+
+model PhysicalAddress {
+    id   BigInt      @id @default(autoincrement())
+    type AddressType
+
+    street1 String  @db.VarChar(50)
+    street2 String? @db.VarChar(50)
+
+    city     String  @db.VarChar(50)
+    postcode String? @db.VarChar(25)
+    state    String? @db.Char(2)
+    country  String  @db.Char(2) // ISO 3166-1 alpha-2
+
+    Transaction Transaction[]
+    Buyer       Buyer[]
+    Merchant    Merchant[]
+}
+
+enum TransactionStatus {
+    PENDING
+    COMPLETE
+    FAILED
+    ERROR
+}
+
+enum AddressType {
+    BILLING
+    SHIPPING
+    REGISTERED
+}
+
+// @note: what are other status' captured by Bridge.xyz (& co)?
+enum VerificationStatus {
+    INCOMPLETE
+    PENDING
+    EXPIRED
+    CANCELLED
+    APPROVED
+    DENIED
+}
+
+enum TosStatus {
+    INCOMPLETE
+    ACCEPTED
+    DECLINED
+}
+
+enum AccountType {
+    BUSINESS
+    INDIVIDUAL
+}
