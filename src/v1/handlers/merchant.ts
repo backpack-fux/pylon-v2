@@ -16,7 +16,11 @@ export async function createMerchantHandler(
     companyNumber,
     companyJurisidiction,
     walletAddress,
+    registeredAddress,
   } = req.body;
+
+  const { type, street1, street2, city, postcode, state, country } =
+    registeredAddress;
 
   try {
     const merchant = await prisma.merchant.create({
@@ -27,6 +31,17 @@ export async function createMerchantHandler(
         companyNumber,
         companyJurisidiction,
         walletAddress,
+        registeredAddress: {
+          create: {
+            type,
+            street1,
+            street2,
+            city,
+            postcode,
+            state,
+            country,
+          },
+        },
       },
     });
 
