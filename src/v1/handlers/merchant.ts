@@ -41,6 +41,7 @@ export async function createMerchantHandler(
    */
 
   try {
+    /** @dev create partner */
     const merchant = await prisma.merchant.create({
       data: {
         name,
