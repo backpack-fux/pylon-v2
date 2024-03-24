@@ -20,14 +20,9 @@ export const CreateMerchantInput = {
     }),
   }),
   response: {
-    200: t.Object({
-      data: t.Any(),
-    }),
-    404: t.Object({
-      merchant: t.String(),
-    }),
-    500: t.Object({
-      msg: t.String(),
-    }),
+    200: t.Any(),
+    400: t.Any(),
+    404: t.Any(),
+    500: t.Any(),
   },
 };
