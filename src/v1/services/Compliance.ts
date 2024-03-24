@@ -4,6 +4,9 @@ import { BridgeComplianceLinksResponse } from '../types/bridge';
 import { prisma } from '@/db';
 import { Merchant } from '@prisma/client';
 import { AccountType, TosStatus, VerificationStatus } from '@prisma/client';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { ERROR400 } from '@/helpers/constants';
+import { PrismaError } from './Error';
 
 export class ComplianceService {
   private static instance: ComplianceService;
@@ -42,8 +45,11 @@ export class ComplianceService {
         });
       return compliance;
     } catch (error) {
-      console.error(error);
-      return null;
+      if (error instanceof PrismaClientKnownRequestError) {
+        throw new PrismaError(ERROR400.statusCode, error.message);
+      } else {
+        throw error;
+      }
     }
   }
 }

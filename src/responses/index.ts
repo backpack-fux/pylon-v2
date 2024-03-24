@@ -22,11 +22,11 @@ export const unathorizedResponse = (req: FastifyRequest, res: FastifyReply) => {
 };
 
 export const successResponse = (
-  res: FastifyReply,
+  rep: FastifyReply,
   statusCode: number,
   data: any
 ) => {
-  return res.code(statusCode).send({
+  return rep.code(statusCode).send({
     statusCode,
     data,
   });
@@ -34,7 +34,7 @@ export const successResponse = (
 
 export const errorResponse = (
   req: FastifyRequest,
-  res: FastifyReply,
+  rep: FastifyReply,
   statusCode: number,
   errorMessage: string
 ) => {
@@ -45,7 +45,7 @@ export const errorResponse = (
     method: req.routerMethod,
   });
 
-  return res.code(statusCode).send({
+  return rep.code(statusCode).send({
     statusCode,
     error: new Error(errorMessage),
     message: errorMessage,

@@ -7,6 +7,9 @@ import { BridgeService } from './external/Bridge';
 import { UUID } from 'crypto';
 import { PrismaMerchant } from '../types/prisma';
 import { AddressType } from '@prisma/client';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { ERROR400 } from '@/helpers/constants';
+import { PrismaError } from './Error';
 
 const bridgeService = BridgeService.getInstance();
 
@@ -21,7 +24,7 @@ export class MerchantService {
   }
 
   /** @dev create partner */
-  public async createPartner(partnerData: any): Promise<PrismaMerchant | null> {
+  public async createPartner(partnerData: any): Promise<PrismaMerchant> {
     const {
       name,
       surname,
@@ -63,9 +66,12 @@ export class MerchantService {
       });
 
       return merchant;
-    } catch (error) {
-      console.error(error);
-      return null;
+    } catch (error: unknown) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        throw new PrismaError(ERROR400.statusCode, error.message);
+      } else {
+        throw error;
+      }
     }
   }
 
@@ -74,7 +80,7 @@ export class MerchantService {
     merchantUuid: UUID,
     fullName: string,
     email: string
-  ): Promise<BridgeComplianceLinksResponse | null> {
+  ): Promise<BridgeComplianceLinksResponse> {
     try {
       const registered: BridgeComplianceLinksResponse =
         await bridgeService.createComplianceLinks(
@@ -86,8 +92,7 @@ export class MerchantService {
 
       return registered;
     } catch (error) {
-      console.error(error);
-      return null;
+      throw error;
     }
   }
 }
