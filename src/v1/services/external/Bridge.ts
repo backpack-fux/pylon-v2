@@ -2,7 +2,7 @@ import { Config } from '@/config';
 import { headers, methods } from '@/helpers/api';
 import { ERRORS } from '@/helpers/errors';
 import { UUID } from 'crypto';
-import { ComplianceType } from '../types/bridge';
+import { BridgeComplianceType } from '../../types/bridge';
 
 export class BridgeService {
   private static instance: BridgeService;
@@ -112,7 +112,7 @@ export class BridgeService {
   async createComplianceLinks(
     idempotencyKey: UUID,
     fullName: string,
-    type: ComplianceType,
+    type: BridgeComplianceType,
     email: string
   ) {
     const headers = this.buildRequestHeaders({

@@ -24,7 +24,7 @@ export const CreateMerchantInput = {
       data: t.Any(),
     }),
     404: t.Object({
-      msg: t.String(),
+      merchant: t.String(),
     }),
     500: t.Object({
       msg: t.String(),

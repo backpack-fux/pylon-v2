@@ -50,3 +50,7 @@ export const validateAPIKey = async (
     return;
   }
 };
+
+/** @TODO create merchant middleware to check if any of the body is not unique,
+ * unless this can be done natively by prisma 
+ * */

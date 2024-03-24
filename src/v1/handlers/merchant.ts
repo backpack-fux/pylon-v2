@@ -1,87 +1,77 @@
-import { AddressType } from '@prisma/client/edge';
-
 import {
-  FastifyRequestTypebox,
-  FastifyReplyTypebox,
-} from '@/v1/types/fastifyTypes';
+  AddressType,
+  AccountType,
+  VerificationStatus,
+  TosStatus,
+} from '@prisma/client';
+
+import { FastifyRequestTypebox, FastifyReplyTypebox } from '@/v1/types/fastify';
 import { prisma } from '@/db/index';
 import { ERRORS } from '@/helpers/errors';
 import { CreateMerchantInput } from '../schemas/merchant';
-import { ERROR404, ERROR500, STANDARD } from '@/helpers/constants';
-import { BridgeService } from '../services/bridgeService';
-import { ComplianceTypeEnum } from '@/v1/types/bridge';
+import { ERROR400, ERROR404, ERROR500, STANDARD } from '@/helpers/constants';
+import { BridgeService } from '../services/external/Bridge';
+import {
+  BridgeComplianceLinksResponse,
+  BridgeComplianceTypeEnum,
+} from '@/v1/types/bridge';
 import { utils } from '@/helpers/utils';
+import { PrismaMerchant, PrismaSelectedCompliance } from '../types/prisma';
+import { errorResponse, successResponse } from '@/responses';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { MerchantService } from '../services/Merchant';
+import { ComplianceService } from '../services/Compliance';
 
 const bridgeService = BridgeService.getInstance();
+const merchantService = MerchantService.getInstance();
+const complianceService = ComplianceService.getInstance();
 
 export async function createMerchantHandler(
   req: FastifyRequestTypebox<typeof CreateMerchantInput>,
   rep: FastifyReplyTypebox<typeof CreateMerchantInput>
 ): Promise<void> {
-  const {
-    name,
-    surname,
-    email,
-    phoneNumber,
-    companyNumber,
-    companyJurisdiction,
-    walletAddress,
-    registeredAddress,
-  } = req.body;
-
-  const { street1, street2, city, postcode, state, country } =
-    registeredAddress;
-
-  /**
-   * @TODO
-   * 1. create partner
-   * 2. do kyb via bridge.xyz
-   * 3. store to db
-   * 4. return bridge.xyz response
-   */
-
   try {
-    /** @dev create partner */
-    const merchant = await prisma.merchant.create({
-      data: {
-        name,
-        surname,
-        email,
-        phoneNumber,
-        companyNumber,
-        companyJurisdiction,
-        walletAddress,
-        registeredAddress: {
-          create: {
-            type: AddressType.REGISTERED,
-            street1,
-            street2,
-            city,
-            postcode,
-            state,
-            country,
-          },
-        },
-      },
-    });
-
-    console.log(`merchant details: ${merchant}`);
+    const merchant = await merchantService.createPartner(req.body);
+    if (!merchant)
+      return rep
+        .code(ERROR404.statusCode)
+        .send({ msg: ERRORS.merchant.exists });
 
     const merchantUuid = utils.generateUUID();
-    const fullName = utils.getFullName(name, surname);
-
-    bridgeService.createComplianceLinks(
+    const fullName = utils.getFullName(req.body.name, req.body.surname);
+    const registered = await merchantService.registerCompliancePartner(
       merchantUuid,
       fullName,
-      ComplianceTypeEnum.Business,
-      email
+      req.body.email
     );
+    if (!registered)
+      return rep
+        .code(ERROR404.statusCode)
+        .send({ msg: ERRORS.merchant.exists });
 
-    if (!merchant)
-      rep.code(ERROR404.statusCode).send({ msg: ERRORS.merchant.exists });
-    else rep.code(STANDARD.SUCCESS).send({ data: merchant });
+    const compliance = complianceService.storePartner(
+      merchantUuid,
+      registered,
+      merchant
+    );
+    if (!compliance)
+      return rep
+        .code(ERROR404.statusCode)
+        .send({ msg: ERRORS.merchant.exists });
+
+    return rep.code(STANDARD.SUCCESS).send({ data: compliance });
   } catch (error) {
-    console.error('Error creating merchant:', error);
-    rep.code(ERROR500.statusCode).send({ msg: ERROR500.message });
+    if (error instanceof PrismaClientKnownRequestError) {
+      if (error.code === 'P2002') {
+        return errorResponse(req, rep, ERROR400.statusCode, error.message);
+      } else {
+        return errorResponse(req, rep, ERROR400.statusCode, error.message);
+      }
+    }
+
+    // Handle generic errors
+    /** @todo handle generic errors in the utils file */
+    const errorMessage = 'An error occurred during partner creation';
+    return errorResponse(req, rep, ERROR500.statusCode, errorMessage);
   }
 }

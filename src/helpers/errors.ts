@@ -15,8 +15,8 @@ export const ERRORS = {
     error: (message: string) => `Fetch error: ${message}`,
   },
   merchant: {
-    exists: 'Merchant already exists',
-    notExists: 'Merchant does not exist',
-    notRegistered: 'Merchant is not registered',
+    exists: 'Already exists',
+    notExists: 'Does not exist',
+    notRegistered: 'Is not registered',
   },
 };

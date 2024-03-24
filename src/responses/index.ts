@@ -20,3 +20,34 @@ export const unathorizedResponse = (req: FastifyRequest, res: FastifyReply) => {
     message: ERROR401.message,
   });
 };
+
+export const successResponse = (
+  res: FastifyReply,
+  statusCode: number,
+  data: any
+) => {
+  return res.code(statusCode).send({
+    statusCode,
+    data,
+  });
+};
+
+export const errorResponse = (
+  req: FastifyRequest,
+  res: FastifyReply,
+  statusCode: number,
+  errorMessage: string
+) => {
+  req.log.error({
+    statusCode,
+    message: errorMessage,
+    path: req.routerPath,
+    method: req.routerMethod,
+  });
+
+  return res.code(statusCode).send({
+    statusCode,
+    error: new Error(errorMessage),
+    message: errorMessage,
+  });
+};

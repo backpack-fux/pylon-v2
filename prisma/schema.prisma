@@ -67,8 +67,8 @@ model Compliance {
     verificationDocumentLink String @unique
     termsOfServiceLink       String @unique
 
-    verificatonStatus    VerificationStatus @default(INCOMPLETE)
-    termsOfServiceStatus TosStatus @default(INCOMPLETE)
+    verificatonStatus    VerificationStatus @default(NOT_STARTED)
+    termsOfServiceStatus TosStatus @default(PENDING)
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt()
@@ -134,20 +134,20 @@ enum AddressType {
     REGISTERED
 }
 
-// @note: what are other status' captured by Bridge.xyz (& co)?
 enum VerificationStatus {
-    INCOMPLETE
+    NOT_STARTED
     PENDING
-    EXPIRED
-    CANCELLED
+    INCOMPLETE
+    AWAITING_UBO
+    MANUAL_REVIEW
+    UNDER_REVIEW
     APPROVED
     REJECTED
 }
 
 enum TosStatus {
-    INCOMPLETE
-    ACCEPTED
-    DECLINED
+    PENDING
+    APPROVED
 }
 
 enum AccountType {
