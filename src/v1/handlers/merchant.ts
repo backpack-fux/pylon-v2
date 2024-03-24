@@ -39,12 +39,9 @@ export async function createMerchantHandler(
     if (error instanceof PrismaClientKnownRequestError) {
       return errorResponse(req, rep, ERROR400.statusCode, error.message);
     } else {
-      return errorResponse(req, rep, ERROR404.statusCode, ERROR404.message);
+      /** @todo handle generic errors in the utils file */
+      const errorMessage = 'An error occurred during partner creation';
+      return errorResponse(req, rep, ERROR404.statusCode, errorMessage);
     }
-
-    // Handle generic errors
-    /** @todo handle generic errors in the utils file */
-    const errorMessage = 'An error occurred during partner creation';
-    return errorResponse(req, rep, ERROR500.statusCode, errorMessage);
   }
 }
