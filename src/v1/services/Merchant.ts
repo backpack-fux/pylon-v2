@@ -92,6 +92,7 @@ export class MerchantService {
 
       return registered;
     } catch (error) {
+      /** @todo improve error handling from compliance partner */
       throw error;
     }
   }

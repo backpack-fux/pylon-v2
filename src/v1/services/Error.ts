@@ -3,6 +3,8 @@ export class PrismaError extends Error {
     public readonly statusCode: number,
     message: string
   ) {
+    console.log('PrismaError: Invoked');
+
     super(message);
     this.name = 'PrismaError';
     this.statusCode = statusCode;

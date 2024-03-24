@@ -8,8 +8,8 @@ import { errorResponse, successResponse } from '@/responses';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { MerchantService } from '../services/Merchant';
 import { ComplianceService } from '../services/Compliance';
+import { PrismaError } from '../services/Error';
 
-const bridgeService = BridgeService.getInstance();
 const merchantService = MerchantService.getInstance();
 const complianceService = ComplianceService.getInstance();
 
@@ -28,16 +28,16 @@ export async function createMerchantHandler(
       req.body.email
     );
 
-    const compliance = complianceService.storePartner(
+    const compliance = await complianceService.storePartner(
       merchantUuid,
       registered,
       merchant
     );
 
-    return successResponse(rep, STANDARD.SUCCESS, compliance);
+    return successResponse(rep, compliance);
   } catch (error) {
-    if (error instanceof PrismaClientKnownRequestError) {
-      return errorResponse(req, rep, ERROR400.statusCode, error.message);
+    if (error instanceof PrismaError) {
+      return errorResponse(req, rep, error.statusCode, error.message);
     } else {
       /** @todo handle generic errors in the utils file */
       const errorMessage = 'An error occurred during partner creation';

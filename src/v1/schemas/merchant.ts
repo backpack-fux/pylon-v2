@@ -2,8 +2,8 @@ import { Type as t } from '@sinclair/typebox';
 
 export const CreateMerchantInput = {
   body: t.Object({
-    name: t.String({ maxLength: 255 }),
-    surname: t.String({ maxLength: 255 }),
+    name: t.String({ minLength: 1, maxLength: 255 }),
+    surname: t.String({ minLength: 1, maxLength: 255 }),
     email: t.String({ format: 'email' }),
     phoneNumber: t.Optional(t.String()),
     companyNumber: t.Optional(t.String()),
@@ -20,9 +20,21 @@ export const CreateMerchantInput = {
     }),
   }),
   response: {
-    200: t.Any(),
-    400: t.Any(),
-    404: t.Any(),
-    500: t.Any(),
+    200: t.Object({
+      statusCode: t.Number(),
+      data: t.Any(),
+    }),
+    400: t.Object({
+      statusCode: t.Number(),
+      message: t.String(),
+    }),
+    404: t.Object({
+      statusCode: t.Number(),
+      message: t.String(),
+    }),
+    500: t.Object({
+      statusCode: t.Number(),
+      message: t.String(),
+    }),
   },
 };
