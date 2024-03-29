@@ -19,7 +19,7 @@ model Merchant {
     tokenAuth   String?
     phoneNumber String? @unique
 
-    companyNumber        String?
+    companyNumber       String?
     companyJurisdiction String? @db.Char(2) // ISO 3166-1 alpha-2
 
     fee           Decimal @default(6.50) @db.Decimal(4, 2) // pct 100.00% to 0.00%
@@ -44,7 +44,7 @@ model Buyer {
     name          String  @db.VarChar(255)
     email         String  @unique
     tokenAuth     String
-    phoneNumber   String? @unique
+    phoneNumber   String
     walletAddress String? @unique
 
     createdAt DateTime @default(now())
@@ -68,7 +68,7 @@ model Compliance {
     termsOfServiceLink       String @unique
 
     verificatonStatus    VerificationStatus @default(NOT_STARTED)
-    termsOfServiceStatus TosStatus @default(PENDING)
+    termsOfServiceStatus TosStatus          @default(PENDING)
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt()
@@ -81,7 +81,7 @@ model Compliance {
 }
 
 model Transaction {
-    id     String          @id @default(uuid())
+    id     String            @id @default(uuid())
     status TransactionStatus
 
     partnerTokenId   String
