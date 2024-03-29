@@ -5,6 +5,37 @@ export enum BridgeComplianceTypeEnum {
 
 export type BridgeComplianceType = 'individual' | 'business';
 
+type BridgePaymentRailType =
+  | 'Polygon'
+  | 'Arbitrum'
+  | 'Avalanche'
+  | 'Optimism'
+  | 'Solana'
+  | 'Stellar'
+  | 'ach'
+  | 'wire'
+  | 'ach_push'
+  | 'prefunded';
+
+export type BridgePaymentRailTypeSrc =
+  | 'ach'
+  | 'wire'
+  | 'ach_push'
+  | 'prefunded';
+
+export type BridgePaymentRailTypeDst = Exclude<
+  BridgePaymentRailType,
+  BridgePaymentRailTypeSrc
+>;
+
+type BridgeCurrencyType = 'usd' | 'usdc';
+
+export type BridgeCurrencyTypeSrc = 'usd';
+export type BridgeCurrencyTypeDst = Exclude<
+  BridgeCurrencyType,
+  BridgeCurrencyTypeSrc
+>;
+
 export type BridgeComplianceLinksResponse = {
   id: string;
   full_name: string;
