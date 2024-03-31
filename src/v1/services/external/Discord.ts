@@ -53,7 +53,11 @@ export class DiscordService {
               const balance =
                 await this.bridgeService.getPrefundedAccountBalance();
 
-              message.reply(`Your balance is ${balance.available_balance}`);
+              message.reply(
+                `Your balance for ${balance.name} is ${
+                  balance.available_balance
+                } ${balance.currency.toUpperCase()}`
+              );
             } catch (error) {
               console.error('Error fetching balance:', error);
               message.reply('An error occurred while fetching your balance.');
