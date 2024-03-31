@@ -1,5 +1,5 @@
 import { ERROR401, STANDARD } from '@/helpers/constants';
-import { CreateMerchantInput } from '@/v1/schemas/merchant';
+import { CustomSchemas } from '@/v1/schemas';
 import { FastifyReplyTypebox, FastifyRequestTypebox } from '@/v1/types/fastify';
 import { FastifyReply, FastifyRequest } from 'fastify';
 
@@ -9,8 +9,8 @@ import { FastifyReply, FastifyRequest } from 'fastify';
  * @param res
  */
 export const unathorizedResponse = (
-  req: FastifyRequestTypebox<typeof CreateMerchantInput>,
-  rep: FastifyReplyTypebox<typeof CreateMerchantInput>
+  req: FastifyRequestTypebox<CustomSchemas>,
+  rep: FastifyReplyTypebox<CustomSchemas>
 ) => {
   req.log.error({
     statusCode: ERROR401.statusCode,
@@ -27,7 +27,7 @@ export const unathorizedResponse = (
 };
 
 export const successResponse = (
-  rep: FastifyReplyTypebox<typeof CreateMerchantInput>,
+  rep: FastifyReplyTypebox<CustomSchemas>,
   data: any
 ) => {
   return rep.code(STANDARD.SUCCESS).send({
@@ -37,8 +37,8 @@ export const successResponse = (
 };
 
 export const errorResponse = (
-  req: FastifyRequestTypebox<typeof CreateMerchantInput>,
-  rep: FastifyReplyTypebox<typeof CreateMerchantInput>,
+  req: FastifyRequestTypebox<CustomSchemas>,
+  rep: FastifyReplyTypebox<CustomSchemas>,
   statusCode: number,
   errorMessage: string
 ) => {

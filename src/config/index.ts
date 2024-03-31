@@ -22,7 +22,7 @@ export const Config = {
   isStaging: process.env.NODE_ENV === 'staging',
   isLocal: process.env.NODE_ENV === 'local',
   subscriptionUri: loadEnvironmentVariable('SUBSCRIPTION_URI'),
-  discordUri: loadEnvironmentVariable('DISCORD_URI'),
+  discordBotToken: loadEnvironmentVariable('DISCORD_BOT_TOKEN'),
   frontendUri: loadEnvironmentVariable(
     'FRONT_END_URI',
     'https://test.checkout.mybackpack.app'

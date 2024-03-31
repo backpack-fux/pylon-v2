@@ -1,6 +1,6 @@
 import { Type as t } from '@sinclair/typebox';
 
-export const CreateMerchantInput = {
+export const CreateMerchantSchema = {
   body: t.Object({
     name: t.String({ minLength: 1, maxLength: 255 }),
     surname: t.String({ minLength: 1, maxLength: 255 }),

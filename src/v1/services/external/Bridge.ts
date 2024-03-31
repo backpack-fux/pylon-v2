@@ -1,5 +1,5 @@
 import { Config } from '@/config';
-import { headers, methods } from '@/helpers/api';
+import { headers, methods } from '@/helpers/constants';
 import { ERRORS } from '@/helpers/errors';
 import { UUID } from 'crypto';
 import {
@@ -8,6 +8,7 @@ import {
   BridgeCurrencyTypeDst,
   BridgePaymentRailTypeSrc,
   BridgePaymentRailTypeDst,
+  BridgePrefundedAccountBalance,
 } from '@/v1/types/bridge';
 import { Hex } from 'viem';
 
@@ -25,6 +26,7 @@ export class BridgeService {
     getCustomer: (customerId: string) => `/customers/${customerId}`,
     getKycLinks: (kycLinkId: string) => `/kyc_links/${kycLinkId}`,
     createPrefundedAccountTransfer: '/transfers',
+    getPrefundedAccountBalance: '/prefunded_accounts',
   };
 
   private constructor() {
@@ -193,6 +195,22 @@ export class BridgeService {
         }),
       }
     );
+    return await response.json();
+  }
+
+  async getPrefundedAccountBalance(): Promise<BridgePrefundedAccountBalance> {
+    const headers = this.buildRequestHeaders({
+      accept: 'application/json',
+    });
+
+    const response = await this.sendRequest(
+      this.endpoints.getPrefundedAccountBalance,
+      {
+        method: methods.GET,
+        headers: headers,
+      }
+    );
+
     return await response.json();
   }
 

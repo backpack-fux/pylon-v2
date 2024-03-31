@@ -7,7 +7,7 @@ import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import jwt from '@fastify/jwt';
 
-import { Home, Merchant } from './v1/routes/index';
+import { Home, Merchant, Bridge } from './v1/routes/index';
 import { Config } from './config';
 
 const startServer = async () => {
@@ -32,7 +32,8 @@ const startServer = async () => {
       })
 
       .register(Home)
-      .register(Merchant, { prefix: '/v1/merchant' });
+      .register(Merchant, { prefix: '/v1/merchant' })
+      .register(Bridge, { prefix: '/v1/bridge' });
 
     const serverOptions = {
       port: Config.port,

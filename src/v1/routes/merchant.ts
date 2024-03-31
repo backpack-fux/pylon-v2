@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
-import { methods } from '@/helpers/api';
+import { methods } from '@/helpers/constants';
 import { createMerchantHandler } from '../handlers/merchant';
-import { CreateMerchantInput } from '../schemas/merchant';
+import { CreateMerchantSchema } from '../schemas/merchant';
 import { validateAPIKey } from '../middleware';
 
 const Merchant = async (app: FastifyInstance) => {
@@ -10,7 +10,7 @@ const Merchant = async (app: FastifyInstance) => {
   app.route({
     method: methods.POST,
     url: '/create',
-    schema: CreateMerchantInput,
+    schema: CreateMerchantSchema,
     preHandler: [validateAPIKey],
     handler: createMerchantHandler,
   });

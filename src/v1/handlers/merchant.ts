@@ -1,6 +1,6 @@
 import { FastifyRequestTypebox, FastifyReplyTypebox } from '@/v1/types/fastify';
 import { ERRORS } from '@/helpers/errors';
-import { CreateMerchantInput } from '../schemas/merchant';
+import { CreateMerchantSchema } from '../schemas/merchant';
 import { ERROR400, ERROR404, ERROR500, STANDARD } from '@/helpers/constants';
 import { BridgeService } from '../services/external/Bridge';
 import { utils } from '@/helpers/utils';
@@ -14,8 +14,8 @@ const merchantService = MerchantService.getInstance();
 const complianceService = ComplianceService.getInstance();
 
 export async function createMerchantHandler(
-  req: FastifyRequestTypebox<typeof CreateMerchantInput>,
-  rep: FastifyReplyTypebox<typeof CreateMerchantInput>
+  req: FastifyRequestTypebox<typeof CreateMerchantSchema>,
+  rep: FastifyReplyTypebox<typeof CreateMerchantSchema>
 ): Promise<void> {
   try {
     const merchant = await merchantService.createPartner(req.body);
@@ -39,6 +39,7 @@ export async function createMerchantHandler(
     if (error instanceof PrismaError) {
       return errorResponse(req, rep, error.statusCode, error.message);
     } else {
+      console.error(error);
       /** @todo handle generic errors in the utils file */
       const errorMessage = 'An error occurred during partner creation';
       return errorResponse(req, rep, ERROR404.statusCode, errorMessage);
