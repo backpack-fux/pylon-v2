@@ -14,12 +14,13 @@ generator client {
 model Merchant {
     id          Int     @id @default(autoincrement())
     name        String  @db.VarChar(255)
+    surname     String  @db.VarChar(255)
     email       String  @unique
-    tokenAuth   String
+    tokenAuth   String?
     phoneNumber String? @unique
 
-    companyNumber        String?
-    companyJurisidiction String? @db.Char(2) // ISO 3166-1 alpha-2
+    companyNumber       String?
+    companyJurisdiction String? @db.Char(2) // ISO 3166-1 alpha-2
 
     fee           Decimal @default(6.50) @db.Decimal(4, 2) // pct 100.00% to 0.00%
     walletAddress String  @unique
@@ -34,7 +35,7 @@ model Merchant {
     Compliance Compliance[]
     Order      Transaction[]
 
-    @@unique([companyNumber, companyJurisidiction])
+    @@unique([companyNumber, companyJurisdiction])
 }
 
 model Buyer {
@@ -43,7 +44,7 @@ model Buyer {
     name          String  @db.VarChar(255)
     email         String  @unique
     tokenAuth     String
-    phoneNumber   String? @unique
+    phoneNumber   String
     walletAddress String? @unique
 
     createdAt DateTime @default(now())
@@ -60,14 +61,14 @@ model Buyer {
 }
 
 model Compliance {
-    id   BigInt      @id @default(autoincrement())
+    id   String      @id @default(uuid()) @db.Uuid
     type AccountType
 
     verificationDocumentLink String @unique
     termsOfServiceLink       String @unique
 
-    verificatonStatus    VerificationStatus @default(INCOMPLETE)
-    termsOfServiceStatus TosStatus @default(INCOMPLETE)
+    verificatonStatus    VerificationStatus @default(NOT_STARTED)
+    termsOfServiceStatus TosStatus          @default(PENDING)
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt()
@@ -80,7 +81,7 @@ model Compliance {
 }
 
 model Transaction {
-    id     String          @id @default(uuid())
+    id     String            @id @default(uuid())
     status TransactionStatus
 
     partnerTokenId   String
@@ -133,20 +134,20 @@ enum AddressType {
     REGISTERED
 }
 
-// @note: what are other status' captured by Bridge.xyz (& co)?
 enum VerificationStatus {
-    INCOMPLETE
+    NOT_STARTED
     PENDING
-    EXPIRED
-    CANCELLED
+    INCOMPLETE
+    AWAITING_UBO
+    MANUAL_REVIEW
+    UNDER_REVIEW
     APPROVED
-    DENIED
+    REJECTED
 }
 
 enum TosStatus {
-    INCOMPLETE
-    ACCEPTED
-    DECLINED
+    PENDING
+    APPROVED
 }
 
 enum AccountType {

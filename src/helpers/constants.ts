@@ -1,3 +1,15 @@
+import { HTTPMethods } from 'fastify';
+
+export const methods: Record<string, HTTPMethods> = {
+  GET: 'GET',
+  POST: 'POST',
+  PUT: 'PUT',
+};
+
+export const headers = {
+  'Content-Type': 'application/json',
+};
+
 export const STANDARD = {
   CREATED: 201,
   SUCCESS: 200,
@@ -32,4 +44,8 @@ export const ERROR409 = {
 export const ERROR400 = {
   statusCode: 400,
   message: 'BAD_REQUEST',
+};
+
+export const DISCORD = {
+  channelId: '1224052196245635222',
 };

@@ -6,4 +6,4 @@ Next-gen Pylon, starting with transactional on-ramping.
 
 `npm i` or `pnpm i`
 
-note: `pnpm` will not install prisma correctly, so you will need to run `pnpm run db:generate` before running `pnpm run dev`
+**Note:** `pnpm` will not install prisma correctly, so you will need to run `pnpm run db:generate` before running `pnpm run dev`

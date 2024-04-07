@@ -4,7 +4,6 @@
   "main": "build/src/index",
   "private": true,
   "engineStrict": true,
-  "packageManager": "pnpm@8.15.4",
   "engines": {
     "npm": ">=10.2.4",
     "pnpm": ">=8.15.4",
@@ -32,6 +31,7 @@
     "@fastify/rate-limit": "9.0.1",
     "@prisma/client": "^5.11.0",
     "cors": "2.8.5",
+    "discord.js": "^14.14.1",
     "fastify": "4.25.2",
     "jsonwebtoken": "^9.0.2",
     "viem": "^2.8.13"
