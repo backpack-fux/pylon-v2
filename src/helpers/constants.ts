@@ -49,3 +49,9 @@ export const ERROR400 = {
 export const DISCORD = {
   channelId: '1224052196245635222',
 };
+
+export const bridgeWebhookAllowedIPs = [
+  '35.160.120.126',
+  '44.233.151.27',
+  '34.211.200.85',
+];

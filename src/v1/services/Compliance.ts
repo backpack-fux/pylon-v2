@@ -32,7 +32,7 @@ export class ComplianceService {
             type: AccountType.BUSINESS,
             verificationDocumentLink: registered.kyc_link,
             termsOfServiceLink: registered.tos_link,
-            verificatonStatus: VerificationStatus.NOT_STARTED,
+            verificationStatus: VerificationStatus.NOT_STARTED,
             termsOfServiceStatus: TosStatus.PENDING,
             merchant: {
               connect: { id: merchant.id },

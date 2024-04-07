@@ -3,6 +3,11 @@ export const ERRORS = {
     invalidJWT: 'Invalid JWT',
     invalidAPIKey: 'Invalid API key',
     missingAuthorizationHeader: 'Missing or invalid authorization header',
+    bridge: {
+      malformedSignature: 'Malformed signature header',
+      invalidSignature: 'Invalid signature',
+      failedSignature: 'Signature verification failed',
+    },
   },
   methods: {
     missingPostBody: 'Body is required for POST requests',

@@ -1,6 +1,9 @@
 import { FastifyRequestTypebox, FastifyReplyTypebox } from '@/v1/types/fastify';
 import { ERRORS } from '@/helpers/errors';
-import { BridgePrefundedAccountBalanceSchema } from '../schemas/bridge';
+import {
+  BridgePrefundedAccountBalanceSchema,
+  BridgeWebhookSchema,
+} from '../schemas/bridge';
 import {
   DISCORD,
   ERROR400,
@@ -30,7 +33,30 @@ export async function getPrefundedAccountBalance(
     successResponse(rep, res);
   } catch (error) {
     console.error(error);
-    const errorMessage = 'An error occurred during partner creation';
+    const errorMessage =
+      'An error occurred fetching the prefunded account balance';
+    return errorResponse(req, rep, ERROR404.statusCode, errorMessage);
+  }
+}
+
+// event_category: kyc_link
+// event_type:
+export async function processWebhooksHandler(
+  req: FastifyRequestTypebox<typeof BridgeWebhookSchema>,
+  rep: FastifyReplyTypebox<typeof BridgeWebhookSchema>
+): Promise<void> {
+  try {
+    const balance = await bridgeService.getPrefundedAccountBalance();
+    const res = await discordService.send(
+      DISCORD.channelId,
+      balance.available_balance
+    );
+    console.log(res);
+    successResponse(rep, res);
+  } catch (error) {
+    console.error(error);
+    const errorMessage =
+      'An error occurred fetching the prefunded account balance';
     return errorResponse(req, rep, ERROR404.statusCode, errorMessage);
   }
 }

@@ -1,5 +1,6 @@
+import { Config } from '@/config';
 import { prisma } from '@/db';
-import { UUID } from 'crypto';
+import { UUID, createHash, createVerify, KeyLike } from 'crypto';
 
 export const utils = {
   isJSON: (data: string) => {
@@ -31,5 +32,22 @@ export const utils = {
   },
   getFullName: (name: string, surname: string) => {
     return name + ' ' + surname;
+  },
+  verifySignature(
+    timestamp: string,
+    body: string | unknown,
+    signature: string
+  ) {
+    const hash = createHash('SHA256');
+    hash.update(timestamp + '.' + body);
+
+    const verifier = createVerify('SHA256');
+    verifier.update(hash.digest());
+    verifier.end();
+
+    return verifier.verify(
+      Config.bridgeWebhookPublicKey as KeyLike,
+      Buffer.from(signature, 'base64')
+    );
   },
 };

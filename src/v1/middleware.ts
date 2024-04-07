@@ -1,7 +1,18 @@
 import { Config } from '@/config';
-import { ERROR401 } from '@/helpers/constants';
+import {
+  ERROR400,
+  ERROR401,
+  ERROR403,
+  bridgeWebhookAllowedIPs,
+} from '@/helpers/constants';
 import { ERRORS } from '@/helpers/errors';
-import { FastifyRequest, FastifyReply } from 'fastify';
+import {
+  FastifyRequest,
+  FastifyReply,
+  FastifyServerFactoryHandler,
+} from 'fastify';
+import { createHmac } from 'crypto';
+import { utils } from '@/helpers/utils';
 
 export const authenticate = async (
   request: FastifyRequest,
@@ -49,6 +60,49 @@ export const validateAPIKey = async (
   } else {
     return;
   }
+};
+
+export const authMiddlewareForWebhook = async (
+  req: FastifyRequest,
+  res: FastifyReply
+) => {
+  // const ipAddress = req.ip;
+
+  // if (!bridgeWebhookAllowedIPs.includes(ipAddress)) {
+  //   return res.code(ERROR403.statusCode).send({ message: ERROR403.message });
+  // }
+
+  const { headers, rawBody, body } = req;
+  const signatureHeader = headers['x-webhook-signature'] as string;
+  if (!signatureHeader) {
+    return res
+      .status(ERROR400.statusCode)
+      .send({ message: ERRORS.auth.bridge.malformedSignature });
+  }
+
+  const [, timestamp, signature] =
+    signatureHeader.match(/^t=(\d+),v0=(.*)$/) || [];
+  if (!timestamp || !signature) {
+    return res
+      .status(ERROR400.statusCode)
+      .send({ message: ERRORS.auth.bridge.malformedSignature });
+  }
+
+  // if (
+  //   new Date(parseInt(timestamp, 10)) < new Date(Date.now() - 10 * 60 * 1000)
+  // ) {
+  //   return res
+  //     .status(ERROR400.statusCode)
+  //     .send({ message: ERRORS.auth.bridge.invalidSignature });
+  // }
+
+  if (!utils.verifySignature(timestamp, rawBody, signature)) {
+    return res
+      .status(ERROR400.statusCode)
+      .send({ message: ERRORS.auth.bridge.invalidSignature });
+  }
+
+  return res.status(200);
 };
 
 /** @TODO create merchant middleware to check if any of the body is not unique,
