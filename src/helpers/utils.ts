@@ -35,19 +35,21 @@ export const utils = {
   },
   verifySignature(
     timestamp: string,
-    body: string | unknown,
-    signature: string
+    rawBody: string | unknown,
+    encodedSignature: string
   ) {
-    const hash = createHash('SHA256');
-    hash.update(timestamp + '.' + body);
+    // Generate SHA256 digest of timestamp and raw body
+    const hash = createHash('sha256');
+    hash.update(timestamp + '.' + rawBody);
+    const digest = hash.digest();
 
-    const verifier = createVerify('SHA256');
-    verifier.update(hash.digest());
-    verifier.end();
+    // Decode the encoded signature with base64
+    const decodedSignature = Buffer.from(encodedSignature, 'base64');
 
-    return verifier.verify(
-      Config.bridgeWebhookPublicKey as KeyLike,
-      Buffer.from(signature, 'base64')
-    );
+    // Verify the signature
+    const verifier = createVerify('sha256');
+    verifier.update(digest);
+
+    return verifier.verify(Config.bridgeWebhookPublicKey, decodedSignature);
   },
 };

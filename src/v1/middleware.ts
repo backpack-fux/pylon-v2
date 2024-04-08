@@ -80,7 +80,7 @@ export const authMiddlewareForWebhook = async (
       .send({ message: ERRORS.auth.bridge.malformedSignature });
   }
 
-  const [, timestamp, signature] =
+  const [_, timestamp, signature] =
     signatureHeader.match(/^t=(\d+),v0=(.*)$/) || [];
   if (!timestamp || !signature) {
     return res
