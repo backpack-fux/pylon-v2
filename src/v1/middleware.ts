@@ -66,11 +66,11 @@ export const authMiddlewareForWebhook = async (
   req: FastifyRequest,
   res: FastifyReply
 ) => {
-  // const ipAddress = req.ip;
+  const ipAddress = req.ip;
 
-  // if (!bridgeWebhookAllowedIPs.includes(ipAddress)) {
-  //   return res.code(ERROR403.statusCode).send({ message: ERROR403.message });
-  // }
+  if (!bridgeWebhookAllowedIPs.includes(ipAddress)) {
+    return res.code(ERROR403.statusCode).send({ message: ERROR403.message });
+  }
 
   const { headers, rawBody, body } = req;
   const signatureHeader = headers['x-webhook-signature'] as string;
@@ -88,13 +88,13 @@ export const authMiddlewareForWebhook = async (
       .send({ message: ERRORS.auth.bridge.malformedSignature });
   }
 
-  // if (
-  //   new Date(parseInt(timestamp, 10)) < new Date(Date.now() - 10 * 60 * 1000)
-  // ) {
-  //   return res
-  //     .status(ERROR400.statusCode)
-  //     .send({ message: ERRORS.auth.bridge.invalidSignature });
-  // }
+  if (
+    new Date(parseInt(timestamp, 10)) < new Date(Date.now() - 10 * 60 * 1000)
+  ) {
+    return res
+      .status(ERROR400.statusCode)
+      .send({ message: ERRORS.auth.bridge.invalidSignature });
+  }
 
   if (!utils.verifySignature(timestamp, rawBody, signature)) {
     return res
