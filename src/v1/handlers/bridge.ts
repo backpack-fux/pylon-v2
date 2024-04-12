@@ -14,6 +14,7 @@ import {
 import { BridgeService } from '../services/external/Bridge';
 import { DiscordService } from '../services/external/Discord';
 import { errorResponse, successResponse } from '@/responses';
+import { BridgeWebhookPayload_KycLink } from '../types/bridge';
 
 const discordService = DiscordService.getInstance();
 const bridgeService = BridgeService.getInstance();
@@ -40,19 +41,28 @@ export async function getPrefundedAccountBalance(
 }
 
 // event_category: kyc_link
-// event_type:
+// event_type: kyc_link.updated.status_transitioned
+// event_object_status
 export async function processWebhooksHandler(
   req: FastifyRequestTypebox<typeof BridgeWebhookSchema>,
   rep: FastifyReplyTypebox<typeof BridgeWebhookSchema>
 ): Promise<void> {
   try {
-    const balance = await bridgeService.getPrefundedAccountBalance();
-    const res = await discordService.send(
-      DISCORD.channelId,
-      balance.available_balance
-    );
-    console.log(res);
-    successResponse(rep, res);
+    const payload = req.body as BridgeWebhookPayload_KycLink;
+
+    console.log(payload, 'payload');
+
+    switch (payload.event_category) {
+      case 'kyc_link':
+        switch (payload.event_type) {
+          case 'kyc_link.updated.status_transitioned':
+            console.log('Processing KYC link event:', payload);
+            break;
+        }
+        break;
+    }
+
+    successResponse(rep, payload);
   } catch (error) {
     console.error(error);
     const errorMessage =
