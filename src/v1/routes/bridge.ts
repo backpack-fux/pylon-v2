@@ -21,7 +21,7 @@ const Bridge = async (app: FastifyInstance) => {
       },
       method: methods.POST,
       url: '/webhook',
-      preHandler: [],
+      preHandler: [authMiddlewareForWebhook],
       handler: processWebhooksHandler,
     });
 };
