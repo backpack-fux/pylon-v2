@@ -1,3 +1,6 @@
+import { UUID } from 'crypto';
+import { TosStatus, VerificationStatus } from '@prisma/client';
+
 /** @dev COMPLIANCE */
 export enum BridgeComplianceTypeEnum {
   Individual = 'individual',
@@ -71,10 +74,10 @@ export type BridgeWebhookPayload_KycLink = {
   event_id: string;
   event_category: string;
   event_type: string;
-  event_object_id: string;
+  event_object_id: UUID;
   event_object_status?: string;
   event_object: {
-    id: string;
+    id: UUID;
     type: string;
     email: string;
     kyc_link: string;

@@ -38,7 +38,7 @@ CREATE TABLE "Buyer" (
     "name" VARCHAR(255) NOT NULL,
     "email" TEXT NOT NULL,
     "tokenAuth" TEXT NOT NULL,
-    "phoneNumber" TEXT,
+    "phoneNumber" TEXT NOT NULL,
     "walletAddress" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -54,7 +54,7 @@ CREATE TABLE "Compliance" (
     "type" "AccountType" NOT NULL,
     "verificationDocumentLink" TEXT NOT NULL,
     "termsOfServiceLink" TEXT NOT NULL,
-    "verificatonStatus" "VerificationStatus" NOT NULL DEFAULT 'NOT_STARTED',
+    "verificationStatus" "VerificationStatus" NOT NULL DEFAULT 'NOT_STARTED',
     "termsOfServiceStatus" "TosStatus" NOT NULL DEFAULT 'PENDING',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -110,9 +110,6 @@ CREATE UNIQUE INDEX "Merchant_companyNumber_companyJurisdiction_key" ON "Merchan
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Buyer_email_key" ON "Buyer"("email");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Buyer_phoneNumber_key" ON "Buyer"("phoneNumber");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Buyer_walletAddress_key" ON "Buyer"("walletAddress");

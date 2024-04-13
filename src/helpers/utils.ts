@@ -1,6 +1,7 @@
 import { Config } from '@/config';
 import { prisma } from '@/db';
 import { UUID, createHash, createVerify, KeyLike } from 'crypto';
+import { TosStatus, VerificationStatus } from '@prisma/client';
 
 export const utils = {
   isJSON: (data: string) => {
@@ -51,5 +52,15 @@ export const utils = {
     verifier.update(digest);
 
     return verifier.verify(Config.bridgeWebhookPublicKey, decodedSignature);
+  },
+  formattedKycStatus: (status: string): VerificationStatus => {
+    const uppercaseStatus = status.toUpperCase();
+    return VerificationStatus[
+      uppercaseStatus as keyof typeof VerificationStatus
+    ];
+  },
+  formattedTosStatus: (status: string): TosStatus => {
+    const uppercaseStatus = status.toUpperCase();
+    return TosStatus[uppercaseStatus as keyof typeof TosStatus];
   },
 };
