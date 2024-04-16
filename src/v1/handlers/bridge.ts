@@ -1,6 +1,9 @@
 import { FastifyRequestTypebox, FastifyReplyTypebox } from '@/v1/types/fastify';
 import { ERRORS } from '@/helpers/errors';
-import { BridgePrefundedAccountBalanceSchema } from '../schemas/bridge';
+import {
+  BridgePrefundedAccountBalanceSchema,
+  BridgeWebhookSchema,
+} from '../schemas/bridge';
 import {
   DISCORD,
   ERROR400,
@@ -11,11 +14,15 @@ import {
 import { BridgeService } from '../services/external/Bridge';
 import { DiscordService } from '../services/external/Discord';
 import { errorResponse, successResponse } from '@/responses';
+import { BridgeWebhookPayload_KycLink } from '../types/bridge';
+import { ComplianceService } from '../services/Compliance';
+import { utils } from '@/helpers/utils';
 
 const discordService = DiscordService.getInstance();
 const bridgeService = BridgeService.getInstance();
+const complianceService = ComplianceService.getInstance();
 
-//https://discord.com/channels/1082013710048051342/1224052196245635222
+/** @docs https://discord.com/channels/1082013710048051342/1224052196245635222 */
 export async function getPrefundedAccountBalance(
   req: FastifyRequestTypebox<typeof BridgePrefundedAccountBalanceSchema>,
   rep: FastifyReplyTypebox<typeof BridgePrefundedAccountBalanceSchema>
@@ -30,7 +37,33 @@ export async function getPrefundedAccountBalance(
     successResponse(rep, res);
   } catch (error) {
     console.error(error);
-    const errorMessage = 'An error occurred during partner creation';
+    const errorMessage =
+      'An error occurred fetching the prefunded account balance';
+    return errorResponse(req, rep, ERROR404.statusCode, errorMessage);
+  }
+}
+
+/** @docs https://withbridge.notion.site/Bridge-Webhooks-User-Guide-491f603997194c868b0600a5f45051e6 */
+export async function processWebhooksHandler(
+  req: FastifyRequestTypebox<typeof BridgeWebhookSchema>,
+  rep: FastifyReplyTypebox<typeof BridgeWebhookSchema>
+): Promise<void> {
+  try {
+    const payload = req.body as BridgeWebhookPayload_KycLink;
+
+    switch (payload.event_type) {
+      case 'kyc_link.updated.status_transitioned':
+        const { kyc_status, tos_status } = payload.event_object;
+        const resp = await complianceService.update(
+          payload.event_object_id,
+          utils.formattedKycStatus(kyc_status),
+          utils.formattedTosStatus(tos_status)
+        );
+        return successResponse(rep, resp);
+    }
+  } catch (error) {
+    console.error(error);
+    const errorMessage = 'An error occurred processing the bridge webhook';
     return errorResponse(req, rep, ERROR404.statusCode, errorMessage);
   }
 }

@@ -5,7 +5,7 @@ export const CreateMerchantSchema = {
     name: t.String({ minLength: 1, maxLength: 255 }),
     surname: t.String({ minLength: 1, maxLength: 255 }),
     email: t.String({ format: 'email' }),
-    phoneNumber: t.String({ pattern: '^[+(s.-/d)]{5,30}$' }),
+    phoneNumber: t.String({ pattern: '^[+(s.-d)]{5,30}$' }),
     companyNumber: t.Optional(t.String()),
     companyJurisdiction: t.Optional(t.String({ minLength: 2, maxLength: 2 })),
     fee: t.Optional(t.Number({ minimum: 3, maximum: 100 })),

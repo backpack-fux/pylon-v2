@@ -67,7 +67,7 @@ model Compliance {
     verificationDocumentLink String @unique
     termsOfServiceLink       String @unique
 
-    verificatonStatus    VerificationStatus @default(NOT_STARTED)
+    verificationStatus   VerificationStatus @default(NOT_STARTED)
     termsOfServiceStatus TosStatus          @default(PENDING)
 
     createdAt DateTime @default(now())

@@ -6,6 +6,7 @@ import formbody from '@fastify/formbody';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import jwt from '@fastify/jwt';
+import rawBody from 'fastify-raw-body';
 
 import { Home, Merchant, Bridge } from './v1/routes/index';
 import { Config } from './config';
@@ -29,6 +30,14 @@ const startServer = async () => {
             return token;
           },
         },
+      });
+    await server
+      .register(rawBody, {
+        field: 'rawBody',
+        global: false,
+        encoding: 'utf8',
+        runFirst: true,
+        routes: [],
       })
 
       .register(Home)

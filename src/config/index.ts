@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 function loadEnvironmentVariable(
   envVarKey: string | number,
   defaultValue?: any
@@ -18,6 +20,7 @@ export const Config = {
   serverApiKey: loadEnvironmentVariable('SERVER_API_KEY'),
   bridgeApiKey: loadEnvironmentVariable('BRIDGE_API_KEY'),
   bridgeApiURI: loadEnvironmentVariable('BRIDGE_API_URI'),
+  bridgeWebhookPublicKey: loadEnvironmentVariable('BRIDGE_WEBHOOK_PUBLIC_KEY'),
   isProduction: process.env.NODE_ENV === 'production',
   isStaging: process.env.NODE_ENV === 'staging',
   isLocal: process.env.NODE_ENV === 'local',
@@ -28,9 +31,9 @@ export const Config = {
     'https://test.checkout.mybackpack.app'
   ),
   web3: {
+    explorerUri: loadEnvironmentVariable('EXPLORER_URI'),
     rpcProviderUri: loadEnvironmentVariable('RPC_PROVIDER_URI'),
     usdcContractAddress: loadEnvironmentVariable('USDC_CONTRACT_ADDRESS'),
     usdcPoolPrivateKey: loadEnvironmentVariable('USDC_POOL_PRIVATE_KEY'),
-    explorerUri: loadEnvironmentVariable('EXPLORER_URI'),
   },
 };
