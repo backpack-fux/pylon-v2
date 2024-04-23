@@ -36,4 +36,11 @@ export const Config = {
     usdcContractAddress: loadEnvironmentVariable('USDC_CONTRACT_ADDRESS'),
     usdcPoolPrivateKey: loadEnvironmentVariable('USDC_POOL_PRIVATE_KEY'),
   },
+  worldpay: {
+    baseUrl: loadEnvironmentVariable('WORLDPAY_API_URI'),
+    entityRef: loadEnvironmentVariable('WORLDPAY_ENTITY_REF'),
+    username: loadEnvironmentVariable('WORLDPAY_USERNAME'),
+    password: loadEnvironmentVariable('WORLDPAY_PASSWORD'),
+    accessCheckoutId: loadEnvironmentVariable('WORLDPAY_ACCESS_CHECKOUT_ID'),
+  },
 };
