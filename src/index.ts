@@ -7,8 +7,12 @@ import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import jwt from '@fastify/jwt';
 import rawBody from 'fastify-raw-body';
+import session from '@fastify/session';
+import cookie from '@fastify/cookie';
 
-import { Home, Merchant, Bridge } from './v1/routes/index';
+import { 
+  // Home, Merchant, Bridge, 
+  Authentication } from './v1/routes/index';
 import { Config } from './config';
 
 const startServer = async () => {
@@ -17,6 +21,11 @@ const startServer = async () => {
       .withTypeProvider<TypeBoxTypeProvider>()
       .register(accepts)
       .register(cors)
+      .register(cookie)
+      .register(session, {
+        secret: Config.sessionSecret,
+        cookie: { secure: false, httpOnly: true, maxAge: 6 * 60 * 1000 },
+      })
       .register(formbody)
       .register(helmet)
       .register(rateLimit)
@@ -39,10 +48,10 @@ const startServer = async () => {
         runFirst: true,
         routes: [],
       })
-
-      .register(Home)
-      .register(Merchant, { prefix: '/v1/merchant' })
-      .register(Bridge, { prefix: '/v1/bridge' });
+      // .register(Home)
+      .register(Authentication, { prefix: '/v1/auth' });
+    // .register(Merchant, { prefix: '/v1/merchant' })
+    // .register(Bridge, { prefix: '/v1/bridge' });
 
     const serverOptions = {
       port: Config.port,
