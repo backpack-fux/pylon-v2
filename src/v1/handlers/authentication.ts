@@ -35,8 +35,6 @@ export async function registerDeviceWithWebAuthn(
   rep: FastifyReplyTypebox<typeof RegisterDeviceWithWebAuthnSchema>
 ) {
   try {
-    console.log((req.session as SessionWIthChallenge).challenge);
-    console.log(req.body.challenge);
     return successResponse(rep, {
       challenge: (req.session as SessionWIthChallenge).challenge,
       bodyChallenge: req.body.challenge,
