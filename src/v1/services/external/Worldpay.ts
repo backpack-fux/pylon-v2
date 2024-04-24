@@ -1,5 +1,17 @@
 import { Config } from '@/config';
+import { headers, methods } from '@/helpers/constants';
 import { ERRORS } from '@/helpers/errors';
+import {
+  WorldpayAuthorizePaymentRequest,
+  WorldpayAuthorizePaymentResponse,
+  WorldpayVerifiedTokenRequest,
+  WorldpayVerifiedTokenResponse,
+} from '@/v1/types/worldpay';
+
+const worldpayHeaders = {
+  'Content-Type': 'application/vnd.worldpay.payments-v7+json',
+  Accept: 'application/vnd.worldpay.payments-v7+json',
+};
 
 export class WorldpayService {
   private static instance: WorldpayService;
@@ -10,15 +22,22 @@ export class WorldpayService {
   private accessCheckoutId: string;
 
   private endpoints = {
-    cardOnFile: 'verifiedTokens/cardOnFile',
+    cardOnFile: '/verifiedTokens/cardOnFile',
+    authorizePayment: '/cardPayments/customerInitiatedTransactions',
+    fetchCardBins: '/api/cardBin/panLookup',
+    deleteToken: (verifiedToken: string) => `/tokens/${verifiedToken}`,
   };
 
   private constructor() {
-    this.baseUrl = Config.worldpay.baseUrl;
-    this.entityRef = Config.worldpay.entityRef;
-    this.username = Config.worldpay.username;
-    this.password = Config.worldpay.password;
-    this.accessCheckoutId = Config.worldpay.accessCheckoutId;
+    this.baseUrl = Config.isLocal ? Config.worldpay.testnet.apiUrl : 'TODO';
+    this.username = Config.isLocal ? Config.worldpay.testnet.username : 'TODO';
+    this.password = Config.isLocal ? Config.worldpay.testnet.password : 'TODO';
+    this.entityRef = Config.isLocal
+      ? Config.worldpay.testnet.entityRef
+      : 'TODO';
+    this.accessCheckoutId = Config.isLocal
+      ? Config.worldpay.testnet.accessCheckoutId
+      : 'TODO';
   }
 
   public static getInstance(): WorldpayService {
@@ -30,7 +49,7 @@ export class WorldpayService {
 
   private getCredentials(): string {
     const credentials = `${this.username}:${this.password}`;
-    return Buffer.from(credentials).toString('base64');
+    return 'Basic ' + Buffer.from(credentials).toString('base64');
   }
 
   private async sendRequest(
@@ -65,4 +84,48 @@ export class WorldpayService {
       throw new Error(ERRORS.fetch.error(error.message));
     }
   }
+
+  async createVerifiedToken(
+    body: WorldpayVerifiedTokenRequest
+  ): Promise<WorldpayVerifiedTokenResponse> {
+    const response = await this.sendRequest(this.endpoints.cardOnFile, {
+      method: methods.POST,
+      headers: worldpayHeaders,
+      body: JSON.stringify(body),
+    });
+    const data = await response.json();
+    return data.url;
+  }
+
+  async authorizePayment(
+    body: WorldpayAuthorizePaymentRequest
+  ): Promise<WorldpayAuthorizePaymentResponse> {
+    const response = await this.sendRequest(this.endpoints.authorizePayment, {
+      method: methods.POST,
+      headers,
+      body: JSON.stringify(body),
+    });
+    const data = await response.json();
+    return data.url;
+  }
+
+  /**
+   * You might want to delete tokens if a customer has closed their account with you,
+   * or if the customer no longer wants their card details kept on file.
+   * @param verifiedToken the token to delete
+   * @returns status 204 No Content
+   */
+  async deleteVerifiedToken(verifiedToken: string): Promise<any> {
+    const response = await this.sendRequest(
+      this.endpoints.deleteToken(verifiedToken),
+      {
+        method: methods.DELETE,
+        headers,
+      }
+    );
+    return await response.json();
+  }
+
+  // TODO: Updating a token with conflicts
+  // TODO: Fetch card BINs
 }
