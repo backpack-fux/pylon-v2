@@ -53,7 +53,7 @@ const InitialUser = t.Object({
   iovationBlackbox: t.String(),
 });
 
-export const CreateIssuingCompanySchema = {
+export const CreateApplicationForCompanySchema = {
   body: t.Object({
     initialUser: InitialUser,
     name: t.String(),
@@ -82,7 +82,7 @@ export const CreateIssuingCompanySchema = {
   },
 };
 
-export const CREATE_ISSUING_USER_SCHEMA = {
+export const CreateApplicationForUserSchema = {
   phoneCountryCode: t.String({ pattern: '^[+(s.-d)]{5,30}$' }),
   phoneNumber: t.String({ pattern: '^[+(s.-d)]{5,30}$' }),
   // Merge the properties from InitialUser

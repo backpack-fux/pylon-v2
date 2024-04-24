@@ -17,6 +17,8 @@ export const Config = {
   port: Number(loadEnvironmentVariable('PORT', 5000)),
   jwtSecret: loadEnvironmentVariable('JWT_SECRET'),
   jwtExpires: Number(loadEnvironmentVariable('JWT_EXPIRES', 24)),
+  rainApiUrl: loadEnvironmentVariable('RAIN_API_URL'),
+  rainApiKey: loadEnvironmentVariable('RAIN_API_KEY'),
   sessionSecret: loadEnvironmentVariable('SESSION_SECRET'),
   serverApiKey: loadEnvironmentVariable('SERVER_API_KEY'),
   bridgeApiKey: loadEnvironmentVariable('BRIDGE_API_KEY'),

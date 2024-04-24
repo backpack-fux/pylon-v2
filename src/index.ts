@@ -10,9 +10,11 @@ import rawBody from 'fastify-raw-body';
 import session from '@fastify/session';
 import cookie from '@fastify/cookie';
 
-import { 
-  // Home, Merchant, Bridge, 
-  Authentication } from './v1/routes/index';
+import {
+  // Home, Merchant, Bridge,
+  Authentication,
+  Rain,
+} from './v1/routes/index';
 import { Config } from './config';
 
 const startServer = async () => {
@@ -49,7 +51,8 @@ const startServer = async () => {
         routes: [],
       })
       // .register(Home)
-      .register(Authentication, { prefix: '/v1/auth' });
+      .register(Authentication, { prefix: '/v1/auth' })
+      .register(Rain, { prefix: '/v1/rain' });
     // .register(Merchant, { prefix: '/v1/merchant' })
     // .register(Bridge, { prefix: '/v1/bridge' });
 
