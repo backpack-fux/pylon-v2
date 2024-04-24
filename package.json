@@ -32,7 +32,9 @@
     "@prisma/client": "^5.11.0",
     "cors": "2.8.5",
     "discord.js": "^14.14.1",
+    "dotenv": "^16.4.5",
     "fastify": "4.25.2",
+    "fastify-raw-body": "^4.3.0",
     "jsonwebtoken": "^9.0.2",
     "viem": "^2.8.13"
   },

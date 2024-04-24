@@ -1,5 +1,7 @@
+import { Config } from '@/config';
 import { prisma } from '@/db';
-import { UUID } from 'crypto';
+import { UUID, createHash, createVerify, KeyLike } from 'crypto';
+import { TosStatus, VerificationStatus } from '@prisma/client';
 
 export const utils = {
   isJSON: (data: string) => {
@@ -31,5 +33,34 @@ export const utils = {
   },
   getFullName: (name: string, surname: string) => {
     return name + ' ' + surname;
+  },
+  verifySignature(
+    timestamp: string,
+    rawBody: string | unknown,
+    encodedSignature: string
+  ) {
+    // Generate SHA256 digest of timestamp and raw body
+    const hash = createHash('sha256');
+    hash.update(timestamp + '.' + rawBody);
+    const digest = hash.digest();
+
+    // Decode the encoded signature with base64
+    const decodedSignature = Buffer.from(encodedSignature, 'base64');
+
+    // Verify the signature
+    const verifier = createVerify('sha256');
+    verifier.update(digest);
+
+    return verifier.verify(Config.bridgeWebhookPublicKey, decodedSignature);
+  },
+  formattedKycStatus: (status: string): VerificationStatus => {
+    const uppercaseStatus = status.toUpperCase();
+    return VerificationStatus[
+      uppercaseStatus as keyof typeof VerificationStatus
+    ];
+  },
+  formattedTosStatus: (status: string): TosStatus => {
+    const uppercaseStatus = status.toUpperCase();
+    return TosStatus[uppercaseStatus as keyof typeof TosStatus];
   },
 };

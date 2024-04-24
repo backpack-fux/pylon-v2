@@ -20,3 +20,5 @@ export const BridgePrefundedAccountBalanceSchema = {
     }),
   },
 };
+
+export const BridgeWebhookSchema = {};
