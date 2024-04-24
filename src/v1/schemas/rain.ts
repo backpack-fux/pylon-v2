@@ -53,6 +53,7 @@ const InitialUser = t.Object({
   iovationBlackbox: t.String(),
 });
 
+// Company
 export const CreateApplicationForCompanySchema = {
   body: t.Object({
     initialUser: InitialUser,
@@ -81,6 +82,34 @@ export const CreateApplicationForCompanySchema = {
     }),
   },
 };
+
+export const CheckCompanyApplicationStatusSchema = {
+  params: t.Object({
+    companyId: t.String(),
+  }),
+  response: {
+    200: t.Object({
+      statusCode: t.Number(),
+      data: t.Any(),
+    }),
+    400: t.Object({
+      statusCode: t.Number(),
+      message: t.String(),
+    }),
+    404: t.Object({
+      statusCode: t.Number(),
+      message: t.String(),
+    }),
+    500: t.Object({
+      statusCode: t.Number(),
+      message: t.String(),
+    }),
+  },
+};
+
+/**
+ * USER
+ */
 
 export const CreateApplicationForUserSchema = {
   phoneCountryCode: t.String({ pattern: '^[+(s.-d)]{5,30}$' }),

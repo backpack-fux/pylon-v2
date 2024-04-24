@@ -1,5 +1,5 @@
 import { errorResponse, successResponse } from '@/responses';
-import { CreateApplicationForCompanySchema } from '../schemas/rain';
+import { CheckCompanyApplicationStatusSchema, CreateApplicationForCompanySchema } from '../schemas/rain';
 import { RainService } from '../services/Rain';
 import { FastifyReplyTypebox, FastifyRequestTypebox } from '../types/fastify';
 import { ERROR500 } from '@/helpers/constants';
@@ -14,6 +14,27 @@ export async function createApplicationForCompany(
   try {
     const application = await rainServices.createApplicationForCompany(
       req.body
+    );
+
+    return successResponse(rep, { application });
+  } catch (error) {
+    console.error(error);
+    return errorResponse(
+      req,
+      rep,
+      ERROR500.statusCode,
+      ERRORS.http.error(ERROR500.statusCode)
+    );
+  }
+}
+
+export async function checkCompanyApplicationStatusSchema(
+  req: FastifyRequestTypebox<typeof CheckCompanyApplicationStatusSchema>,
+  rep: FastifyReplyTypebox<typeof CheckCompanyApplicationStatusSchema>
+): Promise<void> {
+  try {
+    const application = await rainServices.getStatusOfCompanyApplication(
+      req.params.companyId
     );
 
     return successResponse(rep, { application });

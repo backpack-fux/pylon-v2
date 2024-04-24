@@ -1,8 +1,7 @@
 import { CreateApplicationForCompanySchema } from './../schemas/rain';
-import { ERROR400, headers } from '@/helpers/constants';
+import { ERROR400 } from '@/helpers/constants';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { Static } from '@sinclair/typebox';
-import axios, { AxiosRequestConfig } from 'axios';
 import { PrismaError } from './Error';
 import { Config } from '@/config';
 
@@ -19,8 +18,13 @@ export class RainService {
   private API_URL = Config.rainApiUrl;
   private API_KEY = Config.rainApiKey;
 
-  private fetcher(url: string, options: AxiosRequestConfig = {}) {
-    return axios(`${this.API_URL}${url}`, {
+  private async fetcher(
+    url: string,
+    options: Omit<RequestInit, 'body'> & {
+      body?: any;
+    }
+  ) {
+    const res = await fetch(`${this.API_URL}${url}`, {
       ...options,
       headers: {
         ...options.headers,
@@ -28,21 +32,39 @@ export class RainService {
         'content-type': 'application/json',
         'Api-Key': this.API_KEY,
       },
+      body: JSON.stringify(options.body),
     });
+
+    return await res.json();
   }
   public async createApplicationForCompany(
     data: Static<(typeof CreateApplicationForCompanySchema)['body']>
   ) {
     try {
-      const { data: applicationResponse } = await this.fetcher('/issuing/applications/company', {
+      const res = await this.fetcher('/issuing/applications/company', {
         method: 'POST',
-        data,
+        body: data,
       });
+      return res;
+    } catch (error: unknown) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        throw new PrismaError(ERROR400.statusCode, error.message);
+      } else {
+        throw error;
+      }
+    }
+  }
 
-      console.log("Application response");
-      console.log(applicationResponse);
+  public async getStatusOfCompanyApplication(companyId: string) {
+    try {
+      const res = await this.fetcher(
+        `/issuing/applications/company/${companyId}`,
+        {
+          method: 'GET',
+        }
+      );
 
-      return applicationResponse;
+      return res;
     } catch (error: unknown) {
       if (error instanceof PrismaClientKnownRequestError) {
         throw new PrismaError(ERROR400.statusCode, error.message);

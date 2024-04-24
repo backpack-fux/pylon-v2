@@ -32,7 +32,6 @@
     "@fastify/rate-limit": "9.0.1",
     "@fastify/session": "^10.7.2",
     "@prisma/client": "^5.11.0",
-    "axios": "^1.6.8",
     "cors": "2.8.5",
     "discord.js": "^14.14.1",
     "dotenv": "^16.4.5",

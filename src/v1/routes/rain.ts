@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { methods } from '@/helpers/constants';
-import { CreateApplicationForCompanySchema } from '../schemas/rain';
-import { createApplicationForCompany } from '../handlers/rain';
+import { CheckCompanyApplicationStatusSchema, CreateApplicationForCompanySchema } from '../schemas/rain';
+import { checkCompanyApplicationStatusSchema, createApplicationForCompany } from '../handlers/rain';
 
 const Rain = async (app: FastifyInstance) => {
   app.route({
@@ -9,6 +9,11 @@ const Rain = async (app: FastifyInstance) => {
     url: '/application/company',
     schema: CreateApplicationForCompanySchema,
     handler: createApplicationForCompany,
+  }).route({
+    method: methods.GET,
+    url: '/application/company/status/:companyId',
+    schema: CheckCompanyApplicationStatusSchema,
+    handler: checkCompanyApplicationStatusSchema,
   });
 };
 
