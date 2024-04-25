@@ -11,7 +11,9 @@ import session from '@fastify/session';
 import cookie from '@fastify/cookie';
 
 import {
-  // Home, Merchant, Bridge,
+  Home,
+  Merchant,
+  Bridge,
   Authentication,
   Rain,
 } from './v1/routes/index';
@@ -50,11 +52,11 @@ const startServer = async () => {
         runFirst: true,
         routes: [],
       })
-      // .register(Home)
+      .register(Home)
       .register(Authentication, { prefix: '/v1/auth' })
+      .register(Merchant, { prefix: '/v1/merchant' })
+      .register(Bridge, { prefix: '/v1/bridge' })
       .register(Rain, { prefix: '/v1/rain' });
-    // .register(Merchant, { prefix: '/v1/merchant' })
-    // .register(Bridge, { prefix: '/v1/bridge' });
 
     const serverOptions = {
       port: Config.port,

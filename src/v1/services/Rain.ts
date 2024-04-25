@@ -1,5 +1,8 @@
-import { CreateApplicationForCompanySchema } from './../schemas/rain';
-import { ERROR400 } from '@/helpers/constants';
+import {
+  CreateApplicationForCompanySchema,
+  ReapplyForCompanySchema,
+} from './../schemas/rain';
+import { ERROR400, methods } from '@/helpers/constants';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { Static } from '@sinclair/typebox';
 import { PrismaError } from './Error';
@@ -24,25 +27,30 @@ export class RainService {
       body?: any;
     }
   ) {
-    const res = await fetch(`${this.API_URL}${url}`, {
-      ...options,
-      headers: {
-        ...options.headers,
-        accept: 'application/json',
-        'content-type': 'application/json',
-        'Api-Key': this.API_KEY,
-      },
-      body: JSON.stringify(options.body),
-    });
+    try {
+      const res = await fetch(`${this.API_URL}${url}`, {
+        ...options,
+        headers: {
+          ...options.headers,
+          accept: 'application/json',
+          'content-type': 'application/json',
+          'Api-Key': this.API_KEY,
+        },
+        body: JSON.stringify(options.body),
+      });
 
-    return await res.json();
+      return await res.json();
+    } catch (error) {
+      throw error;
+    }
   }
+
   public async createApplicationForCompany(
     data: Static<(typeof CreateApplicationForCompanySchema)['body']>
   ) {
     try {
       const res = await this.fetcher('/issuing/applications/company', {
-        method: 'POST',
+        method: methods.POST,
         body: data,
       });
       return res;
@@ -60,10 +68,32 @@ export class RainService {
       const res = await this.fetcher(
         `/issuing/applications/company/${companyId}`,
         {
-          method: 'GET',
+          method: methods.GET,
         }
       );
 
+      return res;
+    } catch (error: unknown) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        throw new PrismaError(ERROR400.statusCode, error.message);
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  public async reapplyForCompany(
+    data: Static<(typeof ReapplyForCompanySchema)['body']>,
+    companyId: string
+  ) {
+    try {
+      const res = await this.fetcher(
+        `/issuing/applications/company/${companyId}/reapply`,
+        {
+          method: methods.PUT,
+          body: data,
+        }
+      );
       return res;
     } catch (error: unknown) {
       if (error instanceof PrismaClientKnownRequestError) {

@@ -1,5 +1,9 @@
 import { errorResponse, successResponse } from '@/responses';
-import { CheckCompanyApplicationStatusSchema, CreateApplicationForCompanySchema } from '../schemas/rain';
+import {
+  CheckCompanyApplicationStatusSchema,
+  CreateApplicationForCompanySchema,
+  ReapplyForCompanySchema,
+} from '../schemas/rain';
 import { RainService } from '../services/Rain';
 import { FastifyReplyTypebox, FastifyRequestTypebox } from '../types/fastify';
 import { ERROR500 } from '@/helpers/constants';
@@ -15,6 +19,18 @@ export async function createApplicationForCompany(
     const application = await rainServices.createApplicationForCompany(
       req.body
     );
+
+    if (
+      application.statusCode?.toString().startsWith('4') ||
+      application.statusCode?.toString().startsWith('5')
+    ) {
+      return errorResponse(
+        req,
+        rep,
+        application.statusCode,
+        application.message
+      );
+    }
 
     return successResponse(rep, { application });
   } catch (error) {
@@ -37,6 +53,51 @@ export async function checkCompanyApplicationStatusSchema(
       req.params.companyId
     );
 
+    if (
+      application.statusCode?.toString().startsWith('4') ||
+      application.statusCode?.toString().startsWith('5')
+    ) {
+      return errorResponse(
+        req,
+        rep,
+        application.statusCode,
+        application.message
+      );
+    }
+
+    return successResponse(rep, { application });
+  } catch (error) {
+    console.error(error);
+    return errorResponse(
+      req,
+      rep,
+      ERROR500.statusCode,
+      ERRORS.http.error(ERROR500.statusCode)
+    );
+  }
+}
+
+export async function reapplyForCompany(
+  req: FastifyRequestTypebox<typeof ReapplyForCompanySchema>,
+  rep: FastifyReplyTypebox<typeof ReapplyForCompanySchema>
+): Promise<void> {
+  try {
+    const application = await rainServices.reapplyForCompany(
+      req.body,
+      req.params.companyId
+    );
+
+    if (
+      application.statusCode?.toString().startsWith('4') ||
+      application.statusCode?.toString().startsWith('5')
+    ) {
+      return errorResponse(
+        req,
+        rep,
+        application.statusCode,
+        application.message
+      );
+    }
     return successResponse(rep, { application });
   } catch (error) {
     console.error(error);

@@ -107,6 +107,13 @@ export const CheckCompanyApplicationStatusSchema = {
   },
 };
 
+export const ReapplyForCompanySchema = {
+  params: t.Object({
+    companyId: t.String(),
+  }),
+  ...CreateApplicationForCompanySchema,
+};
+
 /**
  * USER
  */
