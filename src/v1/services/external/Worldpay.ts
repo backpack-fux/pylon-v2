@@ -102,13 +102,25 @@ export class WorldpayService {
 
   async createVerifiedToken(
     bodyContent: WorldpayVerifiedTokenRequest
-  ): Promise<WorldpayVerifiedTokenResponse> {
+  ): Promise<WorldpayVerifiedTokenResponse | any> {
     const response = await this.sendRequest(this.endpoints.cardOnFile, {
       method: methods.POST,
       headers: this.headers.verifiedToken,
       body: JSON.stringify(bodyContent),
     });
-    return await response.json();
+    if (response.status === 200) {
+      // The payload has been verified and a matching Token already exists.
+      return await response.json();
+    } else if (response.status === 201) {
+      // The payload has been verified and a Token has been created.
+      return await response.json();
+    } else if (response.status === 206) {
+      // The supplied payload could not be verified. An unverified token has been created/matched.
+      // TODO
+    } else {
+      // TODO: 409
+      throw Error;
+    }
   }
 
   async authorizePayment(

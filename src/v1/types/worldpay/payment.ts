@@ -62,3 +62,8 @@ export type WorldpayQueryPaymentStatusResponse = {
     };
   };
 };
+
+export enum WorldpayPaymentInstrumentType {
+  CHECKOUT = 'card/checkout',
+  PLAIN = 'card/plain',
+}
