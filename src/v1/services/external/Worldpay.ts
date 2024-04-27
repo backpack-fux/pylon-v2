@@ -29,13 +29,17 @@ export class WorldpayService {
 
   // NB: WP API version control
   private headers = {
-    payments: {
+    payment: {
       'Content-Type': 'application/vnd.worldpay.payments-v7+json',
       Accept: 'application/vnd.worldpay.payments-v7+json',
     },
     verifiedToken: {
       'Content-Type': 'application/vnd.worldpay.verified-tokens-v3.hal+json',
       Accept: 'application/vnd.worldpay.verified-tokens-v3.hal+json',
+    },
+    token: {
+      'Content-Type': 'application/vnd.worldpay.tokens-v3.hal+json',
+      Accept: 'application/vnd.worldpay.tokens-v3.hal+json',
     },
   };
 
@@ -112,7 +116,7 @@ export class WorldpayService {
   ): Promise<WorldpayAuthorizePaymentResponse> {
     const response = await this.sendRequest(this.endpoints.authorizePayment, {
       method: methods.POST,
-      headers: this.headers.payments,
+      headers: this.headers.payment,
       body: JSON.stringify(bodyContent),
     });
     return await response.json();
@@ -124,15 +128,20 @@ export class WorldpayService {
    * @param verifiedToken the token to delete
    * @returns status 204 No Content
    */
-  async deleteVerifiedToken(verifiedToken: string): Promise<any> {
+  async deleteVerifiedToken(verifiedToken: string): Promise<{}> {
     const response = await this.sendRequest(
       this.endpoints.deleteToken(verifiedToken),
       {
         method: methods.DELETE,
-        headers: this.headers.verifiedToken,
+        headers: this.headers.token,
       }
     );
-    return await response.json();
+
+    if (response.status === 204) {
+      return await response.json();
+    } else {
+      throw Error;
+    }
   }
 
   // NB: It can take up to 15 minutes for a payment event to update
@@ -143,7 +152,7 @@ export class WorldpayService {
       this.endpoints.paymentStatus(linkData),
       {
         method: methods.GET,
-        headers: this.headers.payments,
+        headers: this.headers.payment,
       }
     );
     return await response.json();
