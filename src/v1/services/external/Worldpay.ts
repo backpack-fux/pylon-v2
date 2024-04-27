@@ -8,21 +8,23 @@ import {
 import {
   WorldpayAuthorizePaymentRequest,
   WorldpayAuthorizePaymentResponse,
-} from '@/v1/types/worldpay/authorizePayment';
+  WorldpayQueryPaymentStatusResponse,
+} from '@/v1/types/worldpay/payment';
 
 export class WorldpayService {
   private static instance: WorldpayService;
   private baseUrl: string;
-  private entityRef: string;
   private username: string;
   private password: string;
-  private accessCheckoutId: string;
+  public entityRef: string;
+  public accessCheckoutId: string;
 
   private endpoints = {
     cardOnFile: '/verifiedTokens/cardOnFile',
     authorizePayment: '/cardPayments/customerInitiatedTransactions',
     fetchCardBins: '/api/cardBin/panLookup',
     deleteToken: (verifiedToken: string) => `/tokens/${verifiedToken}`,
+    paymentStatus: (linkData: string) => `/payments/events/${linkData}`,
   };
 
   // NB: WP API version control
@@ -128,6 +130,20 @@ export class WorldpayService {
       {
         method: methods.DELETE,
         headers: this.headers.verifiedToken,
+      }
+    );
+    return await response.json();
+  }
+
+  // NB: It can take up to 15 minutes for a payment event to update
+  async queryPaymentStatus(
+    linkData: string
+  ): Promise<WorldpayQueryPaymentStatusResponse> {
+    const response = await this.sendRequest(
+      this.endpoints.paymentStatus(linkData),
+      {
+        method: methods.GET,
+        headers: this.headers.payments,
       }
     );
     return await response.json();

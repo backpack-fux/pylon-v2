@@ -53,3 +53,12 @@ export type WorldpayAuthorizePaymentResponse = {
     };
   };
 };
+
+export type WorldpayQueryPaymentStatusResponse = {
+  lastEvent: string;
+  _links: {
+    [key: string]: {
+      href: string;
+    };
+  };
+};
