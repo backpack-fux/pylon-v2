@@ -1,7 +1,7 @@
 import { Type as t } from '@sinclair/typebox';
 import { BaseResponse } from '.';
 
-export const CreateMerchantSchema = {
+export const MerchantCreateSchema = {
   body: t.Object({
     name: t.String({ minLength: 1, maxLength: 255 }),
     surname: t.String({ minLength: 1, maxLength: 255 }),

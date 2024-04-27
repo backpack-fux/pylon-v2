@@ -5,4 +5,6 @@ export const BridgePrefundedAccountBalanceSchema = {
   ...BaseResponse,
 };
 
-export const BridgeWebhookSchema = {};
+export const BridgeWebhookSchema = {
+  ...BaseResponse,
+};

@@ -5,12 +5,17 @@ import {
   getPrefundedAccountBalance,
   processWebhooksHandler,
 } from '../handlers/bridge';
+import {
+  BridgePrefundedAccountBalanceSchema,
+  BridgeWebhookSchema,
+} from '../schemas/bridge';
 
 const Bridge = async (app: FastifyInstance) => {
   app
     .route({
       method: methods.GET,
       url: '/prefunded-account-balance',
+      schema: BridgePrefundedAccountBalanceSchema,
       preHandler: [],
       handler: getPrefundedAccountBalance,
     })
@@ -21,6 +26,7 @@ const Bridge = async (app: FastifyInstance) => {
       },
       method: methods.POST,
       url: '/webhook',
+      schema: BridgeWebhookSchema,
       preHandler: [authMiddlewareForWebhook],
       handler: processWebhooksHandler,
     });
