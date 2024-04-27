@@ -10,16 +10,6 @@ import {
   WorldpayAuthorizePaymentResponse,
 } from '@/v1/types/worldpay/authorizePayment';
 
-const worldpayHeaders = {
-  payments: {
-    'Content-Type': 'application/vnd.worldpay.payments-v7+json',
-    Accept: 'application/vnd.worldpay.payments-v7+json',
-  },
-  verifiedToken: {
-    'Content-Type': 'application/vnd.worldpay.verified-tokens-v3.hal+json',
-  },
-};
-
 export class WorldpayService {
   private static instance: WorldpayService;
   private baseUrl: string;
@@ -33,6 +23,18 @@ export class WorldpayService {
     authorizePayment: '/cardPayments/customerInitiatedTransactions',
     fetchCardBins: '/api/cardBin/panLookup',
     deleteToken: (verifiedToken: string) => `/tokens/${verifiedToken}`,
+  };
+
+  // NB: WP API version control
+  private headers = {
+    payments: {
+      'Content-Type': 'application/vnd.worldpay.payments-v7+json',
+      Accept: 'application/vnd.worldpay.payments-v7+json',
+    },
+    verifiedToken: {
+      'Content-Type': 'application/vnd.worldpay.verified-tokens-v3.hal+json',
+      Accept: 'application/vnd.worldpay.verified-tokens-v3.hal+json',
+    },
   };
 
   private constructor() {
@@ -93,27 +95,25 @@ export class WorldpayService {
   }
 
   async createVerifiedToken(
-    body: WorldpayVerifiedTokenRequest
+    bodyContent: WorldpayVerifiedTokenRequest
   ): Promise<WorldpayVerifiedTokenResponse> {
     const response = await this.sendRequest(this.endpoints.cardOnFile, {
       method: methods.POST,
-      headers: worldpayHeaders.verifiedToken,
-      body: JSON.stringify(body),
+      headers: this.headers.verifiedToken,
+      body: JSON.stringify(bodyContent),
     });
-    const data = await response.json();
-    return data.url;
+    return await response.json();
   }
 
   async authorizePayment(
-    body: WorldpayAuthorizePaymentRequest
+    bodyContent: WorldpayAuthorizePaymentRequest
   ): Promise<WorldpayAuthorizePaymentResponse> {
     const response = await this.sendRequest(this.endpoints.authorizePayment, {
       method: methods.POST,
-      headers: worldpayHeaders.payments,
-      body: JSON.stringify(body),
+      headers: this.headers.payments,
+      body: JSON.stringify(bodyContent),
     });
-    const data = await response.json();
-    return data.url;
+    return await response.json();
   }
 
   /**
@@ -127,7 +127,7 @@ export class WorldpayService {
       this.endpoints.deleteToken(verifiedToken),
       {
         method: methods.DELETE,
-        headers,
+        headers: this.headers.verifiedToken,
       }
     );
     return await response.json();
