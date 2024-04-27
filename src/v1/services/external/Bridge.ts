@@ -1,15 +1,15 @@
 import { Config } from '@/config';
 import { headers, methods } from '@/helpers/constants';
 import { ERRORS } from '@/helpers/errors';
-import { UUID } from 'crypto';
 import {
-  BridgeComplianceType,
   BridgeCurrencyTypeSrc,
   BridgeCurrencyTypeDst,
   BridgePaymentRailTypeSrc,
   BridgePaymentRailTypeDst,
   BridgePrefundedAccountBalance,
-} from '@/v1/types/bridge';
+} from '@/v1/types/bridge/preFundedAccount';
+import { BridgeComplianceType } from '@/v1/types/bridge/compliance';
+import { UUID } from 'crypto';
 import { Hex } from 'viem';
 
 export class BridgeService {

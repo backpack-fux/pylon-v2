@@ -2,15 +2,22 @@ import { Config } from '@/config';
 import { headers, methods } from '@/helpers/constants';
 import { ERRORS } from '@/helpers/errors';
 import {
-  WorldpayAuthorizePaymentRequest,
-  WorldpayAuthorizePaymentResponse,
   WorldpayVerifiedTokenRequest,
   WorldpayVerifiedTokenResponse,
-} from '@/v1/types/worldpay';
+} from '@/v1/types/worldpay/verifiedToken';
+import {
+  WorldpayAuthorizePaymentRequest,
+  WorldpayAuthorizePaymentResponse,
+} from '@/v1/types/worldpay/authorizePayment';
 
 const worldpayHeaders = {
-  'Content-Type': 'application/vnd.worldpay.payments-v7+json',
-  Accept: 'application/vnd.worldpay.payments-v7+json',
+  payments: {
+    'Content-Type': 'application/vnd.worldpay.payments-v7+json',
+    Accept: 'application/vnd.worldpay.payments-v7+json',
+  },
+  verifiedToken: {
+    'Content-Type': 'application/vnd.worldpay.verified-tokens-v3.hal+json',
+  },
 };
 
 export class WorldpayService {
@@ -90,7 +97,7 @@ export class WorldpayService {
   ): Promise<WorldpayVerifiedTokenResponse> {
     const response = await this.sendRequest(this.endpoints.cardOnFile, {
       method: methods.POST,
-      headers: worldpayHeaders,
+      headers: worldpayHeaders.verifiedToken,
       body: JSON.stringify(body),
     });
     const data = await response.json();
@@ -102,7 +109,7 @@ export class WorldpayService {
   ): Promise<WorldpayAuthorizePaymentResponse> {
     const response = await this.sendRequest(this.endpoints.authorizePayment, {
       method: methods.POST,
-      headers,
+      headers: worldpayHeaders.payments,
       body: JSON.stringify(body),
     });
     const data = await response.json();

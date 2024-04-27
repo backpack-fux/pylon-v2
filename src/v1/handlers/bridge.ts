@@ -14,7 +14,7 @@ import {
 import { BridgeService } from '../services/external/Bridge';
 import { DiscordService } from '../services/external/Discord';
 import { errorResponse, successResponse } from '@/responses';
-import { BridgeWebhookPayload_KycLink } from '../types/bridge';
+import { BridgeWebhookPayload_KycLink } from '../types/bridge/webhooks';
 import { ComplianceService } from '../services/Compliance';
 import { utils } from '@/helpers/utils';
 
