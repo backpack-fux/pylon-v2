@@ -2,6 +2,7 @@ export enum TransactionProcessor {
   WORLDPAY = 'WORLDPAY',
   // Add more payment processors
 }
+
 export enum ISO4217Currency {
   EUR = 'EUR',
   GBP = 'GBP',

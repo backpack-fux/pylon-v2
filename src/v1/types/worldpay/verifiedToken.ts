@@ -1,11 +1,13 @@
 /** @docs https://developer.worldpay.com/products/access/verified-tokens/openapi/#other/cardonfile */
 // TODO: validate schema with Typebox
 
+import { WorldpayPaymentInstrumentType } from './payment';
+
 export type WorldpayVerifiedTokenRequest = {
-  description: 'card/plain' | 'card/checkout';
+  description: string;
   verificationCurrency: string;
   paymentInstrument: {
-    type: string;
+    type: WorldpayPaymentInstrumentType;
     cardHolderName: string;
     sessionHref: string;
     billingAddress: {
@@ -67,29 +69,29 @@ export type WorldpayVerifiedTokenResponse = {
         };
       };
     };
-  };
-  verification: {
-    outcome: string;
-    schemeTransactionReference: string;
-    checkedAt: string;
-    riskFactors: {
-      risk: string;
-      type: string;
-      detail?: string;
-    }[];
-    paymentInstrument: {
-      type: string;
-      card: {
-        brand: string;
-        fundingType: string;
-        issuer: {
-          name: string;
+    verification: {
+      outcome: string;
+      schemeTransactionReference: string;
+      checkedAt: string;
+      riskFactors: {
+        risk: string;
+        type: string;
+        detail?: string;
+      }[];
+      paymentInstrument: {
+        type: string;
+        card: {
+          brand: string;
+          fundingType: string;
+          issuer: {
+            name: string;
+          };
         };
       };
-    };
-    _links: {
-      [key: string]: {
-        href: string;
+      _links: {
+        [key: string]: {
+          href: string;
+        };
       };
     };
   };

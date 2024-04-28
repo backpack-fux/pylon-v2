@@ -4,6 +4,9 @@ export type WorldpayAuthorizePaymentRequest = {
     entity: string;
   };
   instruction: {
+    requestAutoSettlement: {
+      enabled: boolean;
+    };
     narrative: {
       line1: string;
     };
@@ -13,9 +16,10 @@ export type WorldpayAuthorizePaymentRequest = {
     };
     paymentInstrument: {
       type: string;
-      href: string;
+      tokenHref: string;
     };
   };
+  channel: WorldpayPaymentChannelType;
 };
 
 export type WorldpayAuthorizePaymentResponse = {
@@ -66,4 +70,9 @@ export type WorldpayQueryPaymentStatusResponse = {
 export enum WorldpayPaymentInstrumentType {
   CHECKOUT = 'card/checkout',
   PLAIN = 'card/plain',
+}
+
+export enum WorldpayPaymentChannelType {
+  ECOM = 'ecom',
+  MOTO = 'moto'
 }

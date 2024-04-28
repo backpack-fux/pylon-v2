@@ -3,6 +3,7 @@ import { prisma } from '@/db';
 import { UUID, createHash, createVerify, KeyLike, generateKey } from 'crypto';
 import { TosStatus, VerificationStatus } from '@prisma/client';
 import { TransactionProcessor } from '@/v1/types/transaction';
+import { MerchantIdentifier } from '@/v1/types/merchant';
 
 export const utils = {
   isJSON: (data: string) => {
@@ -17,6 +18,14 @@ export const utils = {
     const date = new Date();
     const time = date.getTime();
     return time;
+  },
+  getCurrentDate(): string {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, '0');
+    const mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0!
+    const yyyy = today.getFullYear();
+
+    return `${dd}/${mm}/${yyyy}`;
   },
   healthCheck: (): Promise<void> => {
     return new Promise((resolve, reject) => {
@@ -71,5 +80,16 @@ export const utils = {
   },
   generateTokenDescription: (paymentProcessor: TransactionProcessor) => {
     return `${paymentProcessor}-token-${utils.generateUUID()}`;
+  },
+  generateTransactionReference: (
+    MerchantId: MerchantIdentifier,
+    transactionId: UUID
+  ) => {
+    return `${MerchantId}-${transactionId}-${utils.getCurrentDate()}`;
+  },
+  extractTokenFromUrl(url: string): string {
+    const parts = url.split('/');
+    const token = parts[parts.length - 1];
+    return token;
   },
 };

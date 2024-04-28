@@ -8,9 +8,14 @@ import {
   ISO4217Currency,
   TransactionProcessor,
 } from '../types/transaction';
-import { WorldpayPaymentInstrumentType } from '../types/worldpay/payment';
+import {
+  WorldpayAuthorizePaymentRequest,
+  WorldpayPaymentChannelType,
+  WorldpayPaymentInstrumentType,
+} from '../types/worldpay/payment';
 import { Config } from '@/config';
 import { utils } from '@/helpers/utils';
+import { WorldpayVerifiedTokenRequest } from '../types/worldpay/verifiedToken';
 
 const transactionService = TransactionService.getInstance();
 
@@ -20,42 +25,70 @@ export async function processTransaction(
 ): Promise<void> {
   try {
     const PP = req.query.paymentProcessor as TransactionProcessor;
-    let bodyContent = {};
 
     switch (PP) {
       case TransactionProcessor.WORLDPAY:
-        const { sessionUrl, buyer } = req.body;
+        const { sessionUrl, order } = req.body;
+        const { merchant, value, buyer } = order;
         const { fullName, billingAddress } = buyer;
-        bodyContent = {
+
+        const transactionId = utils.generateUUID();
+        const txRef = utils.generateTransactionReference(
+          merchant.id,
+          transactionId
+        );
+
+        const verifiedTokenPayload: WorldpayVerifiedTokenRequest = {
           description: utils.generateTokenDescription(PP),
           paymentInstrument: {
             type: WorldpayPaymentInstrumentType.CHECKOUT,
             cardHolderName: fullName,
             sessionHref: sessionUrl,
-            billingAddress: {
-              address1: billingAddress.address1,
-              address2: billingAddress.address2,
-              address3: billingAddress.address3,
-              postalCode: billingAddress.postalCode,
-              city: billingAddress.city,
-              state: billingAddress.state,
-              countryCode: billingAddress.countryCode,
-            },
+            billingAddress: billingAddress,
           },
           narrative: {
             line1: 'The Mind Palace Ltd', // TODO: DB operation req (basic details e.g. company name)
-            line2: 'Memory265-13-08-1876', // TODO: DB operation req (e.g. order or phone id )
+            line2: 'Memory265-13-08-1876', // TODO: DB operation req (e.g. order or phone id)
           },
           merchant: {
             entity: Config.worldpay.testnet.entityRef,
           },
-          verificationCurrency: ISO4217Currency.USD,
+          verificationCurrency: value.currency,
         };
+
+        const authorizePaymentPayload: WorldpayAuthorizePaymentRequest = {
+          transactionReference: txRef,
+          merchant: {
+            entity: Config.worldpay.testnet.entityRef,
+          },
+          instruction: {
+            requestAutoSettlement: {
+              enabled: true,
+            },
+            narrative: {
+              line1: 'The Mind Palace Ltd',
+            },
+            value: {
+              currency: value.currency,
+              amount: value.amount,
+            },
+            paymentInstrument: {
+              type: WorldpayPaymentInstrumentType.CHECKOUT,
+              tokenHref: '',
+            },
+          },
+          channel: WorldpayPaymentChannelType.ECOM,
+        };
+
+        const result = await transactionService.processTransaction(
+          PP,
+          verifiedTokenPayload,
+          authorizePaymentPayload
+        );
+
+        successResponse(rep, result);
         break;
     }
-
-    const res = await transactionService.processTransaction(PP, bodyContent);
-    successResponse(rep, res);
   } catch (error) {
     console.error(error);
     const errorMessage = 'An error occurred processing the transaction';
