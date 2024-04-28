@@ -15,10 +15,12 @@ export class PrismaError extends Error {
 export class WorldpayError extends Error {
   constructor(
     public readonly statusCode: number,
-    message: string
+    message: string,
+    public readonly errorName?: string | undefined
   ) {
     super(message);
     this.name = 'WorldpayError';
+    this.errorName = errorName;
     this.statusCode = statusCode;
   }
 }

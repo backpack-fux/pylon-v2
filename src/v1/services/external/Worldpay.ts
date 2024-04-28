@@ -10,6 +10,7 @@ import {
   WorldpayAuthorizePaymentResponse,
   WorldpayQueryPaymentStatusResponse,
 } from '@/v1/types/worldpay/payment';
+import { WorldpayErrorResponse } from '@/v1/types/worldpay/error';
 import { WorldpayError } from '../Error';
 
 export class WorldpayService {
@@ -93,66 +94,77 @@ export class WorldpayService {
     try {
       const response = await fetch(`${this.baseUrl}${url}`, mergedOptions);
       if (!response.ok) {
-        throw new Error(ERRORS.http.error(response.status));
+        const wpResponse = await response.json();
+        console.log({ wpResponse });
+        throw new WorldpayError(
+          response.status,
+          wpResponse.message,
+          wpResponse.errorName
+        );
       }
       return response;
     } catch (error: any) {
-      throw new Error(ERRORS.fetch.error(error.message));
+      throw error;
     }
   }
 
   async createVerifiedToken(
     payload: WorldpayVerifiedTokenRequest
   ): Promise<WorldpayVerifiedTokenResponse> {
-    console.log('go in here', payload);
-    const response = await this.sendRequest(this.endpoints.cardOnFile, {
-      method: methods.POST,
-      headers: this.headers.verifiedToken,
-      body: JSON.stringify(payload),
-    });
-
-    const status = response.status;
-    let responseData: WorldpayVerifiedTokenResponse;
-
     try {
-      responseData = await response.json();
-    } catch (error) {
-      throw new WorldpayError(status, 'Failed to parse response JSON');
-    }
+      const response = await this.sendRequest(this.endpoints.cardOnFile, {
+        method: methods.POST,
+        headers: this.headers.verifiedToken,
+        body: JSON.stringify(payload),
+      });
 
-    console.log('go in here again');
-    switch (status) {
-      case 200:
-        // The payload has been verified and a Token has been created.
-        return responseData;
-      case 201:
-        // The payload has been verified and a matching Token already exists.
-        // data = (await response.json()) as WorldpayVerifiedTokenResponse;
-        return responseData;
-      case 206:
-        // TODO
-        console.log(responseData);
-        throw new WorldpayError(
-          status,
-          'The supplied payload could not be verified. An unverified token has been created/matched.'
-        );
-      case 409:
-        // TODO
-        console.log(responseData);
-        throw new WorldpayError(
-          status,
-          'Conflicts with an existing token for cardOnFile transactions using a verified token or card session created by the access checkout SDK.'
-        );
-      default:
-        // TODO
-        throw new WorldpayError(status, 'Unexpected status code');
+      const status = response.status;
+      let responseData;
+
+      try {
+        responseData = await response.json();
+      } catch (error) {
+        throw new WorldpayError(status, 'Failed to parse response JSON');
+      }
+
+      switch (status) {
+        case 200:
+          // The payload has been verified and a Token has been created.
+          return responseData as WorldpayVerifiedTokenResponse;
+        case 201:
+          // The payload has been verified and a matching Token already exists.
+          return responseData as WorldpayVerifiedTokenResponse;
+        case 206:
+          // TODO
+          console.log(responseData);
+          throw new WorldpayError(
+            status,
+            'The supplied payload could not be verified. An unverified token has been created/matched.'
+          );
+        case 409:
+          // TODO
+          console.log(responseData);
+          throw new WorldpayError(
+            status,
+            'Conflicts with an existing token for cardOnFile transactions using a verified token or card session created by the access checkout SDK.'
+          );
+        default:
+          // TODO
+          responseData as WorldpayErrorResponse;
+          throw new WorldpayError(
+            status,
+            responseData.message,
+            responseData.errorName
+          );
+      }
+    } catch (error) {
+      throw error;
     }
   }
 
   async authorizePayment(
     payload: WorldpayAuthorizePaymentRequest
   ): Promise<WorldpayAuthorizePaymentResponse> {
-    console.log('payload', payload);
     const response = await this.sendRequest(this.endpoints.authorizePayment, {
       method: methods.POST,
       headers: this.headers.payment,

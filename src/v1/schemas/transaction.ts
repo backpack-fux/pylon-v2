@@ -15,6 +15,9 @@ export const TransactionProcessSchema = {
     sessionUrl: t.String({
       format: 'uri',
     }),
+    cvcUrl: t.String({
+      format: 'uri',
+    }),
     order: t.Object({
       merchant: t.Object({
         id: t.Enum(MerchantIdentifier),

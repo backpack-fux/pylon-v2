@@ -1,3 +1,6 @@
+import { WorldpayAuthorizePaymentRequest } from './worldpay/payment';
+import { WorldpayVerifiedTokenRequest } from './worldpay/verifiedToken';
+
 export enum TransactionProcessor {
   WORLDPAY = 'WORLDPAY',
   // Add more payment processors
@@ -261,3 +264,10 @@ export enum ISO3166Alpha2Country {
   ZM = 'ZM', // Zambia
   ZW = 'ZW', // Zimbabwe
 }
+
+export type TransactionProcessProcessorDetails = {
+  worldpayProcessorDetails: {
+    verifiedTokenPayload?: WorldpayVerifiedTokenRequest;
+    authorizePaymentPayload?: WorldpayAuthorizePaymentRequest;
+  };
+};

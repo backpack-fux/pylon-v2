@@ -17,6 +17,7 @@ export type WorldpayAuthorizePaymentRequest = {
     paymentInstrument: {
       type: string;
       tokenHref: string;
+      cvcHref: string;
     };
   };
   channel: WorldpayPaymentChannelType;
@@ -74,5 +75,5 @@ export enum WorldpayPaymentInstrumentType {
 
 export enum WorldpayPaymentChannelType {
   ECOM = 'ecom',
-  MOTO = 'moto'
+  MOTO = 'moto',
 }
