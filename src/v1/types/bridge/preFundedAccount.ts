@@ -30,8 +30,10 @@ export type BridgeCurrencyTypeDst = Exclude<
 >;
 
 export type BridgePrefundedAccountBalance = {
-  id: string;
-  available_balance: string;
-  currency: string;
-  name: string;
+  data: Array<{
+    id: string;
+    available_balance: string;
+    currency: string;
+    name: string;
+  }>;
 };

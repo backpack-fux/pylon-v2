@@ -21,6 +21,14 @@ const Bridge = async (app: FastifyInstance) => {
     })
 
     .route({
+      method: methods.POST,
+      url: '/prefunded-account-transfer',
+      schema: BridgePrefundedAccountBalanceSchema,
+      preHandler: [],
+      handler: getPrefundedAccountBalance,
+    })
+
+    .route({
       config: {
         rawBody: true,
       },

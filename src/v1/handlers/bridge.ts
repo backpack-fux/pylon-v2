@@ -31,10 +31,31 @@ export async function getPrefundedAccountBalance(
     const balance = await bridgeService.getPrefundedAccountBalance();
     const res = await discordService.send(
       DISCORD.channelId,
-      balance.available_balance
+      balance.data[0].available_balance
     );
     console.log(res);
     successResponse(rep, res);
+  } catch (error) {
+    console.error(error);
+    const errorMessage =
+      'An error occurred fetching the prefunded account balance';
+    return errorResponse(req, rep, ERROR404.statusCode, errorMessage);
+  }
+}
+
+export async function createPrefundedAccountTransfer(
+  req: FastifyRequestTypebox<typeof BridgePrefundedAccountBalanceSchema>,
+  rep: FastifyReplyTypebox<typeof BridgePrefundedAccountBalanceSchema>
+): Promise<void> {
+  try {
+    req.body;
+    // const balance = await bridgeService.createPrefundedAccountTransfer();
+    // const res = await discordService.send(
+    //   DISCORD.channelId,
+    //   balance.available_balance
+    // );
+    // console.log(res);
+    // successResponse(rep, res);
   } catch (error) {
     console.error(error);
     const errorMessage =

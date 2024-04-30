@@ -72,6 +72,8 @@ export class BridgeService {
     try {
       const response = await fetch(`${this.baseUrl}${url}`, mergedOptions);
       if (!response.ok) {
+        const res = await response.json();
+        console.error(res);
         throw new Error(ERRORS.http.error(response.status));
       }
       return response;
