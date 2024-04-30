@@ -1,6 +1,7 @@
 import {
   CreateApplicationForCompanySchema,
   ReapplyForCompanySchema,
+  UploadApplicationDocumentSchema,
 } from './../schemas/rain';
 import { ERROR400, methods } from '@/helpers/constants';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
@@ -25,15 +26,17 @@ export class RainService {
     url: string,
     options: Omit<RequestInit, 'body'> & {
       body?: any;
+      contentType?: string;
     }
   ) {
+    const contentType = options.contentType || 'application/json';
+    delete options.contentType;
     try {
       const res = await fetch(`${this.API_URL}${url}`, {
         ...options,
         headers: {
           ...options.headers,
-          accept: 'application/json',
-          'content-type': 'application/json',
+          'content-type': contentType,
           'Api-Key': this.API_KEY,
         },
         body: JSON.stringify(options.body),
@@ -90,6 +93,29 @@ export class RainService {
       const res = await this.fetcher(
         `/issuing/applications/company/${companyId}/reapply`,
         {
+          method: methods.PUT,
+          body: data,
+        }
+      );
+      return res;
+    } catch (error: unknown) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        throw new PrismaError(ERROR400.statusCode, error.message);
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  public async uploadCompanyDocument(
+    data: Static<(typeof UploadApplicationDocumentSchema)['body']>,
+    companyId: string
+  ) {
+    try {
+      const res = await this.fetcher(
+        `/issuing/applications/company/${companyId}/document`,
+        {
+          contentType: 'multipart/form-data',
           method: methods.PUT,
           body: data,
         }

@@ -114,6 +114,31 @@ export const ReapplyForCompanySchema = {
   ...CreateApplicationForCompanySchema,
 };
 
+export const UploadApplicationDocumentSchema = {
+  params: t.Object({
+    id: t.String(),
+  }),
+  body: t.Any(),
+  response: {
+    200: t.Object({
+      statusCode: t.Number(),
+      data: t.Any(),
+    }),
+    400: t.Object({
+      statusCode: t.Number(),
+      message: t.String(),
+    }),
+    404: t.Object({
+      statusCode: t.Number(),
+      message: t.String(),
+    }),
+    500: t.Object({
+      statusCode: t.Number(),
+      message: t.String(),
+    }),
+  },
+};
+
 /**
  * USER
  */

@@ -16,8 +16,10 @@ import {
   Bridge,
   Authentication,
   Rain,
+  Upload,
 } from './v1/routes/index';
 import { Config } from './config';
+import multipart from '@fastify/multipart';
 
 const startServer = async () => {
   try {
@@ -45,6 +47,7 @@ const startServer = async () => {
         },
       });
     await server
+
       .register(rawBody, {
         field: 'rawBody',
         global: false,
@@ -56,7 +59,9 @@ const startServer = async () => {
       .register(Authentication, { prefix: '/v1/auth' })
       .register(Merchant, { prefix: '/v1/merchant' })
       .register(Bridge, { prefix: '/v1/bridge' })
-      .register(Rain, { prefix: '/v1/rain' });
+      .register(Rain, { prefix: '/v1/rain' })
+      .register(multipart, { attachFieldsToBody: true })
+      .register(Upload, { prefix: '/v1/upload' });
 
     const serverOptions = {
       port: Config.port,
