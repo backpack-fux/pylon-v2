@@ -1,0 +1,2 @@
+[build.nixpacksPlan.phases.install]
+cmds = ["npm i && npm run db:deploy"]
