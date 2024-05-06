@@ -34,45 +34,59 @@ export class DiscordService {
   }
 
   private setup() {
+    this.connectDiscord();
+    this.addEventListeners();
+  }
+
+  private connectDiscord() {
     // Connect to Discord using the bot token
     this.discordClient.login(Config.discordBotToken);
-
-    // Add event listeners if needed
+    // Add 'one-time' event listeners
     this.discordClient.once('ready', () => {
       console.log(`Logged in as ${this.discordClient.user?.tag}`);
     });
+  }
 
+  private addEventListeners() {
     /** @dev read channel messages & reply */
-    this.discordClient.on(Events.MessageCreate, async (message: Message) => {
-      if (message.content.startsWith('pylon/')) {
-        const [_, arg] = message.content.split('/');
+    this.discordClient.on(Events.MessageCreate, this.handleMessage);
+  }
 
-        switch (arg) {
-          case 'balance':
-            try {
-              const balance =
-                await this.bridgeService.getPrefundedAccountBalance();
+  private handleMessage = async (message: Message) => {
+    if (message.content.startsWith('pylon/')) {
+      const [_, arg] = message.content.split('/');
 
-              message.reply(
-                `Your balance for ${balance.data[0].name} is ${
-                  balance.data[0].available_balance
-                } ${balance.data[0].currency.toUpperCase()}`
-              );
-            } catch (error) {
-              console.error('Error fetching balance:', error);
-              message.reply('An error occurred while fetching your balance.');
-            }
-            break;
-          case 'help':
-          default:
-            message.reply(`
-            Unknown command. Here are the available commands:
-            - \`pylon/balance\`: Check your account balance
-          `);
-            break;
-        }
+      switch (arg) {
+        case 'balance':
+          await this.handleBalance(message);
+          break;
+        case 'help':
+        default:
+          await this.handleHelp(message);
+          break;
       }
-    });
+    }
+  };
+
+  private async handleBalance(message: Message) {
+    try {
+      const balance = await this.bridgeService.getPrefundedAccountBalance();
+      const bool = await message.reply(
+        `Your balance for ${balance.data[0].name} is ${
+          balance.data[0].available_balance
+        } ${balance.data[0].currency.toUpperCase()}`
+      );
+    } catch (error) {
+      console.error('Error fetching balance:', error);
+      await message.reply('An error occurred while fetching your balance.');
+    }
+  }
+
+  private async handleHelp(message: Message) {
+    await message.reply(`
+      Unknown command. Here are the available commands:
+      - \`pylon/balance\`: Check your account balance
+    `);
   }
 
   async send(channelId: string, content: string) {

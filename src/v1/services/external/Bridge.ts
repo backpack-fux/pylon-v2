@@ -11,6 +11,7 @@ import {
 import { BridgeComplianceType } from '@/v1/types/bridge/compliance';
 import { UUID } from 'crypto';
 import { Hex } from 'viem';
+import { BridgeError } from '../Error';
 
 export class BridgeService {
   private static instance: BridgeService;
@@ -74,11 +75,15 @@ export class BridgeService {
       if (!response.ok) {
         const res = await response.json();
         console.error(res);
-        throw new Error(ERRORS.http.error(response.status));
+        throw new BridgeError(response.status, res.message, res.code);
       }
       return response;
     } catch (error: any) {
-      throw new Error(ERRORS.fetch.error(error.message));
+      if (error instanceof BridgeError) {
+        throw error;
+      } else {
+        throw new Error('SendRequest: Something went wrong ');
+      }
     }
   }
 
