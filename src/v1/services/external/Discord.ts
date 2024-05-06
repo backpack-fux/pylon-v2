@@ -71,14 +71,13 @@ export class DiscordService {
   private async handleBalance(message: Message) {
     try {
       const balance = await this.bridgeService.getPrefundedAccountBalance();
-      const bool = await message.reply(
+      await message.reply(
         `Your balance for ${balance.data[0].name} is ${
           balance.data[0].available_balance
         } ${balance.data[0].currency.toUpperCase()}`
       );
     } catch (error) {
       console.error('Error fetching balance:', error);
-      await message.reply('An error occurred while fetching your balance.');
     }
   }
 
