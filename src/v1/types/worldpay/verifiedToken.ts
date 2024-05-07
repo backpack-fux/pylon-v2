@@ -1,10 +1,10 @@
 /** @docs https://developer.worldpay.com/products/access/verified-tokens/openapi/#other/cardonfile */
-// TODO: validate schema with Typebox
 
+import { ISO3166Alpha2Country } from '../transaction';
 import { WorldpayPaymentInstrumentType } from './payment';
 
 export type WorldpayVerifiedTokenRequest = {
-  description: string;
+  description?: string;
   verificationCurrency: string;
   paymentInstrument: {
     type: WorldpayPaymentInstrumentType;
@@ -17,7 +17,7 @@ export type WorldpayVerifiedTokenRequest = {
       postalCode: string;
       city: string;
       state?: string;
-      countryCode: string; // 2 char
+      countryCode: ISO3166Alpha2Country;
     };
   };
   merchant: {

@@ -1,3 +1,5 @@
+import { ISO4217Currency } from '../transaction';
+
 export type WorldpayAuthorizePaymentRequest = {
   transactionReference: string;
   merchant: {
@@ -11,13 +13,13 @@ export type WorldpayAuthorizePaymentRequest = {
       line1: string;
     };
     value: {
-      currency: string;
+      currency: ISO4217Currency;
       amount: number;
     };
     paymentInstrument: {
       type: string;
       tokenHref: string;
-      cvcHref: string;
+      cvcHref?: string;
     };
   };
   channel: WorldpayPaymentChannelType;

@@ -12,6 +12,10 @@ import {
 } from '@/v1/types/worldpay/payment';
 import { WorldpayErrorResponse } from '@/v1/types/worldpay/error';
 import { WorldpayError } from '../Error';
+import {
+  WorldpayRiskAssessmentRequest,
+  WorldpayRiskAssessmentResponse,
+} from '@/v1/types/worldpay/fraudSight';
 
 export class WorldpayService {
   private static instance: WorldpayService;
@@ -25,6 +29,7 @@ export class WorldpayService {
     cardOnFile: '/verifiedTokens/cardOnFile',
     authorizePayment: '/cardPayments/customerInitiatedTransactions',
     fetchCardBins: '/api/cardBin/panLookup',
+    fraudAssessment: '/fraudsight/assessment',
     deleteToken: (verifiedToken: string) => `/tokens/${verifiedToken}`,
     paymentStatus: (linkData: string) => `/payments/events/${linkData}`,
   };
@@ -42,6 +47,10 @@ export class WorldpayService {
     token: {
       'Content-Type': 'application/vnd.worldpay.tokens-v3.hal+json',
       Accept: 'application/vnd.worldpay.tokens-v3.hal+json',
+    },
+    fraudSight: {
+      'Content-Type': 'application/vnd.worldpay.fraudsight-v1.hal+json',
+      Accept: 'application/vnd.worldpay.fraudsight-v1.hal+json',
     },
   };
 
@@ -93,9 +102,9 @@ export class WorldpayService {
 
     try {
       const response = await fetch(`${this.baseUrl}${url}`, mergedOptions);
-      if (!response.ok) {
+      if (!response.ok && response.status !== 409) {
         const wpResponse = await response.json();
-        console.log({ wpResponse });
+        console.log(wpResponse);
         throw new WorldpayError(
           response.status,
           wpResponse.message,
@@ -124,7 +133,7 @@ export class WorldpayService {
       try {
         responseData = await response.json();
       } catch (error) {
-        throw new WorldpayError(status, 'Failed to parse response JSON');
+        return responseData as WorldpayVerifiedTokenResponse;
       }
 
       switch (status) {
@@ -206,6 +215,17 @@ export class WorldpayService {
         headers: this.headers.payment,
       }
     );
+    return await response.json();
+  }
+
+  async getRiskAssessment(
+    payload: WorldpayRiskAssessmentRequest
+  ): Promise<WorldpayRiskAssessmentResponse> {
+    const response = await this.sendRequest(this.endpoints.fraudAssessment, {
+      method: methods.POST,
+      headers: this.headers.fraudSight,
+      body: JSON.stringify(payload),
+    });
     return await response.json();
   }
 

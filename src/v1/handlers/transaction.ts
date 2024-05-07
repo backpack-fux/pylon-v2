@@ -17,8 +17,120 @@ import { Config } from '@/config';
 import { utils } from '@/helpers/utils';
 import { WorldpayVerifiedTokenRequest } from '../types/worldpay/verifiedToken';
 import { WorldpayError } from '../services/Error';
+import {
+  WorldpayRiskAssessmentInstrumentType,
+  WorldpayRiskAssessmentRequest,
+} from '../types/worldpay/fraudSight';
 
 const transactionService = TransactionService.getInstance();
+
+function createVerifiedTokenPayload(
+  req: FastifyRequestTypebox<typeof TransactionProcessSchema>,
+  PP: TransactionProcessor
+): WorldpayVerifiedTokenRequest {
+  const { sessionUrl, order } = req.body;
+  const { merchant, value, buyer } = order;
+  const { billingAddress } = buyer;
+  const { firstName, lastName, ...addressDetails } = billingAddress;
+
+  return {
+    description: utils.generateTokenDescription(PP),
+    paymentInstrument: {
+      type: WorldpayPaymentInstrumentType.CHECKOUT,
+      cardHolderName: utils.getFullName(firstName, lastName),
+      sessionHref: sessionUrl,
+      billingAddress: addressDetails,
+    },
+    narrative: {
+      line1: 'The Mind Palace Ltd',
+      line2: 'Memory265-13-08-1876',
+    },
+    merchant: {
+      entity: Config.worldpay.testnet.entityRef,
+    },
+    verificationCurrency: value.currency,
+  };
+}
+
+function createAuthorizePaymentPayload(
+  req: FastifyRequestTypebox<typeof TransactionProcessSchema>,
+  txRef: string
+): WorldpayAuthorizePaymentRequest {
+  const { cvcUrl, order } = req.body;
+  const { value } = order;
+
+  return {
+    transactionReference: txRef,
+    merchant: {
+      entity: Config.worldpay.testnet.entityRef,
+    },
+    instruction: {
+      requestAutoSettlement: {
+        enabled: true,
+      },
+      narrative: {
+        line1: 'The Mind Palace Ltd',
+      },
+      value: {
+        currency: value.currency,
+        amount: value.amount,
+      },
+      paymentInstrument: {
+        type: WorldpayPaymentInstrumentType.CHECKOUT,
+        tokenHref: '',
+        cvcHref: cvcUrl,
+      },
+    },
+    channel: WorldpayPaymentChannelType.ECOM,
+  };
+}
+
+function createFraudSightPayload(
+  req: FastifyRequestTypebox<typeof TransactionProcessSchema>,
+  txRef: string
+): WorldpayRiskAssessmentRequest {
+  const { order } = req.body;
+  const { value, buyer } = order;
+  const { billingAddress, shippingAddress, isShippingEqualBilling } = buyer;
+  const { firstName, lastName, ...addressDetails } = billingAddress;
+
+  return {
+    transactionReference: txRef,
+    merchant: {
+      entity: Config.worldpay.testnet.entityRef,
+    },
+    instruction: {
+      value: {
+        amount: value.amount,
+        currency: value.currency,
+      },
+      paymentInstrument: {
+        type: WorldpayRiskAssessmentInstrumentType.CARD_TOKENIZED,
+        href: '', // NB: this will be set in the authorize payment response
+      },
+    },
+    requestExemption: true,
+    doNotApplyExemption: false,
+    riskData: {
+      transaction: {
+        firstName: firstName,
+        lastName: lastName,
+      },
+      shipping: {
+        firstName: firstName,
+        lastName: lastName,
+        // TODO: remove firstName and lastName from shippingAddress
+        address: isShippingEqualBilling ? addressDetails : shippingAddress,
+      },
+    },
+    deviceData: {
+      ipAddress:
+        typeof req.headers['x-forwarded-for'] === 'string'
+          ? req.headers['x-forwarded-for']
+          : req.headers['x-forwarded-for']?.[0] || req.ip,
+    },
+  };
+}
 
 export async function processTransaction(
   req: FastifyRequestTypebox<typeof TransactionProcessSchema>,
@@ -26,13 +138,14 @@ export async function processTransaction(
 ): Promise<void> {
   try {
     const PP = req.query.paymentProcessor as TransactionProcessor;
-
     switch (PP) {
       case TransactionProcessor.WORLDPAY:
         try {
           const { sessionUrl, cvcUrl, order } = req.body;
           const { merchant, value, buyer } = order;
-          const { fullName, billingAddress } = buyer;
+          const { billingAddress, shippingAddress, isShippingEqualBilling } =
+            buyer;
+          const { firstName, lastName, ...addressDetails } = billingAddress;
 
           const transactionId = utils.generateUUID();
           const txRef = utils.generateTransactionReference(
@@ -40,54 +153,17 @@ export async function processTransaction(
             transactionId
           );
 
-          const verifiedTokenPayload: WorldpayVerifiedTokenRequest = {
-            description: utils.generateTokenDescription(PP),
-            paymentInstrument: {
-              type: WorldpayPaymentInstrumentType.CHECKOUT,
-              cardHolderName: fullName,
-              sessionHref: sessionUrl,
-              billingAddress: billingAddress,
-            },
-            narrative: {
-              line1: 'The Mind Palace Ltd', // TODO: DB operation req (basic details e.g. company name)
-              line2: 'Memory265-13-08-1876', // TODO: DB operation req (e.g. order or phone id)
-            },
-            merchant: {
-              entity: Config.worldpay.testnet.entityRef,
-            },
-            verificationCurrency: value.currency,
-          };
-
-          const authorizePaymentPayload: WorldpayAuthorizePaymentRequest = {
-            transactionReference: txRef,
-            merchant: {
-              entity: Config.worldpay.testnet.entityRef,
-            },
-            instruction: {
-              requestAutoSettlement: {
-                enabled: true,
-              },
-              narrative: {
-                line1: 'The Mind Palace Ltd',
-              },
-              value: {
-                currency: value.currency,
-                amount: value.amount,
-              },
-              paymentInstrument: {
-                type: WorldpayPaymentInstrumentType.CHECKOUT,
-                tokenHref: '',
-                cvcHref: cvcUrl,
-              },
-            },
-            channel: WorldpayPaymentChannelType.ECOM,
-          };
+          const verifiedTokenPayload = createVerifiedTokenPayload(req, PP);
+          const authorizePaymentPayload = createAuthorizePaymentPayload(
+            req,
+            txRef
+          );
+          const fraudSightPayload = createFraudSightPayload(req, txRef);
 
           const PPDetails = {
-            worldpayProcessorDetails: {
-              authorizePaymentPayload,
-              verifiedTokenPayload,
-            },
+            authorizePaymentPayload,
+            verifiedTokenPayload,
+            fraudSightPayload,
           };
 
           const result = await transactionService.processTransaction(
@@ -114,7 +190,18 @@ export async function processTransaction(
     }
   } catch (error) {
     console.error(error);
-    const errorMessage = 'An error occurred processing the transaction';
+    let errorMessage = 'An error occurred processing the transaction';
+    if (error instanceof WorldpayError) {
+      errorMessage = error.message || errorMessage;
+      return errorResponse(
+        req,
+        rep,
+        error.statusCode || ERROR404.statusCode,
+        errorMessage
+      );
+    } else if (error instanceof Error) {
+      errorMessage = error.message || errorMessage;
+    }
     return errorResponse(req, rep, ERROR404.statusCode, errorMessage);
   }
 }
