@@ -4,6 +4,7 @@ import { ERROR500, STANDARD } from '@/helpers/constants';
 
 import Merchant from './merchant';
 import Bridge from './bridge';
+import Transaction from './transaction';
 
 const Home = async (app: FastifyInstance) => {
   app
@@ -21,4 +22,4 @@ const Home = async (app: FastifyInstance) => {
     });
 };
 
-export { Home, Merchant, Bridge };
+export { Home, Merchant, Bridge, Transaction };
