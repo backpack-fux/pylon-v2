@@ -10,14 +10,7 @@ import rawBody from 'fastify-raw-body';
 import session from '@fastify/session';
 import cookie from '@fastify/cookie';
 
-import {
-  Home,
-  Merchant,
-  Bridge,
-  Authentication,
-  Rain,
-  Upload,
-} from './v1/routes/index';
+import { Home, Merchant, Bridge, Transaction, Authentication, Rain } from './v1/routes/index';
 import { Config } from './config';
 import multipart from '@fastify/multipart';
 
@@ -60,8 +53,7 @@ const startServer = async () => {
       .register(Merchant, { prefix: '/v1/merchant' })
       .register(Bridge, { prefix: '/v1/bridge' })
       .register(Rain, { prefix: '/v1/rain' })
-      .register(multipart, { attachFieldsToBody: true })
-      .register(Upload, { prefix: '/v1/upload' });
+      .register(Transaction, { prefix: '/v1/transaction' });
 
     const serverOptions = {
       port: Config.port,

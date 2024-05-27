@@ -1,6 +1,6 @@
 import { UUID } from 'crypto';
 import { PrismaSelectedCompliance } from '../types/prisma';
-import { BridgeComplianceLinksResponse } from '../types/bridge';
+import { BridgeComplianceLinksResponse } from '../types/bridge/compliance';
 import { prisma } from '@/db';
 import { Merchant } from '@prisma/client';
 import { AccountType, TosStatus, VerificationStatus } from '@prisma/client';

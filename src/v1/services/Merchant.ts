@@ -2,7 +2,7 @@ import { prisma } from '@/db';
 import {
   BridgeComplianceLinksResponse,
   BridgeComplianceTypeEnum,
-} from '../types/bridge';
+} from '../types/bridge/compliance';
 import { BridgeService } from './external/Bridge';
 import { UUID } from 'crypto';
 import { PrismaMerchant } from '../types/prisma';

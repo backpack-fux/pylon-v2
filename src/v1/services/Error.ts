@@ -11,3 +11,29 @@ export class PrismaError extends Error {
     Object.setPrototypeOf(this, new.target.prototype);
   }
 }
+
+export class WorldpayError extends Error {
+  constructor(
+    public readonly statusCode: number,
+    message: string,
+    public readonly errorName?: string | undefined
+  ) {
+    super(message);
+    this.name = 'WorldpayError';
+    this.errorName = errorName;
+    this.statusCode = statusCode;
+  }
+}
+
+export class BridgeError extends Error {
+  constructor(
+    public readonly statusCode: number,
+    message: string,
+    public readonly errorName?: string | undefined
+  ) {
+    super(message);
+    this.name = 'BridgeError';
+    this.errorName = errorName;
+    this.statusCode = statusCode;
+  }
+}
