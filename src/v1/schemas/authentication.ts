@@ -4,8 +4,14 @@ import { Type as t } from '@sinclair/typebox';
 export const RegisterDeviceWithWebAuthnSchema = {
   body: t.Object({
     username: t.String(),
-    algorithm: t.String(),
-    credentialsId: t.String(),
+    credential: t.Object({
+      id: t.String(),
+      algorithm: t.Enum({ RS256: 'RS256', ES256: 'ES256' }),
+      publicKey: t.String(),
+    }),
+    authenticatorData: t.String(),
+    clientData: t.String(),
+    attestationData: t.String().optional(),
   }),
   session: t.Object({
     challenge: t.String({ minLength: 32 }),

@@ -30,6 +30,15 @@ const Authentication = async (app: FastifyInstance) => {
       url: '/register',
       schema: RegisterDeviceWithWebAuthnSchema,
       handler: registerDeviceWithWebAuthn,
+    })
+    /**
+     * @description Authenticate a device with WebAuthn
+     */
+    .route({
+      method: methods.POST,
+      url: '/authenticate',
+      schema: RegisterDeviceWithWebAuthnSchema,
+      handler: registerDeviceWithWebAuthn,
     });
 };
 

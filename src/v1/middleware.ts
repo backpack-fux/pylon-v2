@@ -40,12 +40,6 @@ export const authenticate = async (
   }
 };
 
-export const authenticateWebAuthn = async (
-  request: FastifyRequest,
-  reply: FastifyReply
-) => {
-  
-};
 
 export const validateAPIKey = async (
   request: FastifyRequest,

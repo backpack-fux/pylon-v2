@@ -10,7 +10,14 @@ import rawBody from 'fastify-raw-body';
 import session from '@fastify/session';
 import cookie from '@fastify/cookie';
 
-import { Home, Merchant, Bridge, Transaction, Authentication, Rain } from './v1/routes/index';
+import {
+  Home,
+  Merchant,
+  Bridge,
+  Transaction,
+  Authentication,
+  Rain,
+} from './v1/routes/index';
 import { Config } from './config';
 
 const startServer = async () => {
@@ -36,6 +43,10 @@ const startServer = async () => {
             console.log(Config.jwtSecret, 'secret & token:', token);
             return token;
           },
+        },
+        sign: {
+          expiresIn: Config.jwtExpires,
+          
         },
       });
     await server

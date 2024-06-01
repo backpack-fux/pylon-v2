@@ -24,6 +24,7 @@ export const Config = {
   isProduction: process.env.NODE_ENV === 'production',
   isStaging: process.env.NODE_ENV === 'staging',
   isLocal: process.env.NODE_ENV === 'local',
+  host: loadEnvironmentVariable('HOST'),
   discordBotToken: loadEnvironmentVariable('DISCORD_BOT_TOKEN'),
   web3: {
     explorerUri: loadEnvironmentVariable('EXPLORER_URI'),

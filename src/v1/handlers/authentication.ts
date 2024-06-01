@@ -8,6 +8,7 @@ import { AuthenticationService } from '../services/Authentication';
 import { FastifyReplyTypebox, FastifyRequestTypebox } from '../types/fastify';
 import { ERROR500 } from '@/helpers/constants';
 import { ERRORS } from '@/helpers/errors';
+import { Config } from '@/config';
 
 const authenticationService = AuthenticationService.getInstance();
 export async function sendChallenge(
@@ -35,13 +36,30 @@ export async function registerDeviceWithWebAuthn(
   rep: FastifyReplyTypebox<typeof RegisterDeviceWithWebAuthnSchema>
 ) {
   try {
-    const { username, algorithm, credentialsId } = req.body;
+    const registration = req.body;
 
-    // const user = await authenticationService.registerDeviceWithWebAuthn();
+    const session = req.session as SessionWIthChallenge;
+    if (!session.challenge) {
+      return errorResponse(req, rep, 400, 'No challenge found');
+    }
+
+    const expected = {
+      challenge: session.challenge,
+      origin: Config.host,
+    };
+
+    const user = await authenticationService.registerDeviceWithWebAuthn(
+      registration,
+      expected
+    );
+
+    const token = await rep.jwtSign({ credentialId: user.credentialId });
 
     return successResponse(rep, {
-      // user,
+      user,
+      token,
     });
+
   } catch (error) {
     console.error(error);
     return errorResponse(
@@ -53,24 +71,3 @@ export async function registerDeviceWithWebAuthn(
   }
 }
 
-// export async function verifyChallenge(
-//   req: FastifyRequestTypebox<typeof SendWebAuthnChallengeSchema>,
-//   rep: FastifyReplyTypebox<typeof SendWebAuthnChallengeSchema>
-// ): Promise<void> {
-//   try {
-//     const { challenge } = req.body;
-//     const session = req.session as SessionWIthChallenge;
-//     if (session.challenge !== challenge) {
-//       return errorResponse(req, rep, 400, 'Invalid challenge');
-//     }
-//     return successResponse(rep, { valid: true });
-//   } catch (error) {
-//     console.error(error);
-//     return errorResponse(
-//       req,
-//       rep,
-//       ERROR500.statusCode,
-//       ERRORS.http.error(ERROR500.statusCode)
-//     );
-//   }
-// }
