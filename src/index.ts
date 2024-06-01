@@ -12,7 +12,6 @@ import cookie from '@fastify/cookie';
 
 import { Home, Merchant, Bridge, Transaction, Authentication, Rain } from './v1/routes/index';
 import { Config } from './config';
-import multipart from '@fastify/multipart';
 
 const startServer = async () => {
   try {

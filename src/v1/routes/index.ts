@@ -6,7 +6,6 @@ import Merchant from './merchant';
 import Bridge from './bridge';
 export { default as Authentication } from './authentication';
 export { default as Rain } from './rain';
-export { default as Upload } from './upload';
 import Transaction from './transaction';
 
 const Home = async (app: FastifyInstance) => {

@@ -35,9 +35,12 @@ export async function registerDeviceWithWebAuthn(
   rep: FastifyReplyTypebox<typeof RegisterDeviceWithWebAuthnSchema>
 ) {
   try {
+    const { username, algorithm, credentialsId } = req.body;
+
+    // const user = await authenticationService.registerDeviceWithWebAuthn();
+
     return successResponse(rep, {
-      challenge: (req.session as SessionWIthChallenge).challenge,
-      bodyChallenge: req.body.challenge,
+      // user,
     });
   } catch (error) {
     console.error(error);

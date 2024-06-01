@@ -2,155 +2,179 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 generator client {
-    provider      = "prisma-client-js"
-    binaryTargets = ["native", "linux-musl"]
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl"]
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  authId    String    @unique
+  username  String    @unique @db.VarChar(15)
+  challenge String    @db.VarChar(255)
+  algorithm String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt()
+  Session   Session[]
+
+  @@unique([username, authId])
+}
+
+model Session {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+
+  @@unique([token, userId])
 }
 
 model Merchant {
-    id          Int     @id @default(autoincrement())
-    name        String  @db.VarChar(255)
-    surname     String  @db.VarChar(255)
-    email       String  @unique
-    tokenAuth   String?
-    phoneNumber String? @unique
+  id          Int     @id @default(autoincrement())
+  name        String  @db.VarChar(255)
+  surname     String  @db.VarChar(255)
+  email       String  @unique
+  tokenAuth   String?
+  phoneNumber String? @unique
 
-    companyNumber       String?
-    companyJurisdiction String? @db.Char(2) // ISO 3166-1 alpha-2
+  companyNumber       String?
+  companyJurisdiction String? @db.Char(2) // ISO 3166-1 alpha-2
 
-    fee           Decimal @default(6.50) @db.Decimal(4, 2) // pct 100.00% to 0.00%
-    walletAddress String  @unique
+  fee           Decimal @default(6.50) @db.Decimal(4, 2) // pct 100.00% to 0.00%
+  walletAddress String  @unique
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt()
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 
-    registeredAddress PhysicalAddress @relation(fields: [addressId], references: [id])
-    addressId         BigInt
+  registeredAddress PhysicalAddress @relation(fields: [addressId], references: [id])
+  addressId         BigInt
 
-    Buyer      Buyer[]
-    Compliance Compliance[]
-    Order      Transaction[]
+  Buyer      Buyer[]
+  Compliance Compliance[]
+  Order      Transaction[]
 
-    @@unique([companyNumber, companyJurisdiction])
+  @@unique([companyNumber, companyJurisdiction])
 }
 
 model Buyer {
-    id BigInt @id @default(autoincrement())
+  id BigInt @id @default(autoincrement())
 
-    name          String  @db.VarChar(255)
-    email         String  @unique
-    tokenAuth     String
-    phoneNumber   String
-    walletAddress String? @unique
+  name          String  @db.VarChar(255)
+  email         String  @unique
+  tokenAuth     String
+  phoneNumber   String
+  walletAddress String? @unique
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt()
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 
-    merchant   Merchant @relation(fields: [merchantId], references: [id])
-    merchantId Int
+  merchant   Merchant @relation(fields: [merchantId], references: [id])
+  merchantId Int
 
-    billingAddress PhysicalAddress? @relation(fields: [addressId], references: [id])
-    addressId      BigInt?
+  billingAddress PhysicalAddress? @relation(fields: [addressId], references: [id])
+  addressId      BigInt?
 
-    Compliance Compliance[]
-    Order      Transaction[]
+  Compliance Compliance[]
+  Order      Transaction[]
 }
 
 model Compliance {
-    id   String      @id @default(uuid()) @db.Uuid
-    type AccountType
+  id   String      @id @default(uuid()) @db.Uuid
+  type AccountType
 
-    verificationDocumentLink String @unique
-    termsOfServiceLink       String @unique
+  verificationDocumentLink String @unique
+  termsOfServiceLink       String @unique
 
-    verificationStatus   VerificationStatus @default(NOT_STARTED)
-    termsOfServiceStatus TosStatus          @default(PENDING)
+  verificationStatus   VerificationStatus @default(NOT_STARTED)
+  termsOfServiceStatus TosStatus          @default(PENDING)
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt()
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 
-    buyer   Buyer?  @relation(fields: [buyerId], references: [id])
-    buyerId BigInt?
+  buyer   Buyer?  @relation(fields: [buyerId], references: [id])
+  buyerId BigInt?
 
-    merchant   Merchant? @relation(fields: [merchantId], references: [id])
-    merchantId Int?
+  merchant   Merchant? @relation(fields: [merchantId], references: [id])
+  merchantId Int?
 }
 
 model Transaction {
-    id     String            @id @default(uuid())
-    status TransactionStatus
+  id     String            @id @default(uuid())
+  status TransactionStatus
 
-    partnerTokenId   String
-    partnerRequestId String
+  partnerTokenId   String
+  partnerRequestId String
 
-    currency String   @db.Char(3) // ISO 4217
-    amount   BigInt // store in cents
-    tip      Decimal? @default(0.00) @db.Decimal(4, 2) // pct
+  currency String   @db.Char(3) // ISO 4217
+  amount   BigInt // store in cents
+  tip      Decimal? @default(0.00) @db.Decimal(4, 2) // pct
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt()
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 
-    buyer   Buyer  @relation(fields: [buyerId], references: [id])
-    buyerId BigInt
+  buyer   Buyer  @relation(fields: [buyerId], references: [id])
+  buyerId BigInt
 
-    merchant   Merchant @relation(fields: [merchantId], references: [id])
-    merchantId Int
+  merchant   Merchant @relation(fields: [merchantId], references: [id])
+  merchantId Int
 
-    shippingAddress PhysicalAddress? @relation(fields: [addressId], references: [id])
-    addressId       BigInt?
+  shippingAddress PhysicalAddress? @relation(fields: [addressId], references: [id])
+  addressId       BigInt?
 }
 
 model PhysicalAddress {
-    id   BigInt      @id @default(autoincrement())
-    type AddressType
+  id   BigInt      @id @default(autoincrement())
+  type AddressType
 
-    street1 String  @db.VarChar(50)
-    street2 String? @db.VarChar(50)
+  street1 String  @db.VarChar(50)
+  street2 String? @db.VarChar(50)
 
-    city     String  @db.VarChar(50)
-    postcode String? @db.VarChar(25)
-    state    String? @db.Char(2)
-    country  String  @db.Char(2) // ISO 3166-1 alpha-2
+  city     String  @db.VarChar(50)
+  postcode String? @db.VarChar(25)
+  state    String? @db.Char(2)
+  country  String  @db.Char(2) // ISO 3166-1 alpha-2
 
-    Transaction Transaction[]
-    Buyer       Buyer[]
-    Merchant    Merchant[]
+  Transaction Transaction[]
+  Buyer       Buyer[]
+  Merchant    Merchant[]
 }
 
 enum TransactionStatus {
-    PENDING
-    COMPLETE
-    FAILED
-    ERROR
+  PENDING
+  COMPLETE
+  FAILED
+  ERROR
 }
 
 enum AddressType {
-    BILLING
-    SHIPPING
-    REGISTERED
+  BILLING
+  SHIPPING
+  REGISTERED
 }
 
 enum VerificationStatus {
-    NOT_STARTED
-    PENDING
-    INCOMPLETE
-    AWAITING_UBO
-    MANUAL_REVIEW
-    UNDER_REVIEW
-    APPROVED
-    REJECTED
+  NOT_STARTED
+  PENDING
+  INCOMPLETE
+  AWAITING_UBO
+  MANUAL_REVIEW
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
 }
 
 enum TosStatus {
-    PENDING
-    APPROVED
+  PENDING
+  APPROVED
 }
 
 enum AccountType {
-    BUSINESS
-    INDIVIDUAL
+  BUSINESS
+  INDIVIDUAL
 }

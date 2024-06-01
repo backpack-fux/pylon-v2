@@ -32,6 +32,9 @@ dependencies:
   '@fastify/session':
     specifier: ^10.7.2
     version: 10.7.2
+  '@passwordless-id/webauthn':
+    specifier: ^1.6.1
+    version: 1.6.1
   '@prisma/client':
     specifier: ^5.11.0
     version: 5.13.0(prisma@5.13.0)
@@ -315,6 +318,10 @@ packages:
   /@noble/hashes@1.3.2:
     resolution: {integrity: sha512-MVC8EAQp7MvEcm30KWENFjgR+Mkmf+D189XJTkFIlwohU5hcBbn1ZkKq7KVTi2Hme3PMGF390DaL52beVrIihQ==}
     engines: {node: '>= 16'}
+    dev: false
+
+  /@passwordless-id/webauthn@1.6.1:
+    resolution: {integrity: sha512-YQ1ZHU+exsqF1xAdQ1eBEQ3NZrMT4PSHKsaMSA5Oq38esursuH1hhOT2VHDfT/gimlipUfZr2VEs/cfriswT8w==}
     dev: false
 
   /@prisma/client@5.13.0(prisma@5.13.0):

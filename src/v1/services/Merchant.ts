@@ -75,6 +75,27 @@ export class MerchantService {
     }
   }
 
+  /** @dev update merchant rain id */
+  public async updateRainId(
+    merchantId: number,
+    rainId: string
+  ): Promise<PrismaMerchant> {
+    try {
+      const updatedMerchant: PrismaMerchant = await prisma.merchant.update({
+        where: { id: merchantId },
+        data: { },
+      });
+
+      return updatedMerchant;
+    } catch (error: unknown) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        throw new PrismaError(ERROR400.statusCode, error.message);
+      } else {
+        throw error;
+      }
+    }
+  }
+
   /** @dev register kyb partner via compliance partner */
   public async registerCompliancePartner(
     merchantUuid: UUID,

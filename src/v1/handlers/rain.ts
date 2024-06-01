@@ -9,8 +9,10 @@ import { RainService } from '../services/Rain';
 import { FastifyReplyTypebox, FastifyRequestTypebox } from '../types/fastify';
 import { ERROR500 } from '@/helpers/constants';
 import { ERRORS } from '@/helpers/errors';
+import { MerchantService } from '../services/Merchant';
 
 const rainServices = RainService.getInstance();
+const merchantService = MerchantService.getInstance();
 
 export async function createApplicationForCompany(
   req: FastifyRequestTypebox<typeof CreateApplicationForCompanySchema>,
@@ -32,6 +34,8 @@ export async function createApplicationForCompany(
         application.message
       );
     }
+
+    // merchantService.updateRainId(req.user as number, application.id);
 
     return successResponse(rep, { application });
   } catch (error) {
