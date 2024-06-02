@@ -67,7 +67,7 @@ describe('Merchant Creation API Tests', () => {
 
   it('should create a merchant successfully', async () => {
     const payload = {
-      name: 'John',
+      name: 'Jeff',
       surname: 'Winger',
       email: 'youruser@gmail.com',
       phoneNumber: '(558)555-5555',
@@ -96,4 +96,39 @@ describe('Merchant Creation API Tests', () => {
       tos_link: sharedTOSLink,
     });
   });
+
+  // TODO
+  it('should throw an error if the merchant already exists', async () => {
+    const payload = {
+      name: 'Jeff',
+      surname: 'Winger',
+      email: 'youruser@gmail.com',
+      phoneNumber: '(558)555-5555',
+      walletAddress: '0x0000000000000000000000000000000000000003',
+      registeredAddress: {
+        street1: '123 Main Street',
+        city: 'New York',
+        postcode: '11111',
+        country: 'US',
+      },
+    };
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/v1/merchant/create',
+      headers: {
+        Authorization: `Bearer ${Config.serverApiKey}`,
+      },
+      payload: payload,
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(await response.json().data).toEqual({
+      message: 'Merchant with this email already exists.',
+    });
+  });
+
+  // TODO: throw an error when phone number is incorrect
+  // TODO: throw an error when wallet address is incorrect
+  // TODO: throw an error when registered address is incorrect
 });
