@@ -12,6 +12,38 @@ export const RegisterDeviceWithWebAuthnSchema = {
     authenticatorData: t.String(),
     clientData: t.String(),
     attestationData: t.String().optional(),
+    email: t.String({ format: 'email' }),
+  }),
+  session: t.Object({
+    challenge: t.String({ minLength: 32 }),
+  }),
+  response: {
+    200: t.Object({
+      statusCode: t.Number(),
+      data: t.Any(),
+    }),
+    400: t.Object({
+      statusCode: t.Number(),
+      message: t.String(),
+    }),
+    404: t.Object({
+      statusCode: t.Number(),
+      message: t.String(),
+    }),
+    500: t.Object({
+      statusCode: t.Number(),
+      message: t.String(),
+    }),
+  },
+};
+
+export const AuthenticateDeviceWithWebAuthnSchema = {
+  body: t.Object({
+    credentialId: t.String(),
+    authenticatorData: t.String(),
+    clientData: t.String(),
+    signature: t.String(),
+    userHandle: t.String().optional(),
   }),
   session: t.Object({
     challenge: t.String({ minLength: 32 }),

@@ -1,5 +1,6 @@
 import { errorResponse, successResponse } from '@/responses';
 import {
+  AuthenticateDeviceWithWebAuthnSchema,
   RegisterDeviceWithWebAuthnSchema,
   SendWebAuthnChallengeSchema,
   SessionWIthChallenge,
@@ -9,6 +10,7 @@ import { FastifyReplyTypebox, FastifyRequestTypebox } from '../types/fastify';
 import { ERROR500 } from '@/helpers/constants';
 import { ERRORS } from '@/helpers/errors';
 import { Config } from '@/config';
+import { AuthenticationChecks } from '../types/webauthn';
 
 const authenticationService = AuthenticationService.getInstance();
 export async function sendChallenge(
@@ -37,6 +39,7 @@ export async function registerDeviceWithWebAuthn(
 ) {
   try {
     const registration = req.body;
+    const email = req.body.email;
 
     const session = req.session as SessionWIthChallenge;
     if (!session.challenge) {
@@ -50,16 +53,16 @@ export async function registerDeviceWithWebAuthn(
 
     const user = await authenticationService.registerDeviceWithWebAuthn(
       registration,
-      expected
+      expected,
+      email
     );
 
-    const token = await rep.jwtSign({ credentialId: user.credentialId });
+    const token = await rep.jwtSign({ user });
 
     return successResponse(rep, {
       user,
       token,
     });
-
   } catch (error) {
     console.error(error);
     return errorResponse(
@@ -70,4 +73,43 @@ export async function registerDeviceWithWebAuthn(
     );
   }
 }
+export async function authenticateDeviceWithWebAuthn(
+  req: FastifyRequestTypebox<typeof AuthenticateDeviceWithWebAuthnSchema>,
+  rep: FastifyReplyTypebox<typeof AuthenticateDeviceWithWebAuthnSchema>
+) {
+  try {
+    const authentication = req.body;
 
+    const session = req.session as SessionWIthChallenge;
+    if (!session.challenge) {
+      return errorResponse(req, rep, 400, 'No challenge found');
+    }
+
+    const expected: AuthenticationChecks = {
+      challenge: session.challenge,
+      origin: Config.host,
+      userVerified: true,
+      verbose: !Config.isProduction,
+    };
+
+    const user = await authenticationService.authenticateDeviceWithWebAuthn(
+      authentication,
+      expected
+    );
+
+    const token = await rep.jwtSign({ user });
+
+    return successResponse(rep, {
+      user,
+      token,
+    });
+  } catch (error) {
+    console.error(error);
+    return errorResponse(
+      req,
+      rep,
+      ERROR500.statusCode,
+      ERRORS.http.error(ERROR500.statusCode)
+    );
+  }
+}

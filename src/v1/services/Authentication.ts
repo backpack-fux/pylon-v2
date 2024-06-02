@@ -1,7 +1,11 @@
 import crypto from 'crypto';
 import { RegisterDeviceWithWebAuthnSchema } from '@/v1/schemas/authentication';
 import { server } from '@passwordless-id/webauthn';
-import { AuthenticationEncoded, CredentialKey, RegistrationEncoded } from '@passwordless-id/webauthn/dist/esm/types';
+import {
+  AuthenticationEncoded,
+  CredentialKey,
+  RegistrationEncoded,
+} from '@passwordless-id/webauthn/dist/esm/types';
 import { AuthenticationChecks, RegistrationChecks } from '../types/webauthn';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { PrismaError } from './Error';
@@ -25,7 +29,8 @@ export class AuthenticationService {
 
   public async registerDeviceWithWebAuthn(
     registration: RegistrationEncoded,
-    expected: RegistrationChecks
+    expected: RegistrationChecks,
+    email: string
   ) {
     try {
       // Return the verified credentials
@@ -34,9 +39,16 @@ export class AuthenticationService {
       const user = await prisma.user.create({
         data: {
           username: verified.username,
+          email: email,
+        },
+      });
+
+      await prisma.registeredDevice.create({
+        data: {
+          userId: user.id,
           credentialId: verified.credential.id,
-          algorithm: verified.credential.algorithm,
           publicKey: verified.credential.publicKey,
+          algorithm: verified.credential.algorithm,
         },
       });
 
@@ -52,17 +64,35 @@ export class AuthenticationService {
 
   public async authenticateDeviceWithWebAuthn(
     authentication: AuthenticationEncoded,
-    credentialKey: CredentialKey,
     expected: AuthenticationChecks
   ) {
     try {
-      const authenticationParsed = await server.verifyAuthentication(authentication, credentialKey, expected)
-      const user = await prisma.user.findUnique({
+      const registeredDevice = await prisma.registeredDevice.findUnique({
         where: {
-          credentialId: authenticationParsed.credentialId,
+          credentialId: authentication.credentialId,
+        },
+        include: {
+          user: true,
         },
       });
 
+      if (!registeredDevice) {
+        throw new PrismaError(ERROR400.statusCode, 'Device not registered');
+      }
+
+      const credentialKey: CredentialKey = {
+        id: registeredDevice.credentialId,
+        algorithm: registeredDevice.algorithm,
+        publicKey: registeredDevice.publicKey,
+      };
+
+      await server.verifyAuthentication(
+        authentication,
+        credentialKey,
+        expected
+      );
+
+      return registeredDevice?.user;
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         throw new PrismaError(ERROR400.statusCode, error.message);
@@ -71,5 +101,4 @@ export class AuthenticationService {
       }
     }
   }
-
 }
