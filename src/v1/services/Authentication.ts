@@ -1,19 +1,25 @@
 import crypto from 'crypto';
-import { RegisterDeviceWithWebAuthnSchema } from '@/v1/schemas/authentication';
-import { server } from '@passwordless-id/webauthn';
-import {
+import type {
   AuthenticationEncoded,
   CredentialKey,
   RegistrationEncoded,
-} from '@passwordless-id/webauthn/dist/esm/types';
-import { AuthenticationChecks, RegistrationChecks } from '../types/webauthn';
+} from '@/v1/types/webauthn';
+import type {
+  AuthenticationChecks,
+  RegistrationChecks,
+} from '@/v1/types/webauthn';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { PrismaError } from './Error';
 import { ERROR400 } from '@/helpers/constants';
 import { prisma } from '@/db';
+import PasswordlessIdService from './external/Passwordless';
+
+const passwordlessService = PasswordlessIdService.getInstance();
 
 export class AuthenticationService {
   private static instance: AuthenticationService;
+
+  constructor() {}
 
   public static getInstance(): AuthenticationService {
     if (!AuthenticationService.instance) {
@@ -33,6 +39,9 @@ export class AuthenticationService {
     email: string
   ) {
     try {
+      // get passwordless server
+      const server = await passwordlessService.getServer();
+
       // Return the verified credentials
       const verified = await server.verifyRegistration(registration, expected);
 
@@ -85,6 +94,9 @@ export class AuthenticationService {
         algorithm: registeredDevice.algorithm,
         publicKey: registeredDevice.publicKey,
       };
+
+      // get passwordless serve
+      const server = await passwordlessService.getServer();
 
       await server.verifyAuthentication(
         authentication,

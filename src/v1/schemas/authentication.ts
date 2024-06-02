@@ -11,7 +11,7 @@ export const RegisterDeviceWithWebAuthnSchema = {
     }),
     authenticatorData: t.String(),
     clientData: t.String(),
-    attestationData: t.String().optional(),
+    attestationData: t.String().optional,
     email: t.String({ format: 'email' }),
   }),
   session: t.Object({
@@ -43,7 +43,7 @@ export const AuthenticateDeviceWithWebAuthnSchema = {
     authenticatorData: t.String(),
     clientData: t.String(),
     signature: t.String(),
-    userHandle: t.String().optional(),
+    userHandle: t.String().optional,
   }),
   session: t.Object({
     challenge: t.String({ minLength: 32 }),
