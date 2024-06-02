@@ -9,7 +9,7 @@ export default class PasswordlessIdService {
   };
 
   public async getServer() {
-    const { server } = await import('@passwordless-id/webauthn');
+    const server = await require('@passwordless-id/webauthn/dist/esm/server');
     return server;
   }
 }

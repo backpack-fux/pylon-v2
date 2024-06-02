@@ -1,10 +1,12 @@
 import { FastifyInstance } from 'fastify';
 import { methods } from '@/helpers/constants';
 import {
+  AuthenticateDeviceWithWebAuthnSchema,
   RegisterDeviceWithWebAuthnSchema,
   SendWebAuthnChallengeSchema,
 } from '../schemas/authentication';
 import {
+  authenticateDeviceWithWebAuthn,
   registerDeviceWithWebAuthn,
   sendChallenge,
 } from '../handlers/authentication';
@@ -37,8 +39,8 @@ const Authentication = async (app: FastifyInstance) => {
     .route({
       method: methods.POST,
       url: '/authenticate',
-      schema: RegisterDeviceWithWebAuthnSchema,
-      handler: registerDeviceWithWebAuthn,
+      schema: AuthenticateDeviceWithWebAuthnSchema,
+      handler: authenticateDeviceWithWebAuthn,
     });
 };
 

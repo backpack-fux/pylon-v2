@@ -30,7 +30,7 @@ export class AuthenticationService {
 
   public async generateChallenge() {
     // Generate a random challenge
-    return crypto.randomBytes(32).toString('base64');
+    return crypto.randomUUID();
   }
 
   public async registerDeviceWithWebAuthn(

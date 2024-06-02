@@ -1,3 +1,4 @@
+import { FastifyCookie } from '@fastify/cookie';
 import { FastifySessionObject } from '@fastify/session';
 import { Type as t } from '@sinclair/typebox';
 
@@ -11,11 +12,12 @@ export const RegisterDeviceWithWebAuthnSchema = {
     }),
     authenticatorData: t.String(),
     clientData: t.String(),
-    attestationData: t.String().optional,
+    attestationData: t.Optional(t.String()),
     email: t.String({ format: 'email' }),
+    challenge: t.String(),
   }),
   session: t.Object({
-    challenge: t.String({ minLength: 32 }),
+    challenge: t.String(),
   }),
   response: {
     200: t.Object({

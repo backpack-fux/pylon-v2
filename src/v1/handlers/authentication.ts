@@ -19,7 +19,6 @@ export async function sendChallenge(
 ): Promise<void> {
   try {
     const challenge = await authenticationService.generateChallenge();
-    (req.session as SessionWIthChallenge).challenge = challenge;
 
     return successResponse(rep, { challenge });
   } catch (error) {
@@ -41,13 +40,8 @@ export async function registerDeviceWithWebAuthn(
     const registration = req.body;
     const email = req.body.email;
 
-    const session = req.session as SessionWIthChallenge;
-    if (!session.challenge) {
-      return errorResponse(req, rep, 400, 'No challenge found');
-    }
-
     const expected = {
-      challenge: session.challenge,
+      challenge: req.body.challenge,
       origin: Config.host,
     };
 

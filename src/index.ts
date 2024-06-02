@@ -25,11 +25,19 @@ const startServer = async () => {
     const server = fastify()
       .withTypeProvider<TypeBoxTypeProvider>()
       .register(accepts)
-      .register(cors)
+      .register(cors, {
+        credentials: true,
+        origin: '*',
+      })
       .register(cookie)
       .register(session, {
         secret: Config.sessionSecret,
-        cookie: { secure: false, httpOnly: true, maxAge: 6 * 60 * 1000 },
+        cookie: {
+          secure: false,
+          httpOnly: true,
+          maxAge: 6 * 60 * 1000, // 6 minutes
+          sameSite: 'lax',
+        },
       })
       .register(formbody)
       .register(helmet)
@@ -46,7 +54,6 @@ const startServer = async () => {
         },
         sign: {
           expiresIn: Config.jwtExpires,
-          
         },
       });
     await server
