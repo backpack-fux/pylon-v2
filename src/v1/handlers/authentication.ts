@@ -67,13 +67,13 @@ export async function registerDeviceWithWebAuthn(
     );
   }
 }
+
 export async function authenticateDeviceWithWebAuthn(
   req: FastifyRequestTypebox<typeof AuthenticateDeviceWithWebAuthnSchema>,
   rep: FastifyReplyTypebox<typeof AuthenticateDeviceWithWebAuthnSchema>
 ) {
   try {
     const authentication = req.body;
-
 
     const expected: AuthenticationChecks = {
       challenge: req.body.challenge,
@@ -87,8 +87,6 @@ export async function authenticateDeviceWithWebAuthn(
       expected
     );
 
-    console.log(user);
-    
     const token = await rep.jwtSign({ user });
 
     return successResponse(rep, {
