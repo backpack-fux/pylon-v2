@@ -45,7 +45,8 @@ export const AuthenticateDeviceWithWebAuthnSchema = {
     authenticatorData: t.String(),
     clientData: t.String(),
     signature: t.String(),
-    userHandle: t.String().optional,
+    userHandle: t.Optional(t.String()),
+    challenge: t.String(),
   }),
   session: t.Object({
     challenge: t.String({ minLength: 32 }),

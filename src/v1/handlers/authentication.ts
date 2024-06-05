@@ -74,13 +74,9 @@ export async function authenticateDeviceWithWebAuthn(
   try {
     const authentication = req.body;
 
-    const session = req.session as SessionWIthChallenge;
-    if (!session.challenge) {
-      return errorResponse(req, rep, 400, 'No challenge found');
-    }
 
     const expected: AuthenticationChecks = {
-      challenge: session.challenge,
+      challenge: req.body.challenge,
       origin: Config.clientHost,
       userVerified: true,
       verbose: !Config.isProduction,
