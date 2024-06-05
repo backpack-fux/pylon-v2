@@ -12,9 +12,6 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { PrismaError } from './Error';
 import { ERROR400 } from '@/helpers/constants';
 import { prisma } from '@/db';
-import PasswordlessIdService from './external/Passwordless';
-
-const passwordlessService = PasswordlessIdService.getInstance();
 
 export class AuthenticationService {
   private static instance: AuthenticationService;
@@ -30,7 +27,10 @@ export class AuthenticationService {
 
   public async generateChallenge() {
     // Generate a random challenge
-    return crypto.randomUUID();
+    const randomBuffer = new Uint8Array(32);
+
+    crypto.randomFillSync(randomBuffer);
+    return Buffer.from(randomBuffer).toString('hex');
   }
 
   public async registerDeviceWithWebAuthn(
@@ -40,10 +40,13 @@ export class AuthenticationService {
   ) {
     try {
       // get passwordless server
-      const server = await passwordlessService.getServer();
+      const passwordless = await import('@passwordless-id/webauthn/dist/esm/index.js');
 
       // Return the verified credentials
-      const verified = await server.verifyRegistration(registration, expected);
+      const verified = await passwordless.server.verifyRegistration(
+        registration,
+        expected
+      );
 
       const user = await prisma.user.create({
         data: {
@@ -95,10 +98,11 @@ export class AuthenticationService {
         publicKey: registeredDevice.publicKey,
       };
 
-      // get passwordless serve
-      const server = await passwordlessService.getServer();
+      // get passwordless server
+      const passwordless = await import('@passwordless-id/webauthn/dist/esm/index.js');
 
-      await server.verifyAuthentication(
+      // Return the verified credentials
+      await passwordless.server.verifyAuthentication(
         authentication,
         credentialKey,
         expected

@@ -42,7 +42,7 @@ export async function registerDeviceWithWebAuthn(
 
     const expected = {
       challenge: req.body.challenge,
-      origin: Config.host,
+      origin: Config.clientHost,
     };
 
     const user = await authenticationService.registerDeviceWithWebAuthn(
@@ -81,7 +81,7 @@ export async function authenticateDeviceWithWebAuthn(
 
     const expected: AuthenticationChecks = {
       challenge: session.challenge,
-      origin: Config.host,
+      origin: Config.clientHost,
       userVerified: true,
       verbose: !Config.isProduction,
     };
@@ -91,6 +91,8 @@ export async function authenticateDeviceWithWebAuthn(
       expected
     );
 
+    console.log(user);
+    
     const token = await rep.jwtSign({ user });
 
     return successResponse(rep, {
