@@ -22,12 +22,6 @@ export const Config = {
   isStaging: process.env.NODE_ENV === 'staging',
   isLocal: process.env.NODE_ENV === 'local',
   discordBotToken: loadEnvironmentVariable('DISCORD_BOT_TOKEN'),
-  web3: {
-    explorerUri: loadEnvironmentVariable('EXPLORER_URI'),
-    rpcProviderUri: loadEnvironmentVariable('RPC_PROVIDER_URI'),
-    usdcContractAddress: loadEnvironmentVariable('USDC_CONTRACT_ADDRESS'),
-    usdcPoolPrivateKey: loadEnvironmentVariable('USDC_POOL_PRIVATE_KEY'),
-  },
   bridge: {
     testnet: {
       apiKey: loadEnvironmentVariable('BRIDGE_API_KEY'),
