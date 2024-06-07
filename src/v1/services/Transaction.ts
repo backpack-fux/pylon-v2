@@ -62,13 +62,10 @@ export class TransactionService {
       fraudSightPayload.instruction.paymentInstrument.href = tokenUrl;
       console.log(fraudSightPayload);
 
-      // TODO: Remove this check once we understand the problem
-      if (!Config.isLocal || !Config.isStaging) {
-        const riskAssessment =
-          await this.worldpayService.getRiskAssessment(fraudSightPayload);
-        if (riskAssessment.outcome === WorldpayFraudOutcomeTypes.HIGH_RISK) {
-          throw new Error('Transaction is high risk.');
-        }
+      const riskAssessment =
+        await this.worldpayService.getRiskAssessment(fraudSightPayload);
+      if (riskAssessment.outcome === WorldpayFraudOutcomeTypes.HIGH_RISK) {
+        throw new Error('Transaction is high risk.');
       }
 
       // TODO: Link the FraudSight assessment
