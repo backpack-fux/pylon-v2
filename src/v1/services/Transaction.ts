@@ -90,12 +90,24 @@ export class TransactionService {
     processor: TransactionProcessor,
     worldpayProcessorDetails: TransactionProcessProcessorDetails
   ): Promise<WorldpayAuthorizePaymentResponse | Error | WorldpayError> {
-    switch (processor) {
-      case TransactionProcessor.WORLDPAY:
-        return this.handleWorldpayTransaction(worldpayProcessorDetails);
-      // Add more here
-      default:
-        throw new Error('Invalid payment processor');
+    try {
+      const PP = req.query.paymentProcessor as TransactionProcessor;
+      const { order } = req.body;
+      const { merchant, value } = order;
+      // Retrieve the maximum transaction amount for the merchant
+      const merchantDetails = await merchantService.getMerchantDetails(merchant.id);
+      if (value.amount > merchantDetails.maxTransactionAmount) {
+        throw new Error(`Transaction amount exceeds the maximum limit of $${merchantDetails.maxTransactionAmount}`);
+      }
+      switch (processor) {
+        case TransactionProcessor.WORLDPAY:
+          return this.handleWorldpayTransaction(worldpayProcessorDetails);
+        // Add more here
+        default:
+          throw new Error('Invalid payment processor');
+      }
+    } catch (error) {
+      throw error;
     }
   }
 

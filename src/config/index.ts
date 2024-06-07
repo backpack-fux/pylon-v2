@@ -42,11 +42,11 @@ export const Config = {
   },
   worldpay: {
     testnet: {
-      apiUrl: loadEnvironmentVariable('WORLDPAY_API_URI'),
-      entityRef: loadEnvironmentVariable('WORLDPAY_ENTITY_REF'),
-      username: loadEnvironmentVariable('WORLDPAY_USERNAME'),
-      password: loadEnvironmentVariable('WORLDPAY_PASSWORD'),
-      accessCheckoutId: loadEnvironmentVariable('WORLDPAY_ACCESS_CHECKOUT_ID'),
+      apiUrl: loadEnvironmentVariable('WORLDPAY_API_URI', ''),
+      entityRef: loadEnvironmentVariable('WORLDPAY_ENTITY_REF', ''),
+      username: loadEnvironmentVariable('WORLDPAY_USERNAME', ''),
+      password: loadEnvironmentVariable('WORLDPAY_PASSWORD', ''),
+      accessCheckoutId: loadEnvironmentVariable('WORLDPAY_ACCESS_CHECKOUT_ID', ''),
     },
   },
 };

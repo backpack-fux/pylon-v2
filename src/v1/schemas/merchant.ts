@@ -19,6 +19,7 @@ export const MerchantCreateSchema = {
       state: t.Optional(t.String({ minLength: 2, maxLength: 2 })),
       country: t.String({ minLength: 2, maxLength: 2 }),
     }),
+    maxTransactionAmount: t.Number({ maximum: 10000 }), // Maximum transaction amount in dollars
   }),
   ...BaseResponse,
 };
