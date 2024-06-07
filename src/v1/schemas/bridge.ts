@@ -27,5 +27,3 @@ export const BridgePrefundedAccountTransferSchema = {
 export const BridgeWebhookSchema = {
   ...BaseResponse,
 };
-
-export const BridgeWebhookSchema = {};
