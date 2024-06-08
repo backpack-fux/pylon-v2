@@ -24,6 +24,15 @@ export class MerchantService {
   }
 
   /** @dev create partner */
+  public async emailExists(email: string): Promise<boolean> {
+    const count = await prisma.merchant.count({
+      where: {
+        email: email,
+      },
+    });
+    return count > 0;
+  }
+
   public async createPartner(partnerData: any): Promise<PrismaMerchant> {
     const {
       name,
@@ -41,6 +50,18 @@ export class MerchantService {
       registeredAddress;
 
     try {
+      const existingEmailCount = await prisma.merchant.count({ where: { email } });
+      if (existingEmailCount > 0) {
+        console.error(`Email already exists in the database: ${email}`);
+        throw new Error('A merchant with this email already exists.');
+      }
+
+      const existingPhoneCount = await prisma.merchant.count({ where: { phoneNumber } });
+      if (existingPhoneCount > 0) {
+        console.error(`Phone number already exists in the database: ${phoneNumber}`);
+        throw new Error('A merchant with this phone number already exists.');
+      }
+
       const merchant: PrismaMerchant = await prisma.merchant.create({
         data: {
           name,

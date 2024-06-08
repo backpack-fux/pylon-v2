@@ -18,6 +18,11 @@ export async function createMerchantHandler(
   rep: FastifyReplyTypebox<typeof MerchantCreateSchema>
 ): Promise<void> {
   try {
+    const emailExists = await merchantService.emailExists(req.body.email);
+    if (emailExists) {
+      return errorResponse(req, rep, ERROR400.statusCode, 'A merchant with this email already exists.');
+    }
+
     const merchant = await merchantService.createPartner(req.body);
 
     const complianceUuid = utils.generateUUID();

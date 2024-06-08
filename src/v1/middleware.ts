@@ -18,11 +18,15 @@ export const authenticate = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
+  // Extract the authorization header from the request
   const authHeader = request.headers.authorization;
+  // Attempt to extract the token from the 'Authorization' header
   const token = authHeader && authHeader.split(' ')[1];
 
+  // Log the secret and token for debugging purposes (ensure to remove in production)
   console.log(process.env.JWT_SECRET, 'secret & token:', token);
 
+  // If no token is found, return a 401 Unauthorized error
   if (!token) {
     return reply.code(ERROR401.statusCode).send({
       unauthorized: ERRORS.auth.missingAuthorizationHeader,
@@ -34,6 +38,7 @@ export const authenticate = async (
     // If the token is valid, continue with the request
     return;
   } catch (err) {
+    // If token verification fails, return a 401 Unauthorized error
     return reply
       .code(ERROR401.statusCode)
       .send({ unauthorized: ERRORS.auth.invalidJWT });
