@@ -90,7 +90,6 @@ export class TransactionService {
     processor: TransactionProcessor,
     worldpayProcessorDetails: TransactionProcessProcessorDetails
   ): Promise<WorldpayAuthorizePaymentResponse | Error | WorldpayError> {
-    try {
     switch (processor) {
       case TransactionProcessor.WORLDPAY:
         return this.handleWorldpayTransaction(worldpayProcessorDetails);
