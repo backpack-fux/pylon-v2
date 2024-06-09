@@ -11,6 +11,7 @@ import {
   FastifyReply,
   FastifyServerFactoryHandler,
 } from 'fastify';
+import { prisma } from '@/db';
 import { createHmac } from 'crypto';
 import { utils } from '@/helpers/utils';
 
@@ -105,6 +106,37 @@ export const authMiddlewareForWebhook = async (
   return res.status(200);
 };
 
-/** @TODO create merchant middleware to check if any of the body is not unique,
- * unless this can be done natively by prisma
- * */
+async function checkMerchantConstraints(email: string, phoneNumber: string, walletAddress: string): Promise<void> {
+  const merchant = await prisma.merchant.findFirst({
+    where: {
+      OR: [
+        { email },
+        { phoneNumber },
+        { walletAddress }
+      ]
+    },
+    select: {
+      email: true,
+      phoneNumber: true,
+      walletAddress: true,
+    }
+  });
+
+  if (merchant) {
+    if (merchant.email === email) {
+      console.error(`Email already exists in the database: ${email}`);
+      throw new Error('A merchant with this email already exists.');
+    }
+    if (merchant.phoneNumber === phoneNumber) {
+      console.error(`Phone number already exists in the database: ${phoneNumber}`);
+      throw new Error('A merchant with this phone number already exists.');
+    }
+    if (merchant.walletAddress === walletAddress) {
+      const walletCount = await prisma.merchant.count({ where: { walletAddress } });
+      if (walletCount > 10) {
+        console.error(`Wallet address is used too frequently in the database: ${walletAddress}`);
+        throw new Error('This wallet address has been used too many times.');
+      }
+    }
+  }
+}
