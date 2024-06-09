@@ -16,7 +16,7 @@ function loadEnvironmentVariable(
 export const Config = {
   port: Number(loadEnvironmentVariable('PORT', 5000)),
   jwtSecret: loadEnvironmentVariable('JWT_SECRET'),
-  jwtExpires: Number(loadEnvironmentVariable('JWT_EXPIRES_IN_HOURS', 24)),
+  jwtExpires: Number(loadEnvironmentVariable('JWT_EXPIRES', 24)),
   serverApiKey: loadEnvironmentVariable('SERVER_API_KEY'),
   bridgeApiKey: loadEnvironmentVariable('BRIDGE_API_KEY'),
   bridgeApiURI: loadEnvironmentVariable('BRIDGE_API_URI'),
@@ -27,7 +27,7 @@ export const Config = {
   subscriptionUri: loadEnvironmentVariable('SUBSCRIPTION_URI'),
   discordBotToken: loadEnvironmentVariable('DISCORD_BOT_TOKEN'),
   frontendUri: loadEnvironmentVariable(
-    'FRONTEND_URI',
+    'FRONT_END_URI',
     'https://test.checkout.mybackpack.app'
   ),
   web3: {
