@@ -39,6 +39,7 @@ export async function registerDeviceWithWebAuthn(
   try {
     const registration = req.body;
     const email = req.body.email;
+    const passkeyName = req.body.passkeyName;
 
     const expected = {
       challenge: req.body.challenge,
@@ -49,7 +50,7 @@ export async function registerDeviceWithWebAuthn(
       registration,
       expected,
       email,
-      req.body.passKeyName
+      passkeyName
     );
 
     const token = await rep.jwtSign({ user });

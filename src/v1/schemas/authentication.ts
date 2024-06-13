@@ -5,7 +5,7 @@ import { BaseResponse } from '.';
 
 export const RegisterDeviceWithWebAuthnSchema = {
   body: t.Object({
-    passKeyName: t.Optional(t.String()),
+    passkeyName: t.Optional(t.String()),
     username: t.String(),
     credential: t.Object({
       id: t.String(),
