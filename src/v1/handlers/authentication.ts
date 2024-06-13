@@ -48,7 +48,8 @@ export async function registerDeviceWithWebAuthn(
     const user = await authenticationService.registerDeviceWithWebAuthn(
       registration,
       expected,
-      email
+      email,
+      req.body.passKeyName
     );
 
     const token = await rep.jwtSign({ user });

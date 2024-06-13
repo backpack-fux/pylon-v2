@@ -36,7 +36,8 @@ export class AuthenticationService {
   public async registerDeviceWithWebAuthn(
     registration: RegistrationEncoded,
     expected: RegistrationChecks,
-    email: string
+    email: string,
+    passKeyName?: string
   ) {
     try {
       // get passwordless server
@@ -63,6 +64,7 @@ export class AuthenticationService {
           credentialId: verified.credential.id,
           publicKey: verified.credential.publicKey,
           algorithm: verified.credential.algorithm,
+          name: passKeyName,
         },
       });
 
