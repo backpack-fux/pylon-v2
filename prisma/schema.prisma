@@ -37,6 +37,7 @@ model RainMembers {
 
 model RegisteredDevice {
   id           Int                 @id @default(autoincrement())
+  name         String              @db.VarChar(255)
   credentialId String              @unique
   publicKey    String
   algorithm    CredentialAlgorithm @default(ES256)
