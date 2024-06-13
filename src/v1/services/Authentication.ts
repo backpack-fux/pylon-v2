@@ -40,7 +40,9 @@ export class AuthenticationService {
   ) {
     try {
       // get passwordless server
-      const passwordless = await import('@passwordless-id/webauthn/dist/esm/index.js');
+      const passwordless = await import(
+        '@passwordless-id/webauthn/dist/esm/index.js'
+      );
 
       // Return the verified credentials
       const verified = await passwordless.server.verifyRegistration(
@@ -99,7 +101,9 @@ export class AuthenticationService {
       };
 
       // get passwordless server
-      const passwordless = await import('@passwordless-id/webauthn/dist/esm/index.js');
+      const passwordless = await import(
+        '@passwordless-id/webauthn/dist/esm/index.js'
+      );
 
       // Return the verified credentials
       await passwordless.server.verifyAuthentication(

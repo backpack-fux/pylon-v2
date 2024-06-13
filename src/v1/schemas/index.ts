@@ -24,6 +24,22 @@ export const BaseResponse = {
   },
 };
 
+export const RequestUser = t.Object({
+  id: t.Number(),
+  email: t.String({format: 'email'}),
+  username: t.String(),
+  rain: t.String({format: 'uuid'}),
+  createdAt: t.String({format: "date-time"}),
+  created: t.String({format: "date-time"}),
+
+  // username          String             @unique @db.VarChar(15)
+  // rain              String             @unique @db.VarChar(36)
+  // createdAt         DateTime           @default(now())
+  // updatedAt         DateTime           @updatedAt
+  // RegisteredDevices RegisteredDevice[]
+  // RainCompany  
+})
+
 /** @dev we need this for the error and success responses */
 export type CustomSchemas =
   | typeof BridgePrefundedAccountBalanceSchema

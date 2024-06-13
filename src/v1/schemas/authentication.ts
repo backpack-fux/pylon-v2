@@ -1,6 +1,7 @@
 import { FastifyCookie } from '@fastify/cookie';
 import { FastifySessionObject } from '@fastify/session';
 import { Type as t } from '@sinclair/typebox';
+import { BaseResponse } from '.';
 
 export const RegisterDeviceWithWebAuthnSchema = {
   body: t.Object({
@@ -19,24 +20,7 @@ export const RegisterDeviceWithWebAuthnSchema = {
   session: t.Object({
     challenge: t.String(),
   }),
-  response: {
-    200: t.Object({
-      statusCode: t.Number(),
-      data: t.Any(),
-    }),
-    400: t.Object({
-      statusCode: t.Number(),
-      message: t.String(),
-    }),
-    404: t.Object({
-      statusCode: t.Number(),
-      message: t.String(),
-    }),
-    500: t.Object({
-      statusCode: t.Number(),
-      message: t.String(),
-    }),
-  },
+  ...BaseResponse,
 };
 
 export const AuthenticateDeviceWithWebAuthnSchema = {
@@ -51,48 +35,14 @@ export const AuthenticateDeviceWithWebAuthnSchema = {
   session: t.Object({
     challenge: t.String({ minLength: 32 }),
   }),
-  response: {
-    200: t.Object({
-      statusCode: t.Number(),
-      data: t.Any(),
-    }),
-    400: t.Object({
-      statusCode: t.Number(),
-      message: t.String(),
-    }),
-    404: t.Object({
-      statusCode: t.Number(),
-      message: t.String(),
-    }),
-    500: t.Object({
-      statusCode: t.Number(),
-      message: t.String(),
-    }),
-  },
+  ...BaseResponse,
 };
 
 export const SendWebAuthnChallengeSchema = {
   session: t.Object({
     challenge: t.String({ minLength: 32 }),
   }),
-  response: {
-    200: t.Object({
-      statusCode: t.Number(),
-      data: t.Any(),
-    }),
-    400: t.Object({
-      statusCode: t.Number(),
-      message: t.String(),
-    }),
-    404: t.Object({
-      statusCode: t.Number(),
-      message: t.String(),
-    }),
-    500: t.Object({
-      statusCode: t.Number(),
-      message: t.String(),
-    }),
-  },
+  ...BaseResponse,
 };
 
 export interface SessionWIthChallenge extends FastifySessionObject {
