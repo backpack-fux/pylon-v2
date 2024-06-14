@@ -18,6 +18,7 @@ export async function createMerchantHandler(
   rep: FastifyReplyTypebox<typeof MerchantCreateSchema>
 ): Promise<void> {
   try {
+    console.log('req.body', req.body, 'coming here merchant')
     const merchant = await merchantService.createPartner(req.body);
 
     const complianceUuid = utils.generateUUID();
@@ -36,6 +37,7 @@ export async function createMerchantHandler(
 
     return successResponse(rep, compliance);
   } catch (error) {
+    console.log(error, 'what is error=')
     if (error instanceof PrismaError) {
       return errorResponse(req, rep, error.statusCode, error.message);
     } else {
