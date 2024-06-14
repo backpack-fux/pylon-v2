@@ -39,6 +39,7 @@ export async function registerDeviceWithWebAuthn(
   try {
     const registration = req.body;
     const email = req.body.email;
+    const passkeyName = req.body.passkeyName;
 
     const expected = {
       challenge: req.body.challenge,
@@ -48,7 +49,8 @@ export async function registerDeviceWithWebAuthn(
     const user = await authenticationService.registerDeviceWithWebAuthn(
       registration,
       expected,
-      email
+      email,
+      passkeyName
     );
 
     const token = await rep.jwtSign({ user });
@@ -67,13 +69,13 @@ export async function registerDeviceWithWebAuthn(
     );
   }
 }
+
 export async function authenticateDeviceWithWebAuthn(
   req: FastifyRequestTypebox<typeof AuthenticateDeviceWithWebAuthnSchema>,
   rep: FastifyReplyTypebox<typeof AuthenticateDeviceWithWebAuthnSchema>
 ) {
   try {
     const authentication = req.body;
-
 
     const expected: AuthenticationChecks = {
       challenge: req.body.challenge,
@@ -87,8 +89,6 @@ export async function authenticateDeviceWithWebAuthn(
       expected
     );
 
-    console.log(user);
-    
     const token = await rep.jwtSign({ user });
 
     return successResponse(rep, {

@@ -36,11 +36,14 @@ export class AuthenticationService {
   public async registerDeviceWithWebAuthn(
     registration: RegistrationEncoded,
     expected: RegistrationChecks,
-    email: string
+    email: string,
+    passKeyName?: string
   ) {
     try {
       // get passwordless server
-      const passwordless = await import('@passwordless-id/webauthn/dist/esm/index.js');
+      const passwordless = await import(
+        '@passwordless-id/webauthn/dist/esm/index.js'
+      );
 
       // Return the verified credentials
       const verified = await passwordless.server.verifyRegistration(
@@ -61,6 +64,7 @@ export class AuthenticationService {
           credentialId: verified.credential.id,
           publicKey: verified.credential.publicKey,
           algorithm: verified.credential.algorithm,
+          name: passKeyName,
         },
       });
 
@@ -99,7 +103,9 @@ export class AuthenticationService {
       };
 
       // get passwordless server
-      const passwordless = await import('@passwordless-id/webauthn/dist/esm/index.js');
+      const passwordless = await import(
+        '@passwordless-id/webauthn/dist/esm/index.js'
+      );
 
       // Return the verified credentials
       await passwordless.server.verifyAuthentication(
