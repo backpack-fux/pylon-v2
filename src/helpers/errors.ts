@@ -23,5 +23,8 @@ export const ERRORS = {
     exists: 'Already exists',
     notExists: 'Does not exist',
     notRegistered: 'Is not registered',
+    emailExists: (email: string) => `A merchant with email ${email} already exists.`,
+    phoneNumberExists: (phoneNumber: string) => `A merchant with phone number ${phoneNumber} already exists.`,
+    walletAddressError: (walletAddress: string) => `The wallet address ${walletAddress} is already in use.`,
   },
 };

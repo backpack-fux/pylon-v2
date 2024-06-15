@@ -133,10 +133,15 @@ async function checkMerchantConstraints(email: string, phoneNumber: string, wall
     }
     if (merchant.walletAddress === walletAddress) {
       const walletCount = await prisma.merchant.count({ where: { walletAddress } });
-      if (walletCount > 10) {
+      if (walletCount > 0) {
         console.error(`Wallet address is used too frequently in the database: ${walletAddress}`);
         throw new Error('This wallet address has been used too many times.');
       }
     }
   }
+}
+
+async function validateMerchantDetails(req, reply) {
+  const { email, phoneNumber, walletAddress } = req.body;
+  await checkMerchantConstraints(email, phoneNumber, walletAddress);
 }
