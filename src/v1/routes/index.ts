@@ -4,6 +4,7 @@ import { ERROR500, STANDARD } from '@/helpers/constants';
 
 import Merchant from './merchant';
 import Bridge from './bridge';
+export { default as Passkey } from './passkey';
 
 const Home = async (app: FastifyInstance) => {
   app
