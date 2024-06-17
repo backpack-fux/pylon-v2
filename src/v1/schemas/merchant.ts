@@ -56,6 +56,7 @@ export const MerchantCreateSchema = {
       nationalId: t.String({ minLength: 1 }),
       countryOfIssue: t.String({ minLength: 1 }),
       email: t.String({ format: 'email' }),
+      phoneNumber: t.String({ pattern: '^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$' }),
       address: AddressSchema,
       idFrontPhoto: t.Any(File),
       idBackPhoto: t.Any(File),

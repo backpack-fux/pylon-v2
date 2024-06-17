@@ -19,8 +19,8 @@ export async function createMerchantHandler(
 ): Promise<void> {
   try {
     console.log('req.body', req.body, 'coming here merchant')
-    const merchant = await merchantService.createPartner(req.body);
-    const { initialUser } = req.body
+    const { initialUser, ultimateBeneficialOwners } = req.body
+    const merchant = await merchantService.createPartner(initialUser, ultimateBeneficialOwners);
 
     const complianceUuid = utils.generateUUID();
     const fullName = utils.getFullName(initialUser.firstName, initialUser.lastName);
