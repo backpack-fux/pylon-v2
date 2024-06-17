@@ -1,16 +1,20 @@
 {
   "compilerOptions": {
+    "module": "CommonJS",
     "outDir": "build",
     "incremental": true,
-    "target": "es6",
-    "module": "commonjs",
+    "target": "ESNext",
+    "moduleResolution": "NodeNext",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*", "prisma/*"]
+      "@/*": [
+        "src/*",
+        "prisma/*"
+      ]
     }
   }
 }

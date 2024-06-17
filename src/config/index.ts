@@ -36,4 +36,5 @@ export const Config = {
     usdcContractAddress: loadEnvironmentVariable('USDC_CONTRACT_ADDRESS'),
     usdcPoolPrivateKey: loadEnvironmentVariable('USDC_POOL_PRIVATE_KEY'),
   },
+  clientHost: loadEnvironmentVariable('CLIENT_HOST'),
 };
