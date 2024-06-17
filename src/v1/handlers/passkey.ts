@@ -7,7 +7,7 @@ import {
 import { PasskeyService } from '../services/Passkey';
 import { FastifyReplyTypebox, FastifyRequestTypebox } from '../types/fastify';
 import { ERROR500 } from '@/helpers/constants';
-import { ERRORS } from '@/helpers/errors';
+import { ERRORS, parseError } from '@/helpers/errors';
 import { Config } from '@/config';
 import { AuthenticationChecks } from '../types/webauthn';
 
@@ -21,14 +21,9 @@ export async function generateChallenge(
     const challenge = await passkeyService.generateChallenge();
 
     return successResponse(rep, { challenge });
-  } catch (error) {
-    console.error(error);
-    return errorResponse(
-      req,
-      rep,
-      ERROR500.statusCode,
-      ERRORS.http.error(ERROR500.statusCode)
-    );
+  } catch (e) {
+    const parsedError = parseError(e);
+    return errorResponse(req, rep, parsedError.statusCode, parsedError.message);
   }
 }
 
@@ -60,13 +55,8 @@ export async function registerDeviceWithWebAuthn(
       token,
     });
   } catch (error) {
-    console.error(error);
-    return errorResponse(
-      req,
-      rep,
-      ERROR500.statusCode,
-      ERRORS.http.error(ERROR500.statusCode)
-    );
+    const parsedError = parseError(error);
+    return errorResponse(req, rep, parsedError.statusCode, parsedError.message);
   }
 }
 
@@ -96,12 +86,7 @@ export async function authenticateDeviceWithWebAuthn(
       token,
     });
   } catch (error) {
-    console.error(error);
-    return errorResponse(
-      req,
-      rep,
-      ERROR500.statusCode,
-      ERRORS.http.error(ERROR500.statusCode)
-    );
+    const parsedError = parseError(error);
+    return errorResponse(req, rep, parsedError.statusCode, parsedError.message);
   }
 }

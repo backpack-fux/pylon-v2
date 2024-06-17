@@ -10,8 +10,8 @@ import type {
   RegistrationChecks,
 } from '@/v1/types/webauthn';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { PrismaError } from './Error';
-import { ERROR400 } from '@/helpers/constants';
+import { PasskeyError, PrismaError } from './Error';
+import { ERROR400, ERROR401 } from '@/helpers/constants';
 import { prisma } from '@/db';
 
 export class PasskeyService {
@@ -51,7 +51,7 @@ export class PasskeyService {
   ) {
     try {
       if (!this.server) {
-        throw new Error('WebAuthn server not initialized');
+        throw new PrismaError(500, 'WebAuthn server not initialized');
       }
 
       // Return the verified credentials
@@ -60,28 +60,30 @@ export class PasskeyService {
         expected
       );
 
+      //  Create a new user with the verified credentials and the email provided
+
       const user = await prisma.user.create({
         data: {
           username: verified.username,
           email: email,
+          // Create a new registered device with the verified credentials
+          RegisteredDevices: {
+            create: {
+              credentialId: verified.credential.id,
+              publicKey: verified.credential.publicKey,
+              algorithm: verified.credential.algorithm,
+              name: passKeyName,
+            },
+          },
         },
       });
 
-      await prisma.registeredDevice.create({
-        data: {
-          userId: user.id,
-          credentialId: verified.credential.id,
-          publicKey: verified.credential.publicKey,
-          algorithm: verified.credential.algorithm,
-          name: passKeyName,
-        },
-      });
       return user;
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         throw new PrismaError(ERROR400.statusCode, error.message);
       } else {
-        throw error;
+        throw new PasskeyError(ERROR400.statusCode, (error as Error).message);
       }
     }
   }
@@ -92,7 +94,7 @@ export class PasskeyService {
   ) {
     try {
       if (!this.server) {
-        throw new Error('WebAuthn server not initialized');
+        throw new PrismaError(500, 'WebAuthn server not initialized');
       }
 
       const registeredDevice = await prisma.registeredDevice.findUnique({
@@ -125,7 +127,7 @@ export class PasskeyService {
       if (error instanceof PrismaClientKnownRequestError) {
         throw new PrismaError(ERROR400.statusCode, error.message);
       } else {
-        throw error;
+        throw new PasskeyError(ERROR401.statusCode, (error as Error).message);
       }
     }
   }
