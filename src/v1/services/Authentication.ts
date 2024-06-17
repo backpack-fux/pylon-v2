@@ -16,7 +16,7 @@ import { prisma } from '@/db';
 export class AuthenticationService {
   private static instance: AuthenticationService;
 
-  constructor() {}
+  constructor() { }
 
   public static getInstance(): AuthenticationService {
     if (!AuthenticationService.instance) {
@@ -64,6 +64,7 @@ export class AuthenticationService {
           credentialId: verified.credential.id,
           publicKey: verified.credential.publicKey,
           algorithm: verified.credential.algorithm,
+
           name: passKeyName,
         },
       });

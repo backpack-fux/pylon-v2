@@ -20,13 +20,14 @@ export async function createMerchantHandler(
   try {
     console.log('req.body', req.body, 'coming here merchant')
     const merchant = await merchantService.createPartner(req.body);
+    const { initialUser } = req.body
 
     const complianceUuid = utils.generateUUID();
-    const fullName = utils.getFullName(req.body.name, req.body.surname);
+    const fullName = utils.getFullName(initialUser.firstName, initialUser.lastName);
     const registered = await merchantService.registerCompliancePartner(
       complianceUuid,
       fullName,
-      req.body.email
+      req.body.initialUser.email
     );
 
     const compliance = await complianceService.insertMerchant(
