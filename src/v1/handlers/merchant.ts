@@ -14,7 +14,7 @@ const merchantService = MerchantService.getInstance();
 const complianceService = ComplianceService.getInstance();
 
 export async function createMerchantHandler(
-  req: FastifyRequestTypebox<typeof MerchantCreateSchema>,
+  req: any,//FastifyRequestTypebox<typeof MerchantCreateSchema>,
   rep: FastifyReplyTypebox<typeof MerchantCreateSchema>
 ): Promise<void> {
   try {
@@ -42,7 +42,7 @@ export async function createMerchantHandler(
     if (error instanceof PrismaError) {
       return errorResponse(req, rep, error.statusCode, error.message);
     } else {
-      console.error(error);
+      console.error(error, 'what is error?');
       /** @todo handle generic errors in the utils file */
       const errorMessage = 'An error occurred during partner creation';
       return errorResponse(req, rep, ERROR404.statusCode, errorMessage);

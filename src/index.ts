@@ -9,6 +9,8 @@ import jwt from '@fastify/jwt';
 import rawBody from 'fastify-raw-body';
 import session from '@fastify/session';
 import cookie from '@fastify/cookie';
+import multipart from '@fastify/multipart';
+
 
 import {
   Home,
@@ -27,7 +29,9 @@ const startServer = async () => {
       .register(accepts)
       .register(cors, {
         credentials: true,
-        origin: '*',
+        origin: [process.env.CLIENT_HOST || 'http://localhost:3000'],
+
+
       })
       .register(cookie)
       .register(session, {
@@ -40,6 +44,7 @@ const startServer = async () => {
         },
       })
       .register(formbody)
+      .register(multipart)
       .register(helmet)
       .register(rateLimit)
       .register(jwt, {
