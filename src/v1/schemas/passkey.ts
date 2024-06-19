@@ -90,6 +90,13 @@ export const RegisterPasskeyForExistingUserSchema = {
   ...BaseResponse,
 };
 
+export const RemovePasskeySchema = {
+  params: t.Object({
+    id: t.Number(),
+  }),
+  ...BaseResponse,
+};
+
 export const SendWebAuthnChallengeSchema = {
   session: t.Object({
     challenge: t.String({ minLength: 32 }),

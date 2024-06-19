@@ -124,7 +124,7 @@ export class PasskeyService {
       if (error instanceof PrismaClientKnownRequestError) {
         throw new PrismaError(ERROR400.statusCode, error.message);
       } else {
-        throw new PasskeyError(ERROR400.statusCode, (error as Error).message);
+        throw new PasskeyError(ERROR400.statusCode, (error as Error).message ?? "Error adding passkey");
       }
     }
   }
@@ -173,6 +173,23 @@ export class PasskeyService {
     }
   }
 
+  async removePasskey(id: number, userId: number) {
+    try {
+      await prisma.registeredPasskey.delete({
+        where: {
+          id,
+          userId,
+        },
+      });
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        throw new PrismaError(ERROR400.statusCode, error.message);
+      } else {
+        throw new PasskeyError(ERROR400.statusCode, (error as Error).message ?? "Error removing passkey");
+      }
+    }
+  }
+
   async initiateRegisterDeviceForExistingUser({
     email,
     token,
@@ -190,7 +207,7 @@ export class PasskeyService {
       if (error instanceof PrismaClientKnownRequestError) {
         throw new PrismaError(ERROR400.statusCode, error.message);
       } else {
-        throw new PasskeyError(ERROR400.statusCode, (error as Error).message);
+        throw new PasskeyError(ERROR400.statusCode, (error as Error).message ?? "Error initiating register device");
       }
     }
   }

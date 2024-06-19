@@ -4,6 +4,7 @@ import {
   InitiateRegisterPasskeyForUserSchema,
   RegisterPasskeyForExistingUserSchema,
   RegisterPasskeyWithWebAuthnSchema,
+  RemovePasskeySchema,
   SendWebAuthnChallengeSchema,
 } from '../schemas/passkey';
 import { PasskeyService } from '../services/Passkey';
@@ -130,11 +131,18 @@ export async function registerPasskeyForExistingUser(
     if (!user) {
       return errorResponse(req, rep, 404, 'User not found');
     }
-
-
-
   } catch (error) {
     const parsedError = parseError(error);
     return errorResponse(req, rep, parsedError.statusCode, parsedError.message);
+  }
+}
+
+export async function authenticatePasskeyForExistingUser(
+  req: FastifyRequestTypebox<typeof RemovePasskeySchema>,
+  rep: FastifyReplyTypebox<typeof RemovePasskeySchema>
+) {
+  try {
+  } catch (error) {
+    
   }
 }
