@@ -1,18 +1,20 @@
 import { errorResponse, successResponse } from '@/responses';
 import {
-  AuthenticateDeviceWithWebAuthnSchema,
+  AuthenticatePasskeyWithWebAuthnSchema,
   InitiateRegisterPasskeyForUserSchema,
-  RegisterDeviceWithWebAuthnSchema,
+  RegisterPasskeyForExistingUserSchema,
+  RegisterPasskeyWithWebAuthnSchema,
   SendWebAuthnChallengeSchema,
 } from '../schemas/passkey';
 import { PasskeyService } from '../services/Passkey';
 import { FastifyReplyTypebox, FastifyRequestTypebox } from '../types/fastify';
-import { ERROR500 } from '@/helpers/constants';
-import { ERRORS, parseError } from '@/helpers/errors';
+import { parseError } from '@/helpers/errors';
 import { Config } from '@/config';
 import { AuthenticationChecks } from '../types/passkey';
+import { UserService } from '@/v1/services/User';
 
 const passkeyService = PasskeyService.getInstance();
+const userService = UserService.getInstance();
 
 export async function generateChallenge(
   req: FastifyRequestTypebox<typeof SendWebAuthnChallengeSchema>,
@@ -28,9 +30,9 @@ export async function generateChallenge(
   }
 }
 
-export async function registerDeviceWithWebAuthn(
-  req: FastifyRequestTypebox<typeof RegisterDeviceWithWebAuthnSchema>,
-  rep: FastifyReplyTypebox<typeof RegisterDeviceWithWebAuthnSchema>
+export async function registerPasskeyWithWebAuthn(
+  req: FastifyRequestTypebox<typeof RegisterPasskeyWithWebAuthnSchema>,
+  rep: FastifyReplyTypebox<typeof RegisterPasskeyWithWebAuthnSchema>
 ) {
   try {
     const registration = req.body;
@@ -42,7 +44,7 @@ export async function registerDeviceWithWebAuthn(
       origin: Config.clientHost,
     };
 
-    const user = await passkeyService.registerDeviceWithWebAuthn(
+    const user = await passkeyService.registerPasskeyWithWebAuthn(
       registration,
       expected,
       email,
@@ -61,9 +63,9 @@ export async function registerDeviceWithWebAuthn(
   }
 }
 
-export async function authenticateDeviceWithWebAuthn(
-  req: FastifyRequestTypebox<typeof AuthenticateDeviceWithWebAuthnSchema>,
-  rep: FastifyReplyTypebox<typeof AuthenticateDeviceWithWebAuthnSchema>
+export async function authenticatePasskeyWithWebAuthn(
+  req: FastifyRequestTypebox<typeof AuthenticatePasskeyWithWebAuthnSchema>,
+  rep: FastifyReplyTypebox<typeof AuthenticatePasskeyWithWebAuthnSchema>
 ) {
   try {
     const authentication = req.body;
@@ -75,7 +77,7 @@ export async function authenticateDeviceWithWebAuthn(
       verbose: !Config.isProduction,
     };
 
-    const user = await passkeyService.authenticateDeviceWithWebAuthn(
+    const user = await passkeyService.authenticatePasskeyWithWebAuthn(
       authentication,
       expected
     );
@@ -92,27 +94,45 @@ export async function authenticateDeviceWithWebAuthn(
   }
 }
 
-export async function initiateRegisterDeviceForExistingUser(
+export async function initiateRegisterPasskeyForExistingUser(
   req: FastifyRequestTypebox<typeof InitiateRegisterPasskeyForUserSchema>,
   rep: FastifyReplyTypebox<typeof InitiateRegisterPasskeyForUserSchema>
 ) {
   try {
     const email = req.body.email;
+    const user = await userService.findOneByEmail(email);
 
-    const challenge = await passkeyService.generateChallenge();
+    if (!user) {
+      return errorResponse(req, rep, 404, 'User not found');
+    }
 
-    return successResponse(rep, { challenge });
+    const token = await rep.jwtSign(user, {
+      expiresIn: 1000 * 60 * 10, //10 minutes
+    });
+
+    await passkeyService.initiateRegisterDeviceForExistingUser({
+      email,
+      token,
+    });
   } catch (error) {
     const parsedError = parseError(error);
     return errorResponse(req, rep, parsedError.statusCode, parsedError.message);
   }
 }
 
-export async function registerDeviceForExistingUser(
-  req: FastifyRequestTypebox<typeof AuthenticateDeviceWithWebAuthnSchema>,
-  rep: FastifyReplyTypebox<typeof AuthenticateDeviceWithWebAuthnSchema>
+export async function registerPasskeyForExistingUser(
+  req: FastifyRequestTypebox<typeof RegisterPasskeyForExistingUserSchema>,
+  rep: FastifyReplyTypebox<typeof RegisterPasskeyForExistingUserSchema>
 ) {
   try {
+    const user = await userService.findOneByEmail(req.user.email);
+
+    if (!user) {
+      return errorResponse(req, rep, 404, 'User not found');
+    }
+
+
+
   } catch (error) {
     const parsedError = parseError(error);
     return errorResponse(req, rep, parsedError.statusCode, parsedError.message);

@@ -34,7 +34,7 @@ export class UserService {
     }
   }
 
-  public async createWithRegisteredDevice(
+  public async createWithRegisteredPasskey(
     userData: CreateUser,
     passkeyData: Omit<CreatePasskey, 'userId'>
   ): Promise<PrismaUser> {
@@ -43,7 +43,7 @@ export class UserService {
         data: {
           ...userData,
           RegisteredPasskey: {
-            create: {...passkeyData},
+            create: { ...passkeyData },
           },
         },
       });
@@ -63,6 +63,22 @@ export class UserService {
       return await prisma.user.findFirst({
         where: {
           email,
+        },
+      });
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        throw new PrismaError(ERROR400.statusCode, error.message);
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  public async findOneById(id: number): Promise<PrismaUser | null> {
+    try {
+      return await prisma.user.findFirst({
+        where: {
+          id,
         },
       });
     } catch (error) {

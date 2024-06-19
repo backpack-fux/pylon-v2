@@ -1,11 +1,18 @@
 import { FastifyInstance } from 'fastify';
 import { methods } from '@/helpers/constants';
 import {
-  AuthenticateDeviceWithWebAuthnSchema,
-  RegisterDeviceWithWebAuthnSchema,
+  AuthenticatePasskeyWithWebAuthnSchema,
+  RegisterPasskeyForExistingUserSchema,
+  RegisterPasskeyWithWebAuthnSchema,
   SendWebAuthnChallengeSchema,
 } from '@/v1/schemas/passkey';
-import { authenticateDeviceWithWebAuthn, generateChallenge, registerDeviceWithWebAuthn } from '@/v1/handlers/passkey';
+import {
+  authenticatePasskeyWithWebAuthn,
+  generateChallenge,
+  registerPasskeyForExistingUser,
+  registerPasskeyWithWebAuthn,
+  initiateRegisterPasskeyForExistingUser,
+} from '@/v1/handlers/passkey';
 
 const Authentication = async (app: FastifyInstance) => {
   /**
@@ -20,23 +27,35 @@ const Authentication = async (app: FastifyInstance) => {
       handler: generateChallenge,
     })
     /**
-     * @description Register a device with WebAuthn
-     * @param {FastifyRequestTypebox<typeof RegisterDeviceWithWebAuthnSchema>} req
+     * @description Register a Passkey with WebAuthn
+     * @param {FastifyRequestTypebox<typeof RegisterPasskeyWithWebAuthnSchema>} req
      */
     .route({
       method: methods.POST,
       url: '/register',
-      schema: RegisterDeviceWithWebAuthnSchema,
-      handler: registerDeviceWithWebAuthn,
+      schema: RegisterPasskeyWithWebAuthnSchema,
+      handler: registerPasskeyWithWebAuthn,
     })
     /**
-     * @description Authenticate a device with WebAuthn
+     * @description Authenticate a Passkey with WebAuthn
      */
     .route({
       method: methods.POST,
       url: '/authenticate',
-      schema: AuthenticateDeviceWithWebAuthnSchema,
-      handler: authenticateDeviceWithWebAuthn,
+      schema: AuthenticatePasskeyWithWebAuthnSchema,
+      handler: authenticatePasskeyWithWebAuthn,
+    })
+    .route({
+      method: methods.POST,
+      url: '/initiate-register',
+      schema: RegisterPasskeyWithWebAuthnSchema,
+      handler: initiateRegisterPasskeyForExistingUser,
+    })
+    .route({
+      method: methods.PATCH,
+      url: '/add',
+      schema: RegisterPasskeyForExistingUserSchema,
+      handler: registerPasskeyForExistingUser,
     });
 };
 

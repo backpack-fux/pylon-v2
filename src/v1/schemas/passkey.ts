@@ -21,7 +21,7 @@ const BaseResponse = {
   },
 };
 
-export const RegisterDeviceWithWebAuthnSchema = {
+export const RegisterPasskeyWithWebAuthnSchema = {
   body: t.Object({
     passkeyName: t.Optional(t.String()),
     username: t.String(),
@@ -42,7 +42,7 @@ export const RegisterDeviceWithWebAuthnSchema = {
   ...BaseResponse,
 };
 
-export const AuthenticateDeviceWithWebAuthnSchema = {
+export const AuthenticatePasskeyWithWebAuthnSchema = {
   body: t.Object({
     credentialId: t.String(),
     authenticatorData: t.String(),
@@ -60,6 +60,32 @@ export const AuthenticateDeviceWithWebAuthnSchema = {
 export const InitiateRegisterPasskeyForUserSchema = {
   body: t.Object({
     email: t.String({ format: 'email' }),
+  }),
+  ...BaseResponse,
+};
+
+export const RegisterPasskeyForExistingUserSchema = {
+  body: t.Object({
+    passkeyName: t.Optional(t.String()),
+    credential: t.Object({
+      id: t.String(),
+      algorithm: t.Enum({ RS256: 'RS256', ES256: 'ES256' }),
+      publicKey: t.String(),
+    }),
+    authenticatorData: t.String(),
+    clientData: t.String(),
+    attestationData: t.Optional(t.String()),
+    challenge: t.String(),
+  }),
+  session: t.Object({
+    challenge: t.String(),
+  }),
+  user: t.Object({
+    email: t.String({ format: 'email' }),
+    username: t.String(),
+    createdAt: t.String(),
+    updatedAt: t.String(),
+    id: t.String(),
   }),
   ...BaseResponse,
 };
