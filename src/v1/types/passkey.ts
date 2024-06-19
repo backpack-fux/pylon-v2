@@ -1,3 +1,5 @@
+import { PrismaRegisteredPasskey } from './prisma';
+
 export type AuthType = 'auto' | 'local' | 'extern' | 'roaming' | 'both';
 export type NumAlgo = -7 | -257;
 export type NamedAlgo = 'RS256' | 'ES256';
@@ -120,3 +122,8 @@ export type PasswordlessServer = {
   ) => Promise<AuthenticationParsed>;
   verifySignature: (params: VerifyParams) => Promise<boolean>;
 };
+
+export type CreatePasskey = Omit<
+  PrismaRegisteredPasskey,
+  'createdAt' | 'updatedAt' | 'id'
+>;

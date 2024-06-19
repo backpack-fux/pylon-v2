@@ -98,7 +98,9 @@ model RainCompany {
   id          Int           @id @default(autoincrement())
   ref         String        @unique
   name        String
-  RainMembers RainMembers[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  rainMembers RainMembers[]
 }
 
 model RainMembers {
@@ -106,41 +108,42 @@ model RainMembers {
   active      Boolean     @default(true)
   userId      Int
   companyId   Int
-  RainCompany RainCompany @relation(fields: [companyId], references: [id])
-  User        User        @relation(fields: [userId], references: [id])
+  createdAt   DateTime    @default(now())
+  rainCompany RainCompany @relation(fields: [companyId], references: [id])
+  user        User        @relation(fields: [userId], references: [id])
 }
 
-model RegisteredDevice {
+model RegisteredPasskey {
   id           Int                 @id @default(autoincrement())
-  name         String              @default("") @db.VarChar(255)
+  name         String?              @default("") @db.VarChar(255)
   credentialId String              @unique
   publicKey    String
   algorithm    CredentialAlgorithm @default(ES256)
   userId       Int
   createdAt    DateTime            @default(now())
-  updatedAt    DateTime
-  User         User                @relation(fields: [userId], references: [id])
-  Session      Session[]
+  updatedAt    DateTime            @updatedAt
+  user         User                @relation(fields: [userId], references: [id])
+  session      Session[]
 }
 
 model Session {
-  id               Int              @id @default(autoincrement())
-  token            String           @unique
-  deviceId         Int
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime
-  RegisteredDevice RegisteredDevice @relation(fields: [deviceId], references: [id])
+  id                Int               @id @default(autoincrement())
+  token             String            @unique
+  deviceId          Int
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  registeredPasskey RegisteredPasskey @relation(fields: [deviceId], references: [id])
 }
 
 model User {
-  id               Int                @id @default(autoincrement())
-  email            String             @unique
-  username         String             @unique @db.VarChar(15)
-  rain             String?            @unique @db.VarChar(36)
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime
-  RainMembers      RainMembers[]
-  RegisteredDevice RegisteredDevice[]
+  id                Int                 @id @default(autoincrement())
+  email             String              @unique
+  username          String              @unique @db.VarChar(15)
+  rain              String?             @unique @db.VarChar(36)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  rainMembers       RainMembers[]
+  registeredPasskey RegisteredPasskey[]
 }
 
 enum TransactionStatus {

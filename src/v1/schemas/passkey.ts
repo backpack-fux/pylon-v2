@@ -57,6 +57,13 @@ export const AuthenticateDeviceWithWebAuthnSchema = {
   ...BaseResponse,
 };
 
+export const InitiateRegisterPasskeyForUserSchema = {
+  body: t.Object({
+    email: t.String({ format: 'email' }),
+  }),
+  ...BaseResponse,
+};
+
 export const SendWebAuthnChallengeSchema = {
   session: t.Object({
     challenge: t.String({ minLength: 32 }),

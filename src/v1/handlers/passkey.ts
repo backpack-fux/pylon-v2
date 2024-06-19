@@ -1,6 +1,7 @@
 import { errorResponse, successResponse } from '@/responses';
 import {
   AuthenticateDeviceWithWebAuthnSchema,
+  InitiateRegisterPasskeyForUserSchema,
   RegisterDeviceWithWebAuthnSchema,
   SendWebAuthnChallengeSchema,
 } from '../schemas/passkey';
@@ -9,7 +10,7 @@ import { FastifyReplyTypebox, FastifyRequestTypebox } from '../types/fastify';
 import { ERROR500 } from '@/helpers/constants';
 import { ERRORS, parseError } from '@/helpers/errors';
 import { Config } from '@/config';
-import { AuthenticationChecks } from '../types/webauthn';
+import { AuthenticationChecks } from '../types/passkey';
 
 const passkeyService = PasskeyService.getInstance();
 
@@ -85,6 +86,33 @@ export async function authenticateDeviceWithWebAuthn(
       user,
       token,
     });
+  } catch (error) {
+    const parsedError = parseError(error);
+    return errorResponse(req, rep, parsedError.statusCode, parsedError.message);
+  }
+}
+
+export async function initiateRegisterDeviceForExistingUser(
+  req: FastifyRequestTypebox<typeof InitiateRegisterPasskeyForUserSchema>,
+  rep: FastifyReplyTypebox<typeof InitiateRegisterPasskeyForUserSchema>
+) {
+  try {
+    const email = req.body.email;
+
+    const challenge = await passkeyService.generateChallenge();
+
+    return successResponse(rep, { challenge });
+  } catch (error) {
+    const parsedError = parseError(error);
+    return errorResponse(req, rep, parsedError.statusCode, parsedError.message);
+  }
+}
+
+export async function registerDeviceForExistingUser(
+  req: FastifyRequestTypebox<typeof AuthenticateDeviceWithWebAuthnSchema>,
+  rep: FastifyReplyTypebox<typeof AuthenticateDeviceWithWebAuthnSchema>
+) {
+  try {
   } catch (error) {
     const parsedError = parseError(error);
     return errorResponse(req, rep, parsedError.statusCode, parsedError.message);

@@ -4,21 +4,22 @@ import type {
   CredentialKey,
   PasswordlessServer,
   RegistrationEncoded,
-} from '@/v1/types/webauthn';
+} from '@/v1/types/passkey';
 import type {
   AuthenticationChecks,
   RegistrationChecks,
-} from '@/v1/types/webauthn';
+} from '@/v1/types/passkey';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { PasskeyError, PrismaError } from './Error';
 import { ERROR400, ERROR401 } from '@/helpers/constants';
 import { prisma } from '@/db';
+import { UserService } from './User';
 
 export class PasskeyService {
   private static instance: PasskeyService;
   private server?: PasswordlessServer;
 
-  constructor() {
+  constructor(private userService = UserService.getInstance()) {
     this.initialize();
   }
 
@@ -62,22 +63,15 @@ export class PasskeyService {
 
       //  Create a new user with the verified credentials and the email provided
 
-      const user = await prisma.user.create({
-        data: {
-          username: verified.username,
-          email: email,
-          // Create a new registered device with the verified credentials
-          RegisteredDevices: {
-            create: {
-              credentialId: verified.credential.id,
-              publicKey: verified.credential.publicKey,
-              algorithm: verified.credential.algorithm,
-              name: passKeyName,
-            },
-          },
-        },
-      });
-
+      const user = await this.userService.createWithRegisteredDevice(
+        { email, username: verified.username },
+        {
+          credentialId: verified.credential.id,
+          publicKey: verified.credential.publicKey,
+          algorithm: verified.credential.algorithm,
+          name: passKeyName ?? '',
+        }
+      );
       return user;
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
@@ -97,12 +91,12 @@ export class PasskeyService {
         throw new PrismaError(500, 'WebAuthn server not initialized');
       }
 
-      const registeredDevice = await prisma.registeredDevice.findUnique({
+      const registeredDevice = await prisma.registeredPasskey.findUnique({
         where: {
           credentialId: authentication.credentialId,
         },
         include: {
-          user: true,
+          User: true,
         },
       });
 
@@ -122,7 +116,7 @@ export class PasskeyService {
         expected
       );
 
-      return registeredDevice?.user;
+      return registeredDevice?.User;
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         throw new PrismaError(ERROR400.statusCode, error.message);
