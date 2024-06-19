@@ -16,7 +16,9 @@ import { PrismaUser } from './prisma';
  */
 declare module '@fastify/jwt' {
   interface FastifyJWT {
-    user: PrismaUser;
+    user: PrismaUser & {
+      credential?: string;
+    };
   }
 }
 

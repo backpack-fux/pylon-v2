@@ -4,6 +4,7 @@ import {
   AuthenticatePasskeyWithWebAuthnSchema,
   RegisterPasskeyForExistingUserSchema,
   RegisterPasskeyWithWebAuthnSchema,
+  RemovePasskeySchema,
   SendWebAuthnChallengeSchema,
 } from '@/v1/schemas/passkey';
 import {
@@ -12,6 +13,7 @@ import {
   registerPasskeyForExistingUser,
   registerPasskeyWithWebAuthn,
   initiateRegisterPasskeyForExistingUser,
+  removePasskey,
 } from '@/v1/handlers/passkey';
 import { authenticate } from '../middleware';
 
@@ -58,6 +60,13 @@ const Authentication = async (app: FastifyInstance) => {
       schema: RegisterPasskeyForExistingUserSchema,
       preHandler: [authenticate],
       handler: registerPasskeyForExistingUser,
+    })
+    .route({
+      method: methods.DELETE,
+      url: '/:id',
+      schema: RemovePasskeySchema,
+      preHandler: [authenticate],
+      handler: removePasskey,
     });
 };
 

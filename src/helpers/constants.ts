@@ -4,7 +4,8 @@ export const methods: Record<string, HTTPMethods> = {
   GET: 'GET',
   POST: 'POST',
   PUT: 'PUT',
-  PATCH: 'PATCH'
+  PATCH: 'PATCH',
+  DELETE: 'DELETE',
 };
 
 export const headers = {

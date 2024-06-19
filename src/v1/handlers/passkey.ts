@@ -52,7 +52,10 @@ export async function registerPasskeyWithWebAuthn(
       passkeyName
     );
 
-    const token = await rep.jwtSign({ user });
+    const token = await rep.jwtSign({
+      user,
+      credential: registration.credential.id,
+    });
 
     return successResponse(rep, {
       user,
@@ -83,7 +86,10 @@ export async function authenticatePasskeyWithWebAuthn(
       expected
     );
 
-    const token = await rep.jwtSign({ user });
+    const token = await rep.jwtSign({
+      user,
+      credential: authentication.credentialId,
+    });
 
     return successResponse(rep, {
       user,
@@ -137,12 +143,24 @@ export async function registerPasskeyForExistingUser(
   }
 }
 
-export async function authenticatePasskeyForExistingUser(
+export async function removePasskey(
   req: FastifyRequestTypebox<typeof RemovePasskeySchema>,
   rep: FastifyReplyTypebox<typeof RemovePasskeySchema>
 ) {
   try {
+    const passkeyId = req.params.id;
+
+    if (!req.user.credential) {
+      return errorResponse(req, rep, 400, 'User does not have a credential');
+    }
+
+    await passkeyService.removePasskey({
+      id: passkeyId,
+      userId: req.user.id,
+      credential: req.user.credential,
+    });
   } catch (error) {
-    
+    const parsedError = parseError(error);
+    return errorResponse(req, rep, parsedError.statusCode, parsedError.message);
   }
 }
