@@ -13,6 +13,7 @@ import {
   registerPasskeyWithWebAuthn,
   initiateRegisterPasskeyForExistingUser,
 } from '@/v1/handlers/passkey';
+import { authenticate } from '../middleware';
 
 const Authentication = async (app: FastifyInstance) => {
   /**
@@ -55,6 +56,7 @@ const Authentication = async (app: FastifyInstance) => {
       method: methods.PATCH,
       url: '/add',
       schema: RegisterPasskeyForExistingUserSchema,
+      preHandler: [authenticate],
       handler: registerPasskeyForExistingUser,
     });
 };

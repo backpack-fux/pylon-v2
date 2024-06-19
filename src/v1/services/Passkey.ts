@@ -200,6 +200,18 @@ export class PasskeyService {
     passkeyData: Omit<CreatePasskey, 'userId'>
   ) {
     try {
+      // verify passkey does not exist
+      const passkey = await prisma.registeredPasskey.findUnique({
+        where: {
+          credentialId: passkeyData.credentialId,
+          userId: id,
+        },
+      });
+
+      if (passkey) {
+        throw new PrismaError(ERROR400.statusCode, 'Passkey already exists');
+      }
+
       await prisma.registeredPasskey.create({
         data: {
           ...passkeyData,
