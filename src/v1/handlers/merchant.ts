@@ -14,18 +14,20 @@ const merchantService = MerchantService.getInstance();
 const complianceService = ComplianceService.getInstance();
 
 export async function createMerchantHandler(
-  req: FastifyRequestTypebox<typeof MerchantCreateSchema>,
+  req: any,//FastifyRequestTypebox<typeof MerchantCreateSchema>,
   rep: FastifyReplyTypebox<typeof MerchantCreateSchema>
 ): Promise<void> {
   try {
-    const merchant = await merchantService.createPartner(req.body);
+    console.log('req.body', req.body, 'coming here merchant')
+    const { initialUser, ultimateBeneficialOwners } = req.body
+    const merchant = await merchantService.createPartner(initialUser, ultimateBeneficialOwners);
 
     const complianceUuid = utils.generateUUID();
-    const fullName = utils.getFullName(req.body.name, req.body.surname);
+    const fullName = utils.getFullName(initialUser.firstName, initialUser.lastName);
     const registered = await merchantService.registerCompliancePartner(
       complianceUuid,
       fullName,
-      req.body.email
+      req.body.initialUser.email
     );
 
     const compliance = await complianceService.insertMerchant(
@@ -36,10 +38,11 @@ export async function createMerchantHandler(
 
     return successResponse(rep, compliance);
   } catch (error) {
+    console.log(error, 'what is error=')
     if (error instanceof PrismaError) {
       return errorResponse(req, rep, error.statusCode, error.message);
     } else {
-      console.error(error);
+      console.error(error, 'what is error?');
       /** @todo handle generic errors in the utils file */
       const errorMessage = 'An error occurred during partner creation';
       return errorResponse(req, rep, ERROR404.statusCode, errorMessage);

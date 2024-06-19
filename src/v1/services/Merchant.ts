@@ -22,34 +22,62 @@ export class MerchantService {
     }
     return MerchantService.instance;
   }
-
+  /* 
+  
+  const AddressSchema = t.Object({
+    street1: t.String({ maxLength: 50 }),
+    street2: t.Optional(t.String({ maxLength: 50 })),
+    city: t.String({ maxLength: 50 }),
+    postcode: t.Optional(t.String({ maxLength: 25 })),
+    state: t.Optional(t.String({ minLength: 2, maxLength: 2 })),
+    country: t.String({ minLength: 2, maxLength: 2 }),
+  });
+  
+  export const MerchantCreateSchema = {
+    body: t.Object({
+      initialUser: t.Object({
+        lastName: t.String({ minLength: 1 }),
+        firstName: t.String({ minLength: 1 }),
+        birthDate: t.String({ minLength: 1 }),
+        nationalId: t.String({ minLength: 1 }),
+        countryOfIssue: t.String({ minLength: 1 }),
+        email: t.String({ format: 'email' }),
+        address: AddressSchema,
+        role: t.String({ minLength: 1 }),
+        walletAddress: t.String({ minLength: 1 }),
+        ipAddress: t.Optional(t.String()),
+        iovationBlackbox: t.Optional(t.String()),
+      }),
+  */
   /** @dev create partner */
-  public async createPartner(partnerData: any): Promise<PrismaMerchant> {
+  public async createPartner(partnerData: any, ultimateBeneficialOwners: any): Promise<PrismaMerchant> {
+    console.log(partnerData, 'PartnerDATA')
+    console.log(ultimateBeneficialOwners, 'ULTIMATE BENEFICIAL OWNERS DATA')
     const {
-      name,
-      surname,
+      firstName,
+      lastName,
       email,
-      phoneNumber,
       companyNumber,
       companyJurisdiction,
       fee,
       walletAddress,
-      registeredAddress,
+      address,
     } = partnerData;
 
+
     const { street1, street2, city, postcode, state, country } =
-      registeredAddress;
+      address;
 
     try {
       const merchant: PrismaMerchant = await prisma.merchant.create({
         data: {
-          name,
-          surname,
+          name: firstName,
+          surname: lastName,
           email,
-          phoneNumber,
-          companyNumber,
-          companyJurisdiction,
-          fee,
+          phoneNumber: ultimateBeneficialOwners[0].phoneNumber,
+          companyNumber: null,
+          companyJurisdiction: ultimateBeneficialOwners[0].address.country,
+          fee: 0.050, //TODO make this not hardcoded?
           walletAddress,
           registeredAddress: {
             create: {
@@ -66,6 +94,27 @@ export class MerchantService {
       });
 
       return merchant;
+    } catch (error: unknown) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        throw new PrismaError(ERROR400.statusCode, error.message);
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  /** @dev update merchant rain id */
+  public async updateRainId(
+    merchantId: number,
+    rainId: string
+  ): Promise<PrismaMerchant> {
+    try {
+      const updatedMerchant: PrismaMerchant = await prisma.merchant.update({
+        where: { id: merchantId },
+        data: {},
+      });
+
+      return updatedMerchant;
     } catch (error: unknown) {
       if (error instanceof PrismaClientKnownRequestError) {
         throw new PrismaError(ERROR400.statusCode, error.message);

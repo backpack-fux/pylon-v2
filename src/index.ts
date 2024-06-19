@@ -7,8 +7,19 @@ import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import jwt from '@fastify/jwt';
 import rawBody from 'fastify-raw-body';
+import session from '@fastify/session';
+import cookie from '@fastify/cookie';
+import multipart from '@fastify/multipart';
 
-import { Home, Merchant, Bridge, Transaction } from './v1/routes/index';
+
+import {
+  Home,
+  Merchant,
+  Bridge,
+  Transaction,
+  Authentication,
+  Rain,
+} from './v1/routes/index';
 import { Config } from './config';
 
 const startServer = async () => {
@@ -16,8 +27,24 @@ const startServer = async () => {
     const server = fastify()
       .withTypeProvider<TypeBoxTypeProvider>()
       .register(accepts)
-      .register(cors)
+      .register(cors, {
+        credentials: true,
+        origin: [process.env.CLIENT_HOST || 'http://localhost:3000'],
+
+
+      })
+      .register(cookie)
+      .register(session, {
+        secret: Config.sessionSecret,
+        cookie: {
+          secure: false,
+          httpOnly: true,
+          maxAge: 6 * 60 * 1000, // 6 minutes
+          sameSite: 'lax',
+        },
+      })
       .register(formbody)
+      .register(multipart)
       .register(helmet)
       .register(rateLimit)
       .register(jwt, {
@@ -30,8 +57,12 @@ const startServer = async () => {
             return token;
           },
         },
+        sign: {
+          expiresIn: Config.jwtExpires,
+        },
       });
     await server
+
       .register(rawBody, {
         field: 'rawBody',
         global: false,
@@ -39,10 +70,11 @@ const startServer = async () => {
         runFirst: true,
         routes: [],
       })
-
       .register(Home)
+      .register(Authentication, { prefix: '/v1/auth' })
       .register(Merchant, { prefix: '/v1/merchant' })
       .register(Bridge, { prefix: '/v1/bridge' })
+      .register(Rain, { prefix: '/v1/rain' })
       .register(Transaction, { prefix: '/v1/transaction' });
 
     const serverOptions = {

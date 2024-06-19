@@ -40,6 +40,7 @@ export const authenticate = async (
   }
 };
 
+
 export const validateAPIKey = async (
   request: FastifyRequest,
   reply: FastifyReply

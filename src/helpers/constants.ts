@@ -1,6 +1,6 @@
 import { HTTPMethods } from 'fastify';
 
-export const methods: Record<string, HTTPMethods> = {
+export const methods: Record<'GET' | 'POST' | 'PUT' | 'DELETE', HTTPMethods> = {
   GET: 'GET',
   POST: 'POST',
   PUT: 'PUT',

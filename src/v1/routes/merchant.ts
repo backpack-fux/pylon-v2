@@ -11,7 +11,7 @@ const Merchant = async (app: FastifyInstance) => {
     method: methods.POST,
     url: '/create',
     schema: MerchantCreateSchema,
-    preHandler: [validateAPIKey],
+    preHandler: /* [validateAPIKey] */[],
     handler: createMerchantHandler,
   });
 };

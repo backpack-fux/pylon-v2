@@ -22,7 +22,7 @@ export class DiscordService {
         GatewayIntentBits.GuildWebhooks,
       ],
     });
-    this.setup();
+    // this.setup();
   }
 
   /** @dev avoid multiple instances; allow one global, reusable instance */
