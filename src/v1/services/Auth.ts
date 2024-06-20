@@ -267,6 +267,10 @@ export class PasskeyService {
         where: {
           userId,
         },
+        select: {
+          id: true,
+          name: true,
+        },
       });
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
