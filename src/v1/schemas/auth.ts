@@ -1,4 +1,5 @@
 import { Type as t } from '@sinclair/typebox';
+import { SWAGGER_TAG } from '../types/swagger';
 
 const BaseResponse = {
   response: {
@@ -22,6 +23,7 @@ const BaseResponse = {
 };
 
 export const RegisterPasskeyWithWebAuthnSchema = {
+  tags: [SWAGGER_TAG.Authentication],
   body: t.Object({
     passkeyName: t.Optional(t.String()),
     username: t.String(),
@@ -43,6 +45,7 @@ export const RegisterPasskeyWithWebAuthnSchema = {
 };
 
 export const AuthenticatePasskeyWithWebAuthnSchema = {
+  tags: [SWAGGER_TAG.Authentication],
   body: t.Object({
     credentialId: t.String(),
     authenticatorData: t.String(),
@@ -58,6 +61,7 @@ export const AuthenticatePasskeyWithWebAuthnSchema = {
 };
 
 export const InitiateRegisterPasskeyForUserSchema = {
+  tags: [SWAGGER_TAG.Authentication],
   body: t.Object({
     email: t.String({ format: 'email' }),
   }),
@@ -65,6 +69,7 @@ export const InitiateRegisterPasskeyForUserSchema = {
 };
 
 export const RegisterPasskeyForExistingUserSchema = {
+  tags: [SWAGGER_TAG.Authentication],
   body: t.Object({
     passkeyName: t.Optional(t.String()),
     credential: t.Object({
@@ -91,6 +96,7 @@ export const RegisterPasskeyForExistingUserSchema = {
 };
 
 export const RemovePasskeySchema = {
+  tags: [SWAGGER_TAG.Authentication],
   params: t.Object({
     id: t.Number(),
   }),
@@ -98,8 +104,11 @@ export const RemovePasskeySchema = {
 };
 
 export const SendWebAuthnChallengeSchema = {
+  tags: [SWAGGER_TAG.Authentication],
   session: t.Object({
     challenge: t.String({ minLength: 32 }),
   }),
   ...BaseResponse,
 };
+
+export const BaseResponseSchema = BaseResponse

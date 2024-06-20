@@ -1,6 +1,7 @@
 import { errorResponse, successResponse } from '@/responses';
 import {
   AuthenticatePasskeyWithWebAuthnSchema,
+  BaseResponseSchema,
   InitiateRegisterPasskeyForUserSchema,
   RegisterPasskeyForExistingUserSchema,
   RegisterPasskeyWithWebAuthnSchema,
@@ -159,6 +160,19 @@ export async function removePasskey(
       userId: req.user.id,
       credential: req.user.credential,
     });
+  } catch (error) {
+    const parsedError = parseError(error);
+    return errorResponse(req, rep, parsedError.statusCode, parsedError.message);
+  }
+}
+
+export async function findPasskeysForUser(
+  req: FastifyRequestTypebox<typeof BaseResponseSchema>,
+  rep: FastifyReplyTypebox<typeof BaseResponseSchema>
+) {
+  try {
+    const passkeys = await passkeyService.findPasskeyByUserid(req.user.id);
+    return successResponse(rep, { passkeys });
   } catch (error) {
     const parsedError = parseError(error);
     return errorResponse(req, rep, parsedError.statusCode, parsedError.message);

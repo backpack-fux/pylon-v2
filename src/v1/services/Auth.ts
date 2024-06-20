@@ -6,10 +6,7 @@ import type {
   PasswordlessServer,
   RegistrationEncoded,
 } from '@/v1/types/auth';
-import type {
-  AuthenticationChecks,
-  RegistrationChecks,
-} from '@/v1/types/auth';
+import type { AuthenticationChecks, RegistrationChecks } from '@/v1/types/auth';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { PasskeyError, PrismaError } from './Error';
 import { ERROR400, ERROR401, ERROR404 } from '@/helpers/constants';
@@ -253,6 +250,22 @@ export class PasskeyService {
         data: {
           ...passkeyData,
           userId: id,
+        },
+      });
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        throw new PrismaError(ERROR400.statusCode, error.message);
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  async findPasskeyByUserid(userId: number) {
+    try {
+      return await prisma.registeredPasskey.findMany({
+        where: {
+          userId,
         },
       });
     } catch (error) {

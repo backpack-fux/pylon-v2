@@ -7,6 +7,8 @@ import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import jwt from '@fastify/jwt';
 import rawBody from 'fastify-raw-body';
+import swagger from '@fastify/swagger';
+import swaggerUi from '@fastify/swagger-ui';
 
 import { Home, Merchant, Bridge, Auth } from './v1/routes/index';
 import { Config } from './config';
@@ -31,6 +33,7 @@ const startServer = async () => {
           },
         },
       });
+
     await server
       .register(rawBody, {
         field: 'rawBody',
@@ -39,7 +42,25 @@ const startServer = async () => {
         runFirst: true,
         routes: [],
       })
-
+      .register(swagger, {
+        prefix: '/docs',
+        swagger: {
+          swagger: '2.0',
+          info: {
+            title: 'Fastify API',
+            description: 'API Documentation',
+            version: '1.0.0',
+          },
+          host: 'localhost:8000',
+          // security: {
+          //   apiKey: '',
+          //   Authorization: 'Bearer <token>',
+          // },
+        },
+      })
+      .register(swaggerUi, {
+        routePrefix: '/docs',
+      })
       .register(Home)
       .register(Merchant, { prefix: '/v1/merchant' })
       .register(Bridge, { prefix: '/v1/bridge' })
@@ -57,6 +78,9 @@ const startServer = async () => {
       }
       console.log(`Server listening on ${address}`);
     });
+
+    await server.ready();
+    server.swagger();
   } catch (e) {
     console.error(e);
   }

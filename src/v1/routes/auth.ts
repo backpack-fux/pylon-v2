@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { methods } from '@/helpers/constants';
 import {
   AuthenticatePasskeyWithWebAuthnSchema,
+  BaseResponseSchema,
   RegisterPasskeyForExistingUserSchema,
   RegisterPasskeyWithWebAuthnSchema,
   RemovePasskeySchema,
@@ -14,8 +15,10 @@ import {
   registerPasskeyWithWebAuthn,
   initiateRegisterPasskeyForExistingUser,
   removePasskey,
+  findPasskeysForUser,
 } from '@/v1/handlers/auth';
 import { authenticate } from '../middleware';
+import { SWAGGER_TAG } from '../types/swagger';
 
 const Authentication = async (app: FastifyInstance) => {
   /**
@@ -44,7 +47,7 @@ const Authentication = async (app: FastifyInstance) => {
      */
     .route({
       method: methods.POST,
-      url: '/authenticate',
+      url: '',
       schema: AuthenticatePasskeyWithWebAuthnSchema,
       handler: authenticatePasskeyWithWebAuthn,
     })
@@ -56,10 +59,20 @@ const Authentication = async (app: FastifyInstance) => {
     })
     .route({
       method: methods.PATCH,
-      url: '/add',
+      url: '/add-passkey',
       schema: RegisterPasskeyForExistingUserSchema,
       preHandler: [authenticate],
       handler: registerPasskeyForExistingUser,
+    })
+    .route({
+      method: methods.GET,
+      url: '',
+      schema: {
+        tags: [SWAGGER_TAG.Authentication],
+        ...BaseResponseSchema,
+      },
+      preHandler: [authenticate],
+      handler: findPasskeysForUser,
     })
     .route({
       method: methods.DELETE,

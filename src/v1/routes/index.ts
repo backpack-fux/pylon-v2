@@ -8,9 +8,17 @@ export { default as Auth } from './auth';
 
 const Home = async (app: FastifyInstance) => {
   app
-    .all('/', async (req: FastifyRequest, rep: FastifyReply) => {
-      rep.code(STANDARD.SUCCESS).send({ ok: true });
-    })
+    .all(
+      '/',
+      {
+        schema: {
+          hide: true,
+        },
+      },
+      async (req: FastifyRequest, rep: FastifyReply) => {
+        rep.code(STANDARD.SUCCESS).send({ ok: true });
+      }
+    )
 
     .get('/health-check', async (req: FastifyRequest, rep: FastifyReply) => {
       try {
