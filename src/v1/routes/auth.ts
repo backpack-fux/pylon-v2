@@ -6,7 +6,7 @@ import {
   RegisterPasskeyWithWebAuthnSchema,
   RemovePasskeySchema,
   SendWebAuthnChallengeSchema,
-} from '@/v1/schemas/passkey';
+} from '@/v1/schemas/auth';
 import {
   authenticatePasskeyWithWebAuthn,
   generateChallenge,
@@ -14,7 +14,7 @@ import {
   registerPasskeyWithWebAuthn,
   initiateRegisterPasskeyForExistingUser,
   removePasskey,
-} from '@/v1/handlers/passkey';
+} from '@/v1/handlers/auth';
 import { authenticate } from '../middleware';
 
 const Authentication = async (app: FastifyInstance) => {

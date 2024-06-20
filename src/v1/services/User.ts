@@ -4,7 +4,7 @@ import { CreateUser } from '../types/user';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { PrismaError } from './Error';
 import { ERROR400 } from '@/helpers/constants';
-import { CreatePasskey } from '../types/passkey';
+import { CreatePasskey } from '../types/auth';
 
 export class UserService {
   private static instance: UserService;
@@ -42,7 +42,7 @@ export class UserService {
       const user = await prisma.user.create({
         data: {
           ...userData,
-          RegisteredPasskey: {
+          registeredPasskey: {
             create: { ...passkeyData },
           },
         },

@@ -6,12 +6,12 @@ import {
   RegisterPasskeyWithWebAuthnSchema,
   RemovePasskeySchema,
   SendWebAuthnChallengeSchema,
-} from '../schemas/passkey';
-import { PasskeyService } from '../services/Passkey';
+} from '../schemas/auth';
+import { PasskeyService } from '../services/Auth';
 import { FastifyReplyTypebox, FastifyRequestTypebox } from '../types/fastify';
 import { parseError } from '@/helpers/errors';
 import { Config } from '@/config';
-import { AuthenticationChecks } from '../types/passkey';
+import { AuthenticationChecks } from '../types/auth';
 import { UserService } from '@/v1/services/User';
 
 const passkeyService = PasskeyService.getInstance();

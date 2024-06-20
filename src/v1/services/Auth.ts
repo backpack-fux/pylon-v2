@@ -5,11 +5,11 @@ import type {
   CredentialKey,
   PasswordlessServer,
   RegistrationEncoded,
-} from '@/v1/types/passkey';
+} from '@/v1/types/auth';
 import type {
   AuthenticationChecks,
   RegistrationChecks,
-} from '@/v1/types/passkey';
+} from '@/v1/types/auth';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { PasskeyError, PrismaError } from './Error';
 import { ERROR400, ERROR401, ERROR404 } from '@/helpers/constants';
@@ -146,7 +146,7 @@ export class PasskeyService {
           credentialId: authentication.credentialId,
         },
         include: {
-          User: true,
+          user: true,
         },
       });
 
@@ -166,7 +166,7 @@ export class PasskeyService {
         expected
       );
 
-      return registeredDevice?.User;
+      return registeredDevice?.user;
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         throw new PrismaError(ERROR400.statusCode, error.message);
