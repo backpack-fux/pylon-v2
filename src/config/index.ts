@@ -49,4 +49,11 @@ export const Config = {
       accessCheckoutId: loadEnvironmentVariable('WORLDPAY_ACCESS_CHECKOUT_ID'),
     },
   },
+  aws: {
+    region: loadEnvironmentVariable('AWS_REGION'),
+    accessKeyId: loadEnvironmentVariable('AWS_ACCESS_KEY_ID'),
+    secretAccessKey: loadEnvironmentVariable('AWS_SECRET_ACCESS_KEY'),
+    cognitoUserPoolId: loadEnvironmentVariable('AWS_COGNITO_USER_POOL_ID'),
+    cognitoAppClientId: loadEnvironmentVariable('AWS_COGNITO_APP_CLIENT_ID'),
+  },
 };
