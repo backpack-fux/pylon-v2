@@ -37,4 +37,5 @@ export const Config = {
     usdcPoolPrivateKey: loadEnvironmentVariable('USDC_POOL_PRIVATE_KEY'),
   },
   clientHost: loadEnvironmentVariable('CLIENT_HOST'),
+  host: loadEnvironmentVariable('HOST'),
 };

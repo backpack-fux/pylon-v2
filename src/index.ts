@@ -47,11 +47,11 @@ const startServer = async () => {
         swagger: {
           swagger: '2.0',
           info: {
-            title: 'Fastify API',
-            description: 'API Documentation',
+            title: 'Pylon V2 API',
+            description: 'Pylon V2 API Documentation',
             version: '1.0.0',
           },
-          host: 'localhost:8000',
+          host: Config.host,
           // security: {
           //   apiKey: '',
           //   Authorization: 'Bearer <token>',
