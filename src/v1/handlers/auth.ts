@@ -1,10 +1,8 @@
 import { FastifyRequestTypebox, FastifyReplyTypebox } from '@/v1/types/fastify';
 import { IssueOTPSchema, VerifyOTPSchema } from '../schemas/auth';
-import { OTPService } from '../services/external/AWS';
+import { OTPService } from '../services/OTP';
 import { successResponse, errorResponse } from '@/responses';
 import { ERROR400, ERROR500 } from '@/helpers/constants';
-
-const otpService = OTPService.getInstance();
 
 export async function issueOTPHandler(
   req: FastifyRequestTypebox<typeof IssueOTPSchema>,
@@ -12,6 +10,7 @@ export async function issueOTPHandler(
 ): Promise<void> {
   try {
     const { email } = req.body;
+    const otpService = OTPService.getInstance(req.server);
     await otpService.issueOTP(email);
     return successResponse(rep, {
       message: 'OTP issued successfully',
@@ -28,6 +27,7 @@ export async function verifyOTPHandler(
 ): Promise<void> {
   try {
     const { email, otp } = req.body;
+    const otpService = OTPService.getInstance(req.server);
     const isValid = await otpService.verifyOTP(email, otp);
     if (isValid) {
       return successResponse(rep, { message: 'OTP verified successfully' });

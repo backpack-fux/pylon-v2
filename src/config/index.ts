@@ -22,6 +22,11 @@ export const Config = {
   isStaging: process.env.NODE_ENV === 'staging',
   isLocal: process.env.NODE_ENV === 'local',
   discordBotToken: loadEnvironmentVariable('DISCORD_BOT_TOKEN'),
+  redis: {
+    host: loadEnvironmentVariable('REDIS_HOST'),
+    port: Number(loadEnvironmentVariable('REDIS_PORT', 6379)),
+    password: loadEnvironmentVariable('REDIS_PASSWORD'),
+  },
   web3: {
     explorerUri: loadEnvironmentVariable('EXPLORER_URI'),
     rpcProviderUri: loadEnvironmentVariable('RPC_PROVIDER_URI'),
@@ -48,12 +53,5 @@ export const Config = {
       password: loadEnvironmentVariable('WORLDPAY_PASSWORD'),
       accessCheckoutId: loadEnvironmentVariable('WORLDPAY_ACCESS_CHECKOUT_ID'),
     },
-  },
-  aws: {
-    region: loadEnvironmentVariable('AWS_REGION'),
-    accessKeyId: loadEnvironmentVariable('AWS_ACCESS_KEY_ID'),
-    secretAccessKey: loadEnvironmentVariable('AWS_SECRET_ACCESS_KEY'),
-    cognitoUserPoolId: loadEnvironmentVariable('AWS_COGNITO_USER_POOL_ID'),
-    cognitoAppClientId: loadEnvironmentVariable('AWS_COGNITO_APP_CLIENT_ID'),
   },
 };

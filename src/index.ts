@@ -7,6 +7,7 @@ import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import jwt from '@fastify/jwt';
 import rawBody from 'fastify-raw-body';
+import fastifyRedis from '@fastify/redis';
 
 import { Home, Merchant, Bridge, Transaction, Auth } from './v1/routes/index';
 import { Config } from './config';
@@ -30,14 +31,18 @@ const startServer = async () => {
             return token;
           },
         },
-      });
-    await server
+      })
       .register(rawBody, {
         field: 'rawBody',
         global: false,
         encoding: 'utf8',
         runFirst: true,
         routes: [],
+      })
+      .register(fastifyRedis, {
+        host: Config.redis.host,
+        port: Config.redis.port,
+        password: Config.redis.password,
       })
 
       .register(Home)
