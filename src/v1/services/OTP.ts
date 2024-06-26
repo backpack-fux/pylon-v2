@@ -1,12 +1,16 @@
 import crypto from 'crypto';
 import { FastifyInstance } from 'fastify/types/instance';
+import { Resend } from 'resend';
+import { Config } from '@/config';
 
 export class OTPService {
   private static instance: OTPService;
   private redis: FastifyInstance['redis'];
+  private resend: Resend;
 
   private constructor(fastify: FastifyInstance) {
     this.redis = fastify.redis;
+    this.resend = new Resend(Config.resend.apiKey);
   }
 
   private generateOTP(): string {
@@ -27,8 +31,12 @@ export class OTPService {
   }
 
   private async sendOTPEmail(email: string, otp: string): Promise<void> {
-    // TODO: Send OTP to email
-    console.log(`Sending OTP ${otp} to email ${email}`);
+    this.resend.emails.send({
+      from: 'no-reply@backpack.network',
+      to: email,
+      subject: 'Your OTP for Backpack',
+      html: `<p>Your One-Time Passcode is ${otp}. This expires in 1 hour.</p>`,
+    });
   }
 
   public async verifyOTP(email: string, otp: string): Promise<boolean> {

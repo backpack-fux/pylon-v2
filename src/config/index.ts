@@ -27,6 +27,9 @@ export const Config = {
     port: Number(loadEnvironmentVariable('REDIS_PORT', 6379)),
     password: loadEnvironmentVariable('REDIS_PASSWORD'),
   },
+  resend: {
+    apiKey: loadEnvironmentVariable('RESEND_API_KEY'),
+  },
   web3: {
     explorerUri: loadEnvironmentVariable('EXPLORER_URI'),
     rpcProviderUri: loadEnvironmentVariable('RPC_PROVIDER_URI'),
