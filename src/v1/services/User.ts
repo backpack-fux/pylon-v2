@@ -16,8 +16,6 @@ export class UserService {
     return UserService.instance;
   }
 
-  /** @dev create user */
-
   public async create(userData: CreateUser): Promise<PrismaUser> {
     try {
       const user = await prisma.user.create({

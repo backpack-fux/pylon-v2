@@ -8,7 +8,7 @@ import {
   RemovePasskeySchema,
   SendWebAuthnChallengeSchema,
 } from '../schemas/auth';
-import { PasskeyService } from '../services/Auth';
+import { PasskeyService } from '../services/Passkey';
 import { FastifyReplyTypebox, FastifyRequestTypebox } from '../types/fastify';
 import { parseError } from '@/helpers/errors';
 import { Config } from '@/config';
@@ -112,7 +112,7 @@ export async function sendUserTokenToAddPasskey(
     const user = await userService.findOneByEmail(email);
 
     if (!user) {
-      return errorResponse(req, rep, 404, 'User not found');
+      return errorResponse(req, rep, ERROR404.statusCode, 'User not found');
     }
 
     const token = await rep.jwtSign(user, {
@@ -153,7 +153,12 @@ export async function removePasskey(
     const passkeyId = req.params.id;
 
     if (!req.user.credential) {
-      return errorResponse(req, rep, ERROR400.statusCode, 'User does not have a credential');
+      return errorResponse(
+        req,
+        rep,
+        ERROR400.statusCode,
+        'User does not have a credential'
+      );
     }
 
     await passkeyService.removePasskey({
@@ -172,7 +177,7 @@ export async function findPasskeysForUser(
   rep: FastifyReplyTypebox<typeof BaseResponseSchema>
 ) {
   try {
-    const passkeys = await passkeyService.findPasskeyByUserid(req.user.id);
+    const passkeys = await passkeyService.findPasskeyByUserId(req.user.id);
     return successResponse(rep, { passkeys });
   } catch (error) {
     const parsedError = parseError(error);

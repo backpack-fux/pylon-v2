@@ -51,7 +51,7 @@ const startServer = async () => {
             description: 'Pylon V2 API Documentation',
             version: '1.0.0',
           },
-          host: Config.host,
+          // host: Config.host, // TODO
           // security: {
           //   apiKey: '',
           //   Authorization: 'Bearer <token>',
@@ -64,7 +64,8 @@ const startServer = async () => {
       .register(Home)
       .register(Merchant, { prefix: '/v1/merchant' })
       .register(Bridge, { prefix: '/v1/bridge' })
-      .register(Auth, { prefix: '/v1/auth' });
+      .register(Auth, { prefix: '/v1/auth' })
+      .swagger();
 
     const serverOptions = {
       port: Config.port,
@@ -78,9 +79,6 @@ const startServer = async () => {
       }
       console.log(`Server listening on ${address}`);
     });
-
-    await server.ready();
-    server.swagger();
   } catch (e) {
     console.error(e);
   }
