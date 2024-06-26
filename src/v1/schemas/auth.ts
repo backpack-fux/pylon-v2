@@ -22,7 +22,7 @@ const BaseResponse = {
   },
 };
 
-export const RegisterPasskeyWithWebAuthnSchema = {
+export const RegisterPasskeySchema = {
   tags: [SWAGGER_TAG.Authentication],
   body: t.Object({
     passkeyName: t.Optional(t.String()),
@@ -44,7 +44,7 @@ export const RegisterPasskeyWithWebAuthnSchema = {
   ...BaseResponse,
 };
 
-export const AuthenticatePasskeyWithWebAuthnSchema = {
+export const AuthenticatePasskeySchema = {
   tags: [SWAGGER_TAG.Authentication],
   body: t.Object({
     credentialId: t.String(),

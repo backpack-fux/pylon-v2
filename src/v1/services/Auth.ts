@@ -9,7 +9,7 @@ import type {
 import type { AuthenticationChecks, RegistrationChecks } from '@/v1/types/auth';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { PasskeyError, PrismaError } from './Error';
-import { ERROR400, ERROR401, ERROR404 } from '@/helpers/constants';
+import { ERROR400, ERROR401, ERROR404, ERROR500 } from '@/helpers/constants';
 import { prisma } from '@/db';
 import { UserService } from './User';
 import { Config } from '@/config';
@@ -43,7 +43,7 @@ export class PasskeyService {
     return Buffer.from(randomBuffer).toString('hex');
   }
 
-  public async registerPasskeyWithWebAuthn(
+  public async registerPasskey(
     registration: RegistrationEncoded,
     expected: RegistrationChecks,
     email: string,
@@ -51,7 +51,10 @@ export class PasskeyService {
   ) {
     try {
       if (!this.server) {
-        throw new PrismaError(500, 'WebAuthn server not initialized');
+        throw new PasskeyError(
+          ERROR500.statusCode,
+          'WebAuthn server not initialized'
+        );
       }
 
       // Return the verified credentials
@@ -109,7 +112,7 @@ export class PasskeyService {
         throw new PrismaError(ERROR404.statusCode, 'User not found');
       }
 
-      await this.createPasskeyForExistingUser(user.id, {
+      await this.addPasskeyForExistingUser(user.id, {
         credentialId: verified.credential.id,
         publicKey: verified.credential.publicKey,
         algorithm: verified.credential.algorithm,
@@ -129,13 +132,13 @@ export class PasskeyService {
     }
   }
 
-  public async authenticatePasskeyWithWebAuthn(
+  public async authenticatePasskey(
     authentication: AuthenticationEncoded,
     expected: AuthenticationChecks
   ) {
     try {
       if (!this.server) {
-        throw new PrismaError(500, 'WebAuthn server not initialized');
+        throw new PrismaError(ERROR500.statusCode, 'WebAuthn server not initialized');
       }
 
       const registeredDevice = await prisma.registeredPasskey.findUnique({
@@ -204,7 +207,7 @@ export class PasskeyService {
     }
   }
 
-  async initiateRegisterDeviceForExistingUser({
+  async sendUserTokenToAddPasskey({
     email,
     token,
   }: {
@@ -229,7 +232,7 @@ export class PasskeyService {
     }
   }
 
-  async createPasskeyForExistingUser(
+  async addPasskeyForExistingUser(
     id: number,
     passkeyData: Omit<CreatePasskey, 'userId'>
   ) {

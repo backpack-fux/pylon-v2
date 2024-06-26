@@ -1,19 +1,19 @@
 import { FastifyInstance } from 'fastify';
 import { methods } from '@/helpers/constants';
 import {
-  AuthenticatePasskeyWithWebAuthnSchema,
+  AuthenticatePasskeySchema,
   BaseResponseSchema,
   RegisterPasskeyForExistingUserSchema,
-  RegisterPasskeyWithWebAuthnSchema,
+  RegisterPasskeySchema,
   RemovePasskeySchema,
   SendWebAuthnChallengeSchema,
 } from '@/v1/schemas/auth';
 import {
-  authenticatePasskeyWithWebAuthn,
+  authenticatePasskey,
   generateChallenge,
   registerPasskeyForExistingUser,
-  registerPasskeyWithWebAuthn,
-  initiateRegisterPasskeyForExistingUser,
+  registerPasskey,
+  sendUserTokenToAddPasskey,
   removePasskey,
   findPasskeysForUser,
 } from '@/v1/handlers/auth';
@@ -22,8 +22,7 @@ import { SWAGGER_TAG } from '../types/swagger';
 
 const Authentication = async (app: FastifyInstance) => {
   /**
-   * @description Send a challenge to the client
-   * @param {FastifyRequestTypebox<typeof SendWebAuthnChallengeSchema>} req
+   * @description Send a passkey challenge to the client
    */
   app
     .route({
@@ -32,41 +31,59 @@ const Authentication = async (app: FastifyInstance) => {
       schema: SendWebAuthnChallengeSchema,
       handler: generateChallenge,
     })
+
     /**
-     * @description Register a Passkey with WebAuthn
-     * @param {FastifyRequestTypebox<typeof RegisterPasskeyWithWebAuthnSchema>} req
+     * @description Register a Passkey for a new user
+     * @returns user object with jwt token
      */
     .route({
       method: methods.POST,
-      url: '/register',
-      schema: RegisterPasskeyWithWebAuthnSchema,
-      handler: registerPasskeyWithWebAuthn,
+      url: '/passkey/register',
+      schema: RegisterPasskeySchema,
+      handler: registerPasskey,
     })
+
     /**
-     * @description Authenticate a Passkey with WebAuthn
+     * @description Authenticate a Passkey against existing passkeys on the server
+     * @returns user object with jwt token
      */
     .route({
       method: methods.POST,
-      url: '',
-      schema: AuthenticatePasskeyWithWebAuthnSchema,
-      handler: authenticatePasskeyWithWebAuthn,
+      url: '/passkey',
+      schema: AuthenticatePasskeySchema,
+      handler: authenticatePasskey,
     })
+
+    /**
+     * @description Send a token to a user to add a new passkey
+     * @returns user object with jwt token
+     */
     .route({
       method: methods.POST,
-      url: '/initiate-register',
-      schema: RegisterPasskeyWithWebAuthnSchema,
-      handler: initiateRegisterPasskeyForExistingUser,
+      url: 'passkey/add/send-token',
+      schema: RegisterPasskeySchema,
+      handler: sendUserTokenToAddPasskey,
     })
+
+    /**
+     * @description Register a Passkey for an existing user
+     * @returns user object with jwt token
+     */
     .route({
-      method: methods.PATCH,
-      url: '/add-passkey',
+      method: methods.PUT,
+      url: '/add',
       schema: RegisterPasskeyForExistingUserSchema,
       preHandler: [authenticate],
       handler: registerPasskeyForExistingUser,
     })
+
+    /**
+     * @description Find all passkeys for a user
+     * @returns passkeys
+     */
     .route({
       method: methods.GET,
-      url: '',
+      url: '/passkey',
       schema: {
         tags: [SWAGGER_TAG.Authentication],
         ...BaseResponseSchema,
@@ -74,9 +91,14 @@ const Authentication = async (app: FastifyInstance) => {
       preHandler: [authenticate],
       handler: findPasskeysForUser,
     })
+
+    /**
+     * @description Remove a passkey for a user
+     * @returns passkeys
+     */
     .route({
       method: methods.DELETE,
-      url: '/:id',
+      url: '/passkey/:id',
       schema: RemovePasskeySchema,
       preHandler: [authenticate],
       handler: removePasskey,

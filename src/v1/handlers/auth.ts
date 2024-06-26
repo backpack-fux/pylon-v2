@@ -1,10 +1,10 @@
 import { errorResponse, successResponse } from '@/responses';
 import {
-  AuthenticatePasskeyWithWebAuthnSchema,
+  AuthenticatePasskeySchema,
   BaseResponseSchema,
   InitiateRegisterPasskeyForUserSchema,
   RegisterPasskeyForExistingUserSchema,
-  RegisterPasskeyWithWebAuthnSchema,
+  RegisterPasskeySchema,
   RemovePasskeySchema,
   SendWebAuthnChallengeSchema,
 } from '../schemas/auth';
@@ -14,6 +14,7 @@ import { parseError } from '@/helpers/errors';
 import { Config } from '@/config';
 import { AuthenticationChecks } from '../types/auth';
 import { UserService } from '@/v1/services/User';
+import { ERROR400, ERROR404 } from '@/helpers/constants';
 
 const passkeyService = PasskeyService.getInstance();
 const userService = UserService.getInstance();
@@ -32,9 +33,9 @@ export async function generateChallenge(
   }
 }
 
-export async function registerPasskeyWithWebAuthn(
-  req: FastifyRequestTypebox<typeof RegisterPasskeyWithWebAuthnSchema>,
-  rep: FastifyReplyTypebox<typeof RegisterPasskeyWithWebAuthnSchema>
+export async function registerPasskey(
+  req: FastifyRequestTypebox<typeof RegisterPasskeySchema>,
+  rep: FastifyReplyTypebox<typeof RegisterPasskeySchema>
 ) {
   try {
     const registration = req.body;
@@ -46,7 +47,7 @@ export async function registerPasskeyWithWebAuthn(
       origin: Config.clientHost,
     };
 
-    const user = await passkeyService.registerPasskeyWithWebAuthn(
+    const user = await passkeyService.registerPasskey(
       registration,
       expected,
       email,
@@ -68,9 +69,9 @@ export async function registerPasskeyWithWebAuthn(
   }
 }
 
-export async function authenticatePasskeyWithWebAuthn(
-  req: FastifyRequestTypebox<typeof AuthenticatePasskeyWithWebAuthnSchema>,
-  rep: FastifyReplyTypebox<typeof AuthenticatePasskeyWithWebAuthnSchema>
+export async function authenticatePasskey(
+  req: FastifyRequestTypebox<typeof AuthenticatePasskeySchema>,
+  rep: FastifyReplyTypebox<typeof AuthenticatePasskeySchema>
 ) {
   try {
     const authentication = req.body;
@@ -82,7 +83,7 @@ export async function authenticatePasskeyWithWebAuthn(
       verbose: !Config.isProduction,
     };
 
-    const user = await passkeyService.authenticatePasskeyWithWebAuthn(
+    const user = await passkeyService.authenticatePasskey(
       authentication,
       expected
     );
@@ -102,7 +103,7 @@ export async function authenticatePasskeyWithWebAuthn(
   }
 }
 
-export async function initiateRegisterPasskeyForExistingUser(
+export async function sendUserTokenToAddPasskey(
   req: FastifyRequestTypebox<typeof InitiateRegisterPasskeyForUserSchema>,
   rep: FastifyReplyTypebox<typeof InitiateRegisterPasskeyForUserSchema>
 ) {
@@ -118,7 +119,7 @@ export async function initiateRegisterPasskeyForExistingUser(
       expiresIn: 1000 * 60 * 10, //10 minutes
     });
 
-    await passkeyService.initiateRegisterDeviceForExistingUser({
+    await passkeyService.sendUserTokenToAddPasskey({
       email,
       token,
     });
@@ -136,7 +137,7 @@ export async function registerPasskeyForExistingUser(
     const user = await userService.findOneByEmail(req.user.email);
 
     if (!user) {
-      return errorResponse(req, rep, 404, 'User not found');
+      return errorResponse(req, rep, ERROR404.statusCode, 'User not found');
     }
   } catch (error) {
     const parsedError = parseError(error);
@@ -152,7 +153,7 @@ export async function removePasskey(
     const passkeyId = req.params.id;
 
     if (!req.user.credential) {
-      return errorResponse(req, rep, 400, 'User does not have a credential');
+      return errorResponse(req, rep, ERROR400.statusCode, 'User does not have a credential');
     }
 
     await passkeyService.removePasskey({
