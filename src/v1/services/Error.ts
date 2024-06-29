@@ -15,7 +15,7 @@ export class PrismaError extends Error {
 export class PasskeyError extends Error {
   constructor(
     public readonly statusCode: number,
-    public readonly message : string = 'Passkey error',
+    public readonly message: string = 'Passkey error',
     public readonly errorCode?: string,
     public readonly details?: any
   ) {
@@ -26,3 +26,28 @@ export class PasskeyError extends Error {
   }
 }
 
+export class WorldpayError extends Error {
+  constructor(
+    public readonly statusCode: number,
+    message: string,
+    public readonly errorName?: string | undefined
+  ) {
+    super(message);
+    this.name = 'WorldpayError';
+    this.errorName = errorName;
+    this.statusCode = statusCode;
+  }
+}
+
+export class BridgeError extends Error {
+  constructor(
+    public readonly statusCode: number,
+    message: string,
+    public readonly errorName?: string | undefined
+  ) {
+    super(message);
+    this.name = 'BridgeError';
+    this.errorName = errorName;
+    this.statusCode = statusCode;
+  }
+}

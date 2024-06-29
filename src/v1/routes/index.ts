@@ -4,7 +4,8 @@ import { ERROR500, STANDARD } from '@/helpers/constants';
 
 import Merchant from './merchant';
 import Bridge from './bridge';
-export { default as Auth } from './auth';
+import Auth from './auth';
+import Transaction from './transaction';
 
 const Home = async (app: FastifyInstance) => {
   app
@@ -30,4 +31,4 @@ const Home = async (app: FastifyInstance) => {
     });
 };
 
-export { Home, Merchant, Bridge };
+export { Home, Merchant, Bridge, Transaction, Auth };

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "module": "CommonJS",
+    "module": "NodeNext",
     "outDir": "build",
     "incremental": true,
     "target": "ESNext",
@@ -11,10 +11,7 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "src/*",
-        "prisma/*"
-      ]
+      "@/*": ["src/*", "prisma/*"]
     }
-  },
+  }
 }

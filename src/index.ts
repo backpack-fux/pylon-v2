@@ -10,7 +10,7 @@ import rawBody from 'fastify-raw-body';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 
-import { Home, Merchant, Bridge, Auth } from './v1/routes/index';
+import { Home, Merchant, Bridge, Transaction, Auth } from './v1/routes/index';
 import { Config } from './config';
 
 const startServer = async () => {
@@ -65,6 +65,7 @@ const startServer = async () => {
       .register(Merchant, { prefix: '/v1/merchant' })
       .register(Bridge, { prefix: '/v1/bridge' })
       .register(Auth, { prefix: '/v1/auth' })
+      .register(Transaction, { prefix: '/v1/transaction' })
       .swagger();
 
     const serverOptions = {
