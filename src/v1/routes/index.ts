@@ -4,7 +4,6 @@ import { ERROR500, STANDARD } from '@/helpers/constants';
 
 import Merchant from './merchant';
 import Bridge from './bridge';
-import Auth from './auth';
 import Transaction from './transaction';
 import Auth from './auth';
 

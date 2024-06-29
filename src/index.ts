@@ -9,7 +9,7 @@ import jwt from '@fastify/jwt';
 import rawBody from 'fastify-raw-body';
 import fastifyRedis from '@fastify/redis';
 import swagger from '@fastify/swagger'; // TODO
-import swaggerUi from '@fastify/swagger-ui';
+import swaggerUi from '@fastify/swagger-ui'; // TODO
 
 import { Home, Merchant, Bridge, Transaction, Auth } from './v1/routes/index';
 import { Config } from './config';
@@ -45,9 +45,6 @@ const startServer = async () => {
         host: Config.redis.host,
         port: Config.redis.port,
         password: Config.redis.password,
-      })
-      .register(swaggerUi, {
-        routePrefix: '/docs',
       })
 
       .register(Home)
