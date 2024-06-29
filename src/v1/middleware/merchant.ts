@@ -10,11 +10,7 @@ export const validateMerchantDetails = async (
 ): Promise<void> => {
   const { email, phoneNumber, walletAddress } = req.body;
 
-  const {
-    email: merchantEmail,
-    phoneNumber: merchantPhoneNumber,
-    walletAddress: merchantWalletAddress,
-  } = await prisma.merchant.findFirst({
+  const merchant = await prisma.merchant.findFirst({
     where: {
       OR: [{ email }, { phoneNumber }, { walletAddress }],
     },
@@ -25,19 +21,19 @@ export const validateMerchantDetails = async (
     },
   });
 
-  if (merchantEmail && merchantEmail === email) {
+  if (merchant && merchant.email === email) {
     return rep.code(ERROR409.statusCode).send({
       statusCode: ERROR409.statusCode,
       message: ERRORS.merchant.emailExists(email),
     });
   }
-  if (merchantPhoneNumber && merchantPhoneNumber === phoneNumber) {
+  if (merchant && merchant.phoneNumber === phoneNumber) {
     return rep.code(ERROR409.statusCode).send({
       statusCode: ERROR409.statusCode,
       message: ERRORS.merchant.phoneNumberExists(phoneNumber),
     });
   }
-  if (merchantWalletAddress && merchantWalletAddress === walletAddress) {
+  if (merchant && merchant.walletAddress === walletAddress) {
     return rep.code(ERROR409.statusCode).send({
       statusCode: ERROR409.statusCode,
       message: ERRORS.merchant.walletAddressExists(walletAddress),

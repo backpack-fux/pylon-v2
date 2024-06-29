@@ -1,20 +1,5 @@
 {
   "compilerOptions": {
-<<<<<<< HEAD
-    "module": "CommonJS",
-    "target": "ES2018",
-    "moduleResolution": "node",
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*", "prisma/*"]
-    },
-    "esModuleInterop": true,
-    "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true
-  },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules"]
-=======
     "module": "NodeNext",
     "outDir": "build",
     "incremental": true,
@@ -31,5 +16,4 @@
   },
   "include": ["src/**/*.ts", "test/**/*.ts"],
   "exclude": ["node_modules", "build"]
->>>>>>> staging
 }
