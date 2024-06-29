@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { methods } from '@/helpers/constants';
-import { validateAPIKey, authMiddlewareForWebhook } from '../middleware';
+import { validateAPIKey } from '../middleware/auth';
+import { validateBridgeWebhook } from '../middleware/webhook';
 import {
   getPrefundedAccountBalance,
   processWebhooksHandler,
@@ -35,7 +36,7 @@ const Bridge = async (app: FastifyInstance) => {
       method: methods.POST,
       url: '/webhook',
       schema: BridgeWebhookSchema,
-      preHandler: [authMiddlewareForWebhook],
+      preHandler: [validateBridgeWebhook],
       handler: processWebhooksHandler,
     });
 };
