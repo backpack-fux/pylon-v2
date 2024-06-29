@@ -12,7 +12,7 @@
   "scripts": {
     "dev": "nodemon",
     "build": "tsc -p tsconfig.json",
-    "start": "ts-node -r tsconfig-paths/register build/index.js",
+    "start": "ts-node -r tsconfig-paths/register build/src/index.js",
     "rebuild": "rm -rf build/ && tsc -p tsconfig.json",
     "reinstall": "rm -rf node_modules/ package-lock.json && pnpm i",
     "db:generate": "prisma generate",
