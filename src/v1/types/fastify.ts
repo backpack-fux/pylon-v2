@@ -11,9 +11,7 @@ import { FastifySchema } from 'fastify/types/schema';
 import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
 import { PrismaUser } from './prisma';
 
-/**
- * @description extend Fastify JWT to include custom user type
- */
+// extends FastifyJWT to include custom user type
 declare module '@fastify/jwt' {
   interface FastifyJWT {
     user: PrismaUser & {

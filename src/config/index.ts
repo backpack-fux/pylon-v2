@@ -25,6 +25,14 @@ export const Config = {
   isStaging: process.env.NODE_ENV === 'staging',
   isLocal: process.env.NODE_ENV === 'local',
   discordBotToken: loadEnvironmentVariable('DISCORD_BOT_TOKEN'),
+  redis: {
+    host: loadEnvironmentVariable('REDIS_HOST'),
+    port: Number(loadEnvironmentVariable('REDIS_PORT', 6379)),
+    password: loadEnvironmentVariable('REDIS_PASSWORD'),
+  },
+  resend: {
+    apiKey: loadEnvironmentVariable('RESEND_API_KEY'),
+  },
   clientHost: loadEnvironmentVariable('CLIENT_HOST'),
   web3: {
     explorerUri: loadEnvironmentVariable('EXPLORER_URI'),

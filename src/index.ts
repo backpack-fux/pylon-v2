@@ -1,5 +1,5 @@
 import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
-import fastify from 'fastify';
+import fastify, { FastifyInstance } from 'fastify';
 import accepts from '@fastify/accepts';
 import cors from '@fastify/cors';
 import formbody from '@fastify/formbody';
@@ -7,15 +7,16 @@ import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import jwt from '@fastify/jwt';
 import rawBody from 'fastify-raw-body';
-import swagger from '@fastify/swagger';
-import swaggerUi from '@fastify/swagger-ui';
+import fastifyRedis from '@fastify/redis';
+import swagger from '@fastify/swagger'; // TODO
+import swaggerUi from '@fastify/swagger-ui'; // TODO
 
 import { Home, Merchant, Bridge, Transaction, Auth } from './v1/routes/index';
 import { Config } from './config';
 
 const startServer = async () => {
   try {
-    const server = fastify()
+    const server: FastifyInstance = fastify()
       .withTypeProvider<TypeBoxTypeProvider>()
       .register(accepts)
       .register(cors)
@@ -32,9 +33,7 @@ const startServer = async () => {
             return token;
           },
         },
-      });
-
-    await server
+      })
       .register(rawBody, {
         field: 'rawBody',
         global: false,
@@ -42,31 +41,17 @@ const startServer = async () => {
         runFirst: true,
         routes: [],
       })
-      .register(swagger, {
-        prefix: '/docs',
-        swagger: {
-          swagger: '2.0',
-          info: {
-            title: 'Pylon V2 API',
-            description: 'Pylon V2 API Documentation',
-            version: '1.0.0',
-          },
-          // host: Config.host, // TODO
-          // security: {
-          //   apiKey: '',
-          //   Authorization: 'Bearer <token>',
-          // },
-        },
+      .register(fastifyRedis, {
+        host: Config.redis.host,
+        port: Config.redis.port,
+        password: Config.redis.password,
       })
-      .register(swaggerUi, {
-        routePrefix: '/docs',
-      })
+
       .register(Home)
       .register(Merchant, { prefix: '/v1/merchant' })
       .register(Bridge, { prefix: '/v1/bridge' })
-      .register(Auth, { prefix: '/v1/auth' })
       .register(Transaction, { prefix: '/v1/transaction' })
-      .swagger();
+      .register(Auth, { prefix: '/v1/auth' });
 
     const serverOptions = {
       port: Config.port,

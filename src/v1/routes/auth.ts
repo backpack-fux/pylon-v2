@@ -1,5 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { methods } from '@/helpers/constants';
+import { issueOTPHandler, verifyOTPHandler } from '../handlers/auth';
+import { IssueOTPSchema, VerifyOTPSchema } from '../schemas/auth';
 import {
   AuthenticatePasskeySchema,
   BaseResponseSchema,
@@ -13,7 +15,7 @@ import {
   generateChallenge,
   registerPasskeyForExistingUser,
   registerPasskey,
-  sendUserTokenToAddPasskey,
+  initiatePasskeyRegistration,
   removePasskey,
   findPasskeysForUser,
 } from '@/v1/handlers/auth';
@@ -21,9 +23,7 @@ import { authenticate } from '../middleware';
 import { SWAGGER_TAG } from '../types/swagger';
 
 const Authentication = async (app: FastifyInstance) => {
-  /**
-   * @description Send a passkey challenge to the client
-   */
+  // Generates a challenge for the client to authenticate the user
   app
     .route({
       method: methods.GET,
@@ -32,10 +32,7 @@ const Authentication = async (app: FastifyInstance) => {
       handler: generateChallenge,
     })
 
-    /**
-     * @description Register a Passkey for a new user
-     * @returns user object with jwt token
-     */
+    // Registers a passkey for a new user
     .route({
       method: methods.POST,
       url: '/passkey/register',
@@ -43,10 +40,7 @@ const Authentication = async (app: FastifyInstance) => {
       handler: registerPasskey,
     })
 
-    /**
-     * @description Authenticate a Passkey against existing passkeys on the server
-     * @returns user object with jwt token
-     */
+    // Authenticates a passkey against existing passkeys on the server
     .route({
       method: methods.POST,
       url: '/passkey',
@@ -54,21 +48,15 @@ const Authentication = async (app: FastifyInstance) => {
       handler: authenticatePasskey,
     })
 
-    /**
-     * @description Send a token to a user to add a new passkey
-     * @returns user object with jwt token
-     */
+    // Sends a token to a user to add a new passkey
     .route({
       method: methods.POST,
-      url: 'passkey/add/send-token',
+      url: '/passkey/add/send-token',
       schema: RegisterPasskeySchema,
-      handler: sendUserTokenToAddPasskey,
+      handler: initiatePasskeyRegistration,
     })
 
-    /**
-     * @description Register a Passkey for an existing user
-     * @returns user object with jwt token
-     */
+    // Registers a passkey for an existing user
     .route({
       method: methods.PUT,
       url: '/add',
@@ -77,10 +65,7 @@ const Authentication = async (app: FastifyInstance) => {
       handler: registerPasskeyForExistingUser,
     })
 
-    /**
-     * @description Find all passkeys for a user
-     * @returns passkeys
-     */
+    // Finds all passkeys for a user
     .route({
       method: methods.GET,
       url: '/passkey',
@@ -92,16 +77,27 @@ const Authentication = async (app: FastifyInstance) => {
       handler: findPasskeysForUser,
     })
 
-    /**
-     * @description Remove a passkey for a user
-     * @returns passkeys
-     */
+    // Removes a passkey for a user
     .route({
       method: methods.DELETE,
       url: '/passkey/:id',
       schema: RemovePasskeySchema,
       preHandler: [authenticate],
       handler: removePasskey,
+    })
+
+    .route({
+      method: methods.POST,
+      url: '/otp/issue',
+      schema: IssueOTPSchema,
+      handler: issueOTPHandler,
+    })
+
+    .route({
+      method: methods.POST,
+      url: '/otp/verify',
+      schema: VerifyOTPSchema,
+      handler: verifyOTPHandler,
     });
 };
 

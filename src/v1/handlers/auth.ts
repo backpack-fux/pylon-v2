@@ -1,3 +1,5 @@
+import { IssueOTPSchema, VerifyOTPSchema } from '../schemas/auth';
+import { OTPService } from '../services/OTP';
 import { errorResponse, successResponse } from '@/responses';
 import {
   AuthenticatePasskeySchema,
@@ -9,12 +11,12 @@ import {
   SendWebAuthnChallengeSchema,
 } from '../schemas/auth';
 import { PasskeyService } from '../services/Passkey';
-import { FastifyReplyTypebox, FastifyRequestTypebox } from '../types/fastify';
+import { FastifyReplyTypebox, FastifyRequestTypebox } from '@/v1/types/fastify';
 import { parseError } from '@/helpers/errors';
 import { Config } from '@/config';
 import { AuthenticationChecks } from '../types/auth';
 import { UserService } from '@/v1/services/User';
-import { ERROR400, ERROR404 } from '@/helpers/constants';
+import { ERROR400, ERROR404, ERROR500 } from '@/helpers/constants';
 
 const passkeyService = PasskeyService.getInstance();
 const userService = UserService.getInstance();
@@ -103,7 +105,7 @@ export async function authenticatePasskey(
   }
 }
 
-export async function sendUserTokenToAddPasskey(
+export async function initiatePasskeyRegistration(
   req: FastifyRequestTypebox<typeof InitiateRegisterPasskeyForUserSchema>,
   rep: FastifyReplyTypebox<typeof InitiateRegisterPasskeyForUserSchema>
 ) {
@@ -116,10 +118,10 @@ export async function sendUserTokenToAddPasskey(
     }
 
     const token = await rep.jwtSign(user, {
-      expiresIn: 1000 * 60 * 10, //10 minutes
+      expiresIn: 1000 * 60 * 10, // 10 minutes
     });
 
-    await passkeyService.sendUserTokenToAddPasskey({
+    await passkeyService.initiatePasskeyRegistration({
       email,
       token,
     });
@@ -182,5 +184,41 @@ export async function findPasskeysForUser(
   } catch (error) {
     const parsedError = parseError(error);
     return errorResponse(req, rep, parsedError.statusCode, parsedError.message);
+  }
+}
+
+export async function issueOTPHandler(
+  req: FastifyRequestTypebox<typeof IssueOTPSchema>,
+  rep: FastifyReplyTypebox<typeof IssueOTPSchema>
+): Promise<void> {
+  try {
+    const { email } = req.body;
+    const otpService = OTPService.getInstance(req.server);
+    await otpService.issueOTP(email);
+    return successResponse(rep, {
+      message: 'OTP issued successfully',
+    });
+  } catch (error) {
+    console.error(error);
+    return errorResponse(req, rep, ERROR500.statusCode, 'Failed to issue OTP');
+  }
+}
+
+export async function verifyOTPHandler(
+  req: FastifyRequestTypebox<typeof VerifyOTPSchema>,
+  rep: FastifyReplyTypebox<typeof VerifyOTPSchema>
+): Promise<void> {
+  try {
+    const { email, otp } = req.body;
+    const otpService = OTPService.getInstance(req.server);
+    const isValid = await otpService.verifyOTP(email, otp);
+    if (isValid) {
+      return successResponse(rep, { message: 'OTP verified successfully' });
+    } else {
+      return errorResponse(req, rep, ERROR400.statusCode, 'Invalid OTP');
+    }
+  } catch (error) {
+    console.error(error);
+    return errorResponse(req, rep, ERROR500.statusCode, 'Failed to verify OTP');
   }
 }

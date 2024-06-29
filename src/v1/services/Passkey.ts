@@ -12,12 +12,18 @@ import { ERROR400, ERROR401, ERROR404, ERROR500 } from '@/helpers/constants';
 import { prisma } from '@/db';
 import { UserService } from './User';
 import { Config } from '@/config';
-import { AuthService } from './Auth';
+import crypto from 'crypto';
 
-export class PasskeyService extends AuthService {
+export class PasskeyService {
   private static instance: PasskeyService;
   private server?: PasswordlessServer;
   private userService: UserService;
+
+  public generateChallenge(): string {
+    const randomBuffer = new Uint8Array(32);
+    crypto.randomFillSync(randomBuffer);
+    return Buffer.from(randomBuffer).toString('hex');
+  }
 
   public static getInstance(): PasskeyService {
     if (!PasskeyService.instance) {
@@ -27,7 +33,6 @@ export class PasskeyService extends AuthService {
   }
 
   constructor() {
-    super();
     this.userService = UserService.getInstance();
     this.initialize();
   }
@@ -59,7 +64,6 @@ export class PasskeyService extends AuthService {
       );
 
       //  Create a new user with the verified credentials and the email provided
-
       const user = await this.userService.createWithRegisteredPasskey(
         { email, username: verified.username },
         {
@@ -175,7 +179,7 @@ export class PasskeyService extends AuthService {
     }
   }
 
-  async removePasskey({
+  public async removePasskey({
     id,
     userId,
     credential,
@@ -206,7 +210,7 @@ export class PasskeyService extends AuthService {
     }
   }
 
-  async sendUserTokenToAddPasskey({
+  public async initiatePasskeyRegistration({
     email,
     token,
   }: {
@@ -228,7 +232,7 @@ export class PasskeyService extends AuthService {
     }
   }
 
-  async addPasskeyForExistingUser(
+  public async addPasskeyForExistingUser(
     id: number,
     passkeyData: Omit<CreatePasskey, 'userId'>
   ) {
@@ -260,7 +264,7 @@ export class PasskeyService extends AuthService {
     }
   }
 
-  async findPasskeyByUserId(userId: number) {
+  public async findPasskeyByUserId(userId: number) {
     try {
       return await prisma.registeredPasskey.findMany({
         where: {

@@ -111,4 +111,21 @@ export const SendWebAuthnChallengeSchema = {
   ...BaseResponse,
 };
 
-export const BaseResponseSchema = BaseResponse
+export const VerifyOTPSchema = {
+  tags: [SWAGGER_TAG.Authentication],
+  body: t.Object({
+    email: t.String({ format: 'email' }),
+    otp: t.String({ minLength: 6, maxLength: 6 }),
+  }),
+  ...BaseResponse,
+};
+
+export const IssueOTPSchema = {
+  tags: [SWAGGER_TAG.Authentication],
+  body: t.Object({
+    email: t.String({ format: 'email' }),
+  }),
+  ...BaseResponse,
+};
+
+export const BaseResponseSchema = BaseResponse;
