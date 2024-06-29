@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
+    "module": "NodeNext",
     "outDir": "build",
     "incremental": true,
-    "target": "es6",
-    "module": "commonjs",
+    "target": "ESNext",
+    "moduleResolution": "NodeNext",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,

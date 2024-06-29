@@ -25,14 +25,32 @@ export const Config = {
   isStaging: process.env.NODE_ENV === 'staging',
   isLocal: process.env.NODE_ENV === 'local',
   discordBotToken: loadEnvironmentVariable('DISCORD_BOT_TOKEN'),
-  frontendUri: loadEnvironmentVariable(
-    'FRONT_END_URI',
-    'https://test.checkout.mybackpack.app'
-  ),
+  clientHost: loadEnvironmentVariable('CLIENT_HOST'),
   web3: {
     explorerUri: loadEnvironmentVariable('EXPLORER_URI'),
     rpcProviderUri: loadEnvironmentVariable('RPC_PROVIDER_URI'),
     usdcContractAddress: loadEnvironmentVariable('USDC_CONTRACT_ADDRESS'),
     usdcPoolPrivateKey: loadEnvironmentVariable('USDC_POOL_PRIVATE_KEY'),
+  },
+  bridge: {
+    testnet: {
+      apiKey: loadEnvironmentVariable('BRIDGE_API_KEY'),
+      apiUrl: loadEnvironmentVariable('BRIDGE_API_URL'),
+      webhookPublicKey: loadEnvironmentVariable('BRIDGE_WEBHOOK_PUBLIC_KEY'),
+    },
+    mainnet: {
+      apiKey: loadEnvironmentVariable('BRIDGE_API_KEY'),
+      apiUrl: loadEnvironmentVariable('BRIDGE_API_URL'),
+      webhookPublicKey: loadEnvironmentVariable('BRIDGE_WEBHOOK_PUBLIC_KEY'),
+    },
+  },
+  worldpay: {
+    testnet: {
+      apiUrl: loadEnvironmentVariable('WORLDPAY_API_URI'),
+      entityRef: loadEnvironmentVariable('WORLDPAY_ENTITY_REF'),
+      username: loadEnvironmentVariable('WORLDPAY_USERNAME'),
+      password: loadEnvironmentVariable('WORLDPAY_PASSWORD'),
+      accessCheckoutId: loadEnvironmentVariable('WORLDPAY_ACCESS_CHECKOUT_ID'),
+    },
   },
 };

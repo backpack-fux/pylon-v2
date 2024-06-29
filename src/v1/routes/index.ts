@@ -4,12 +4,22 @@ import { ERROR500, STANDARD } from '@/helpers/constants';
 
 import Merchant from './merchant';
 import Bridge from './bridge';
+import Auth from './auth';
+import Transaction from './transaction';
 
 const Home = async (app: FastifyInstance) => {
   app
-    .all('/', async (req: FastifyRequest, rep: FastifyReply) => {
-      rep.code(STANDARD.SUCCESS).send({ ok: true });
-    })
+    .all(
+      '/',
+      {
+        schema: {
+          hide: true,
+        },
+      },
+      async (req: FastifyRequest, rep: FastifyReply) => {
+        rep.code(STANDARD.SUCCESS).send({ ok: true });
+      }
+    )
 
     .get('/health-check', async (req: FastifyRequest, rep: FastifyReply) => {
       try {
@@ -21,4 +31,4 @@ const Home = async (app: FastifyInstance) => {
     });
 };
 
-export { Home, Merchant, Bridge };
+export { Home, Merchant, Bridge, Transaction, Auth };

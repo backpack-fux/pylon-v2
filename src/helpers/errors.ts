@@ -1,3 +1,6 @@
+import { PasskeyError, PrismaError } from "@/v1/services/Error";
+import { ERROR500 } from "./constants";
+
 export const ERRORS = {
   auth: {
     invalidJWT: 'Invalid JWT',
@@ -25,3 +28,24 @@ export const ERRORS = {
     notRegistered: 'Is not registered',
   },
 };
+
+export const parseError = (error: unknown): {
+  statusCode: number;
+  message: string;
+} => {
+  let statusCode: number = ERROR500.statusCode;
+  let message: string = ERRORS.http.error(ERROR500.statusCode);
+
+  if (error instanceof Error) {
+    message = error.message;
+  } else if (error instanceof PasskeyError || error instanceof PrismaError) {
+    statusCode = error.statusCode;
+    message = error.message;
+  }
+
+
+  return {
+    statusCode,
+    message,
+  };
+}
