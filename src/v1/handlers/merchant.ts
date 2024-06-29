@@ -1,6 +1,6 @@
 import { FastifyRequestTypebox, FastifyReplyTypebox } from '@/v1/types/fastify';
 import { ERRORS } from '@/helpers/errors';
-import { CreateMerchantSchema } from '../schemas/merchant';
+import { MerchantCreateSchema } from '../schemas/merchant';
 import { ERROR400, ERROR404, ERROR500, STANDARD } from '@/helpers/constants';
 import { BridgeService } from '../services/external/Bridge';
 import { utils } from '@/helpers/utils';
@@ -14,8 +14,8 @@ const merchantService = MerchantService.getInstance();
 const complianceService = ComplianceService.getInstance();
 
 export async function createMerchantHandler(
-  req: FastifyRequestTypebox<typeof CreateMerchantSchema>,
-  rep: FastifyReplyTypebox<typeof CreateMerchantSchema>
+  req: FastifyRequestTypebox<typeof MerchantCreateSchema>,
+  rep: FastifyReplyTypebox<typeof MerchantCreateSchema>
 ): Promise<void> {
   try {
     const merchant = await merchantService.createPartner(req.body);

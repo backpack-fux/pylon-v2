@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+<<<<<<< HEAD
     "module": "CommonJS",
     "target": "ES2018",
     "moduleResolution": "node",
@@ -13,4 +14,22 @@
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
+=======
+    "module": "NodeNext",
+    "outDir": "build",
+    "incremental": true,
+    "target": "ESNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*", "prisma/*"]
+    }
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts"],
+  "exclude": ["node_modules", "build"]
+>>>>>>> staging
 }
