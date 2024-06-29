@@ -34,12 +34,6 @@ export const Config = {
   resend: {
     apiKey: loadEnvironmentVariable('RESEND_API_KEY'),
   },
-  web3: {
-    explorerUri: loadEnvironmentVariable('EXPLORER_URI'),
-    rpcProviderUri: loadEnvironmentVariable('RPC_PROVIDER_URI'),
-    usdcContractAddress: loadEnvironmentVariable('USDC_CONTRACT_ADDRESS'),
-    usdcPoolPrivateKey: loadEnvironmentVariable('USDC_POOL_PRIVATE_KEY'),
-  },
   bridge: {
     apiKey: loadEnvironmentVariable('BRIDGE_API_KEY'),
     apiUrl: loadEnvironmentVariable('BRIDGE_API_URL'),
