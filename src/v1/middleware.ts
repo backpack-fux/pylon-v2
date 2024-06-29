@@ -13,7 +13,9 @@ import {
 } from 'fastify';
 import { createHmac } from 'crypto';
 import { utils } from '@/helpers/utils';
+import { UserService } from './services/User';
 
+const userService = UserService.getInstance();
 export const authenticate = async (
   request: FastifyRequest,
   reply: FastifyReply
@@ -31,7 +33,16 @@ export const authenticate = async (
   try {
     // Verify the JWT token using the Fastify JWT plugin
     await request.jwtVerify();
-    // If the token is valid, continue with the request
+
+    const user = await userService.findOneById(request.user.id);
+
+    if (!user) {
+      return reply
+        .code(ERROR401.statusCode)
+        .send({ unauthorized: ERRORS.auth.invalidJWT });
+    }
+
+    // If the token is valid and User exists, continue with the request
     return;
   } catch (err) {
     return reply

@@ -7,8 +7,10 @@ import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import jwt from '@fastify/jwt';
 import rawBody from 'fastify-raw-body';
+import swagger from '@fastify/swagger';
+import swaggerUi from '@fastify/swagger-ui';
 
-import { Home, Merchant, Bridge, Transaction } from './v1/routes/index';
+import { Home, Merchant, Bridge, Transaction, Auth } from './v1/routes/index';
 import { Config } from './config';
 
 const startServer = async () => {
@@ -31,6 +33,7 @@ const startServer = async () => {
           },
         },
       });
+
     await server
       .register(rawBody, {
         field: 'rawBody',
@@ -39,11 +42,31 @@ const startServer = async () => {
         runFirst: true,
         routes: [],
       })
-
+      .register(swagger, {
+        prefix: '/docs',
+        swagger: {
+          swagger: '2.0',
+          info: {
+            title: 'Pylon V2 API',
+            description: 'Pylon V2 API Documentation',
+            version: '1.0.0',
+          },
+          // host: Config.host, // TODO
+          // security: {
+          //   apiKey: '',
+          //   Authorization: 'Bearer <token>',
+          // },
+        },
+      })
+      .register(swaggerUi, {
+        routePrefix: '/docs',
+      })
       .register(Home)
       .register(Merchant, { prefix: '/v1/merchant' })
       .register(Bridge, { prefix: '/v1/bridge' })
-      .register(Transaction, { prefix: '/v1/transaction' });
+      .register(Auth, { prefix: '/v1/auth' })
+      .register(Transaction, { prefix: '/v1/transaction' })
+      .swagger();
 
     const serverOptions = {
       port: Config.port,
