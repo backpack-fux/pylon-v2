@@ -1,5 +1,5 @@
 import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
-import fastify from 'fastify';
+import fastify, { FastifyInstance } from 'fastify';
 import accepts from '@fastify/accepts';
 import cors from '@fastify/cors';
 import formbody from '@fastify/formbody';
@@ -8,13 +8,15 @@ import rateLimit from '@fastify/rate-limit';
 import jwt from '@fastify/jwt';
 import rawBody from 'fastify-raw-body';
 import fastifyRedis from '@fastify/redis';
+import swagger from '@fastify/swagger'; // TODO
+import swaggerUi from '@fastify/swagger-ui';
 
 import { Home, Merchant, Bridge, Transaction, Auth } from './v1/routes/index';
 import { Config } from './config';
 
 const startServer = async () => {
   try {
-    const server = fastify()
+    const server: FastifyInstance = fastify()
       .withTypeProvider<TypeBoxTypeProvider>()
       .register(accepts)
       .register(cors)
@@ -43,6 +45,9 @@ const startServer = async () => {
         host: Config.redis.host,
         port: Config.redis.port,
         password: Config.redis.password,
+      })
+      .register(swaggerUi, {
+        routePrefix: '/docs',
       })
 
       .register(Home)
