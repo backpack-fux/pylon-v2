@@ -19,7 +19,7 @@ import {
   removePasskey,
   findPasskeysForUser,
 } from '@/v1/handlers/auth';
-import { authenticate } from '../middleware';
+import { authenticate } from '../middleware/auth';
 import { SWAGGER_TAG } from '../types/swagger';
 
 const Authentication = async (app: FastifyInstance) => {

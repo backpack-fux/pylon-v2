@@ -1,5 +1,5 @@
-import { PasskeyError, PrismaError } from "@/v1/services/Error";
-import { ERROR500 } from "./constants";
+import { PasskeyError, PrismaError } from '@/v1/services/Error';
+import { ERROR500 } from './constants';
 
 export const ERRORS = {
   auth: {
@@ -26,10 +26,18 @@ export const ERRORS = {
     exists: 'Already exists',
     notExists: 'Does not exist',
     notRegistered: 'Is not registered',
+    emailExists: (email: string) =>
+      `A merchant with email ${email} already exists.`,
+    phoneNumberExists: (phoneNumber: string) =>
+      `A merchant with phone number ${phoneNumber} already exists.`,
+    walletAddressExists: (walletAddress: string) =>
+      `The wallet address ${walletAddress} is already in use.`,
   },
 };
 
-export const parseError = (error: unknown): {
+export const parseError = (
+  error: unknown
+): {
   statusCode: number;
   message: string;
 } => {
@@ -43,9 +51,8 @@ export const parseError = (error: unknown): {
     message = error.message;
   }
 
-
   return {
     statusCode,
     message,
   };
-}
+};
