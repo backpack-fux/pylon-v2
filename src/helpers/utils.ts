@@ -61,12 +61,7 @@ export const utils = {
     const verifier = createVerify('sha256');
     verifier.update(digest);
 
-    return verifier.verify(
-      Config.isLocal
-        ? Config.bridge.testnet.webhookPublicKey
-        : Config.bridge.mainnet.webhookPublicKey,
-      decodedSignature
-    );
+    return verifier.verify(Config.bridge.webhookPublicKey, decodedSignature);
   },
   formattedKycStatus: (status: string): VerificationStatus => {
     const uppercaseStatus = status.toUpperCase();

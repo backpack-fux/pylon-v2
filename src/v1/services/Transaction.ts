@@ -15,6 +15,7 @@ import {
   WorldpayFraudOutcomeTypes,
   WorldpayRiskAssessmentRequest,
 } from '../types/worldpay/fraudSight';
+import { Config } from '@/config';
 
 export class TransactionService {
   private static instance: TransactionService;

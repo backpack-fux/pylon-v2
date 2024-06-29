@@ -46,7 +46,7 @@ function createVerifiedTokenPayload(
       line2: 'Memory265-13-08-1876',
     },
     merchant: {
-      entity: Config.worldpay.testnet.entityRef,
+      entity: Config.worldpay.entityRef,
     },
     verificationCurrency: value.currency,
   };
@@ -62,7 +62,7 @@ function createAuthorizePaymentPayload(
   return {
     transactionReference: txRef,
     merchant: {
-      entity: Config.worldpay.testnet.entityRef,
+      entity: Config.worldpay.entityRef,
     },
     instruction: {
       requestAutoSettlement: {
@@ -97,7 +97,7 @@ function createFraudSightPayload(
   return {
     transactionReference: txRef,
     merchant: {
-      entity: Config.worldpay.testnet.entityRef,
+      entity: Config.worldpay.entityRef,
     },
     instruction: {
       value: {
