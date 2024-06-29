@@ -31,12 +31,8 @@ export class BridgeService {
   };
 
   private constructor() {
-    this.baseUrl = Config.isLocal
-      ? Config.bridge.testnet.apiUrl
-      : Config.bridge.mainnet.apiUrl;
-    this.apiKey = Config.isLocal
-      ? Config.bridge.testnet.apiKey
-      : Config.bridge.mainnet.apiUrl;
+    this.baseUrl = Config.bridge.apiUrl;
+    this.apiKey = Config.bridge.apiKey;
   }
 
   /** @dev avoid multiple instances; allow one global, reusable instance */

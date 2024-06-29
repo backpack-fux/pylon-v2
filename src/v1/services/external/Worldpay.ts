@@ -55,26 +55,11 @@ export class WorldpayService {
   };
 
   private constructor() {
-    this.baseUrl =
-      Config.isLocal || Config.isStaging
-        ? Config.worldpay.testnet.apiUrl
-        : 'TODO';
-    this.username =
-      Config.isLocal || Config.isStaging
-        ? Config.worldpay.testnet.username
-        : 'TODO';
-    this.password =
-      Config.isLocal || Config.isStaging
-        ? Config.worldpay.testnet.password
-        : 'TODO';
-    this.entityRef =
-      Config.isLocal || Config.isStaging
-        ? Config.worldpay.testnet.entityRef
-        : 'TODO';
-    this.accessCheckoutId =
-      Config.isLocal || Config.isStaging
-        ? Config.worldpay.testnet.accessCheckoutId
-        : 'TODO';
+    this.baseUrl = Config.worldpay.apiUrl;
+    this.username = Config.worldpay.username;
+    this.password = Config.worldpay.password;
+    this.entityRef = Config.worldpay.entityRef;
+    this.accessCheckoutId = Config.worldpay.accessCheckoutId;
   }
 
   public static getInstance(): WorldpayService {
