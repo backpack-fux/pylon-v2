@@ -3,6 +3,7 @@ import { ERROR401 } from '@/helpers/constants';
 import { ERRORS } from '@/helpers/errors';
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { UserService } from '../services/User';
+import { prisma } from '@/db';
 
 const userService = UserService.getInstance();
 
@@ -55,3 +56,39 @@ export const validateAPIKey = async (
     return;
   }
 };
+
+export const validateMerchant = async (
+  req: FastifyRequest,
+  rep: FastifyReply
+) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return rep.code(401).send({ error: 'No token provided' });
+  }
+
+  const decoded = (await req.jwtDecode()) as any;
+  if (!decoded) {
+    return rep.code(401).send({ error: 'Invalid token' });
+  }
+
+  if (!decoded || typeof decoded.merchant_id !== 'number') {
+    return rep.code(401).send({ error: 'Invalid token payload' });
+  }
+
+  const merchant = await getMerchant(decoded.merchant_id);
+  if (!merchant) {
+    return rep.code(401).send({ error: 'Merchant not found' });
+  }
+
+  const signature = await req.jwtVerify({ verify: merchant.id });
+  if (!signature) {
+    return rep.code(401).send({ error: 'Invalid signature' });
+  }
+};
+
+async function getMerchant(id: number) {
+  return await prisma.merchant.findUnique({
+    where: { id },
+  });
+}

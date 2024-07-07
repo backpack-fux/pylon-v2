@@ -32,6 +32,8 @@ const startServer = async () => {
             console.log(Config.jwtSecret, 'secret & token:', token);
             return token;
           },
+          allowedIss: ['merchant', 'id'],
+          allowedAud: ['merchant', 'id'],
         },
       })
       .register(rawBody, {
