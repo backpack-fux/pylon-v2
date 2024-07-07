@@ -1,4 +1,8 @@
-import { IssueOTPSchema, VerifyOTPSchema } from '../schemas/auth';
+import {
+  GenerateFarcasterJWTSchema,
+  IssueOTPSchema,
+  VerifyOTPSchema,
+} from '../schemas/auth';
 import { OTPService } from '../services/OTP';
 import { errorResponse, successResponse } from '@/responses';
 import {
@@ -12,11 +16,18 @@ import {
 } from '../schemas/auth';
 import { PasskeyService } from '../services/Passkey';
 import { FastifyReplyTypebox, FastifyRequestTypebox } from '@/v1/types/fastify';
-import { parseError } from '@/helpers/errors';
+import { ERRORS, parseError } from '@/helpers/errors';
 import { Config } from '@/config';
 import { AuthenticationChecks } from '../types/auth';
 import { UserService } from '@/v1/services/User';
-import { ERROR400, ERROR404, ERROR500 } from '@/helpers/constants';
+import {
+  ERROR400,
+  ERROR401,
+  ERROR403,
+  ERROR404,
+  ERROR500,
+} from '@/helpers/constants';
+import jwt from 'jsonwebtoken';
 
 const passkeyService = PasskeyService.getInstance();
 const userService = UserService.getInstance();
@@ -220,5 +231,41 @@ export async function verifyOTPHandler(
   } catch (error) {
     console.error(error);
     return errorResponse(req, rep, ERROR500.statusCode, 'Failed to verify OTP');
+  }
+}
+
+export async function generateFarcasterJWT(
+  req: FastifyRequestTypebox<typeof GenerateFarcasterJWTSchema>,
+  rep: FastifyReplyTypebox<typeof GenerateFarcasterJWTSchema>
+) {
+  try {
+    const { fid, signerUuid } = req.body;
+
+    if (!fid || !signerUuid) {
+      return rep.code(ERROR401.statusCode).send({
+        statusCode: ERROR401.statusCode,
+        data: ERRORS.auth.farcaster.missingFidOrSignerUuid,
+      });
+    }
+
+    if (!Config.fidAdmins.includes(fid.toString())) {
+      return rep.code(ERROR403.statusCode).send({
+        statusCode: ERROR403.statusCode,
+        data: ERRORS.auth.farcaster.userNotAllowed,
+      });
+    }
+
+    const token = jwt.sign({ fid, signerUuid }, Config.jwtSecret, {
+      expiresIn: '1d',
+    });
+    return successResponse(rep, { message: token });
+  } catch (error) {
+    console.error(error);
+    return errorResponse(
+      req,
+      rep,
+      ERROR500.statusCode,
+      'Failed to generate JWT'
+    );
   }
 }

@@ -1,7 +1,16 @@
 import { FastifyInstance } from 'fastify';
 import { methods } from '@/helpers/constants';
-import { issueOTPHandler, verifyOTPHandler } from '../handlers/auth';
-import { IssueOTPSchema, VerifyOTPSchema } from '../schemas/auth';
+import {
+  generateFarcasterJWT,
+  issueOTPHandler,
+  verifyOTPHandler,
+} from '../handlers/auth';
+import {
+  GenerateFarcasterJWTSchema,
+  IssueOTPSchema,
+  ValidateFarcasterJWTSchema,
+  VerifyOTPSchema,
+} from '../schemas/auth';
 import {
   AuthenticatePasskeySchema,
   BaseResponseSchema,
@@ -19,7 +28,7 @@ import {
   removePasskey,
   findPasskeysForUser,
 } from '@/v1/handlers/auth';
-import { authenticate } from '../middleware/auth';
+import { authenticate, validateFarcasterUser } from '../middleware/auth';
 import { SWAGGER_TAG } from '../types/swagger';
 
 const Authentication = async (app: FastifyInstance) => {
@@ -98,6 +107,13 @@ const Authentication = async (app: FastifyInstance) => {
       url: '/otp/verify',
       schema: VerifyOTPSchema,
       handler: verifyOTPHandler,
+    })
+
+    .route({
+      method: methods.POST,
+      url: '/jwt',
+      schema: GenerateFarcasterJWTSchema,
+      handler: generateFarcasterJWT,
     });
 };
 

@@ -26,6 +26,7 @@ export const Config = {
   isLocal: process.env.NODE_ENV === 'local',
   clientHost: loadEnvironmentVariable('CLIENT_HOST'),
   discordBotToken: loadEnvironmentVariable('DISCORD_BOT_TOKEN'),
+  fidAdmins: loadEnvironmentVariable('FID_ADMINS', '').split(','),
   redis: {
     host: loadEnvironmentVariable('REDIS_HOST'),
     port: Number(loadEnvironmentVariable('REDIS_PORT', 6379)),
