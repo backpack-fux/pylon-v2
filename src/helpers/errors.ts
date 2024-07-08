@@ -11,6 +11,10 @@ export const ERRORS = {
       invalidSignature: 'Invalid signature',
       failedSignature: 'Signature verification failed',
     },
+    farcaster: {
+      missingFidOrSignerUuid: 'Missing fid or signerUuid',
+      userNotAllowed: 'User not allowed to generate JWT',
+    },
   },
   methods: {
     missingPostBody: 'Body is required for POST requests',

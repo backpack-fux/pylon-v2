@@ -128,4 +128,19 @@ export const IssueOTPSchema = {
   ...BaseResponse,
 };
 
+export const GenerateFarcasterJWTSchema = {
+  body: t.Object({
+    fid: t.Number(),
+    signerUuid: t.String(),
+  }),
+  ...BaseResponse,
+};
+
+export const ValidateFarcasterJWTSchema = {
+  body: t.Object({
+    token: t.String(),
+  }),
+  ...BaseResponse,
+};
+
 export const BaseResponseSchema = BaseResponse;

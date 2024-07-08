@@ -1,8 +1,11 @@
 import { Config } from '@/config';
-import { ERROR401 } from '@/helpers/constants';
+import { ERROR401, ERROR403 } from '@/helpers/constants';
 import { ERRORS } from '@/helpers/errors';
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { UserService } from '../services/User';
+import { FastifyReplyTypebox, FastifyRequestTypebox } from '../types/fastify';
+import { ValidateFarcasterJWTSchema } from '../schemas/auth';
+import jwt from 'jsonwebtoken';
 
 const userService = UserService.getInstance();
 
@@ -54,4 +57,59 @@ export const validateAPIKey = async (
   } else {
     return;
   }
+};
+
+export const validateFarcasterUser = async (
+  req: FastifyRequestTypebox<typeof ValidateFarcasterJWTSchema>,
+  rep: FastifyReplyTypebox<typeof ValidateFarcasterJWTSchema>
+) => {
+  const { token } = req.body;
+
+  const isVerified = jwt.verify(token, Config.jwtSecret, { complete: true });
+  if (!isVerified) {
+    return rep.code(ERROR401.statusCode).send({
+      statusCode: ERROR401.statusCode,
+      data: ERRORS.auth.invalidJWT,
+    });
+  }
+
+  const decoded = jwt.decode(token, { complete: true });
+  if (!decoded) {
+    return rep.code(ERROR401.statusCode).send({
+      statusCode: ERROR401.statusCode,
+      data: ERRORS.auth.invalidJWT,
+    });
+  }
+
+  const { payload } = decoded;
+  if (
+    typeof payload !== 'object' ||
+    payload === null ||
+    payload.exp === undefined ||
+    payload.iat === undefined
+  ) {
+    return rep.code(ERROR401.statusCode).send({
+      statusCode: ERROR401.statusCode,
+      data: ERRORS.auth.invalidJWT,
+    });
+  }
+
+  const fid = (payload?.fid as any).toString();
+  const currentTime = Math.floor(Date.now() / 1000);
+
+  if (!Config.fidAdmins.includes(fid)) {
+    return rep.code(ERROR403.statusCode).send({
+      statusCode: ERROR403.statusCode,
+      data: ERRORS.auth.farcaster.userNotAllowed,
+    });
+  }
+
+  if (payload.exp < currentTime || payload.iat > currentTime) {
+    return rep.code(ERROR401.statusCode).send({
+      statusCode: ERROR401.statusCode,
+      data: ERRORS.auth.invalidJWT,
+    });
+  }
+
+  return;
 };
