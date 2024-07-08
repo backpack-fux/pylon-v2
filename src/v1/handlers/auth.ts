@@ -1,25 +1,4 @@
-import {
-  GenerateFarcasterJWTSchema,
-  IssueOTPSchema,
-  VerifyOTPSchema,
-} from '../schemas/auth';
-import { OTPService } from '../services/OTP';
-import { errorResponse, successResponse } from '@/responses';
-import {
-  AuthenticatePasskeySchema,
-  BaseResponseSchema,
-  InitiateRegisterPasskeyForUserSchema,
-  RegisterPasskeyForExistingUserSchema,
-  RegisterPasskeySchema,
-  RemovePasskeySchema,
-  SendWebAuthnChallengeSchema,
-} from '../schemas/auth';
-import { PasskeyService } from '../services/Passkey';
-import { FastifyReplyTypebox, FastifyRequestTypebox } from '@/v1/types/fastify';
-import { ERRORS, parseError } from '@/helpers/errors';
 import { Config } from '@/config';
-import { AuthenticationChecks } from '../types/auth';
-import { UserService } from '@/v1/services/User';
 import {
   ERROR400,
   ERROR401,
@@ -27,6 +6,25 @@ import {
   ERROR404,
   ERROR500,
 } from '@/helpers/constants';
+import { ERRORS, parseError } from '@/helpers/errors';
+import { errorResponse, successResponse } from '@/responses';
+import {
+  AuthenticatePasskeySchema,
+  BaseResponseSchema,
+  GenerateFarcasterJWTSchema,
+  InitiateRegisterPasskeyForUserSchema,
+  IssueOTPSchema,
+  RegisterPasskeyForExistingUserSchema,
+  RegisterPasskeySchema,
+  RemovePasskeySchema,
+  SendWebAuthnChallengeSchema,
+  VerifyOTPSchema,
+} from '@/v1/schemas/auth';
+import { OTPService } from '@/v1/services/OTP';
+import { PasskeyService } from '@/v1/services/Passkey';
+import { UserService } from '@/v1/services/User';
+import { AuthenticationChecks } from '@/v1/types/auth';
+import { FastifyReplyTypebox, FastifyRequestTypebox } from '@/v1/types/fastify';
 import jwt from 'jsonwebtoken';
 
 const passkeyService = PasskeyService.getInstance();

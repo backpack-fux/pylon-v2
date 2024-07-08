@@ -1,35 +1,30 @@
-import { FastifyInstance } from 'fastify';
 import { methods } from '@/helpers/constants';
 import {
+  authenticatePasskey,
+  findPasskeysForUser,
+  generateChallenge,
   generateFarcasterJWT,
+  initiatePasskeyRegistration,
   issueOTPHandler,
+  registerPasskey,
+  registerPasskeyForExistingUser,
+  removePasskey,
   verifyOTPHandler,
-} from '../handlers/auth';
-import {
-  GenerateFarcasterJWTSchema,
-  IssueOTPSchema,
-  ValidateFarcasterJWTSchema,
-  VerifyOTPSchema,
-} from '../schemas/auth';
+} from '@/v1/handlers/auth';
+import { authenticate } from '@/v1/middleware/auth';
 import {
   AuthenticatePasskeySchema,
   BaseResponseSchema,
+  GenerateFarcasterJWTSchema,
+  IssueOTPSchema,
   RegisterPasskeyForExistingUserSchema,
   RegisterPasskeySchema,
   RemovePasskeySchema,
   SendWebAuthnChallengeSchema,
+  VerifyOTPSchema,
 } from '@/v1/schemas/auth';
-import {
-  authenticatePasskey,
-  generateChallenge,
-  registerPasskeyForExistingUser,
-  registerPasskey,
-  initiatePasskeyRegistration,
-  removePasskey,
-  findPasskeysForUser,
-} from '@/v1/handlers/auth';
-import { authenticate, validateFarcasterUser } from '../middleware/auth';
-import { SWAGGER_TAG } from '../types/swagger';
+import { SWAGGER_TAG } from '@/v1/types/swagger';
+import { FastifyInstance } from 'fastify';
 
 const Authentication = async (app: FastifyInstance) => {
   // Generates a challenge for the client to authenticate the user

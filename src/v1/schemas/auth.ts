@@ -1,5 +1,5 @@
+import { SWAGGER_TAG } from '@/v1/types/swagger';
 import { Type as t } from '@sinclair/typebox';
-import { SWAGGER_TAG } from '../types/swagger';
 
 const BaseResponse = {
   response: {
