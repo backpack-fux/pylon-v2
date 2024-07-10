@@ -14,6 +14,9 @@ export const ERRORS = {
     farcaster: {
       missingFidOrSignerUuid: 'Missing fid or signerUuid',
       userNotAllowed: 'User not allowed to generate JWT',
+      signerNotFound: 'Signer not found',
+      signerNotApproved: 'Signer not approved',
+      signerFidMismatch: 'Signer FID does not match',
     },
   },
   methods: {

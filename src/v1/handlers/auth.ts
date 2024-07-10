@@ -26,6 +26,7 @@ import { UserService } from '@/v1/services/User';
 import { AuthenticationChecks } from '@/v1/types/auth';
 import { FastifyReplyTypebox, FastifyRequestTypebox } from '@/v1/types/fastify';
 import jwt from 'jsonwebtoken';
+import { NeynarAPIClient } from '@neynar/nodejs-sdk';
 
 const passkeyService = PasskeyService.getInstance();
 const userService = UserService.getInstance();
@@ -246,16 +247,43 @@ export async function generateFarcasterJWT(
       });
     }
 
-    if (!Config.fidAdmins.includes(fid.toString())) {
+    const neynarAPIClient = new NeynarAPIClient(Config.neynarApiKey);
+    const signer = await neynarAPIClient.lookupSigner(signerUuid);
+
+    if (!signer) {
+      return rep.code(ERROR401.statusCode).send({
+        statusCode: ERROR401.statusCode,
+        data: ERRORS.auth.farcaster.signerNotFound,
+      });
+    }
+
+    const { fid: signerFid, status } = signer;
+
+    if (status !== 'approved') {
+      return rep.code(ERROR401.statusCode).send({
+        statusCode: ERROR401.statusCode,
+        data: ERRORS.auth.farcaster.signerNotApproved,
+      });
+    }
+
+    if (signerFid !== fid) {
+      return rep.code(ERROR401.statusCode).send({
+        statusCode: ERROR401.statusCode,
+        data: ERRORS.auth.farcaster.signerFidMismatch,
+      });
+    }
+
+    if (!Config.fidAdmins.includes(signerFid.toString())) {
       return rep.code(ERROR403.statusCode).send({
         statusCode: ERROR403.statusCode,
         data: ERRORS.auth.farcaster.userNotAllowed,
       });
     }
 
-    const token = jwt.sign({ fid, signerUuid }, Config.jwtSecret, {
+    const token = jwt.sign({ signerFid, signerUuid }, Config.jwtSecret, {
       expiresIn: '1d',
     });
+
     return successResponse(rep, { message: token });
   } catch (error) {
     console.error(error);

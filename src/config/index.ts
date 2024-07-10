@@ -27,6 +27,7 @@ export const Config = {
   clientHost: loadEnvironmentVariable('CLIENT_HOST'),
   discordBotToken: loadEnvironmentVariable('DISCORD_BOT_TOKEN'),
   fidAdmins: loadEnvironmentVariable('FID_ADMINS', '').split(','),
+  neynarApiKey: loadEnvironmentVariable('NEYNAR_API_KEY'),
   redis: {
     host: loadEnvironmentVariable('REDIS_HOST'),
     port: Number(loadEnvironmentVariable('REDIS_PORT', 6379)),
