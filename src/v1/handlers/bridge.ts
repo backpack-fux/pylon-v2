@@ -1,6 +1,4 @@
-import {
-  ERROR404
-} from '@/helpers/constants';
+import { ERROR404 } from '@/helpers/constants';
 import { utils } from '@/helpers/utils';
 import { errorResponse, successResponse } from '@/responses';
 import {

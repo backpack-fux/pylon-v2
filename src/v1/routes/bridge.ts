@@ -5,26 +5,28 @@ import {
 } from '@/v1/handlers/bridge';
 import {
   BridgePrefundedAccountBalanceSchema,
+  BridgePrefundedAccountTransferSchema,
   BridgeWebhookSchema,
 } from '@/v1/schemas/bridge';
 import { FastifyInstance } from 'fastify';
 import { validateBridgeWebhook } from '../middleware/webhook';
+import { validateFarcasterUser } from '../middleware/auth';
 
 const Bridge = async (app: FastifyInstance) => {
   app
     .route({
-      method: methods.GET,
+      method: methods.POST,
       url: '/prefunded-account-balance',
       schema: BridgePrefundedAccountBalanceSchema,
-      preHandler: [],
+      preHandler: [validateFarcasterUser],
       handler: getPrefundedAccountBalance,
     })
 
     .route({
       method: methods.POST,
       url: '/prefunded-account-transfer',
-      schema: BridgePrefundedAccountBalanceSchema,
-      preHandler: [],
+      schema: BridgePrefundedAccountTransferSchema,
+      preHandler: [validateFarcasterUser],
       handler: getPrefundedAccountBalance,
     })
 

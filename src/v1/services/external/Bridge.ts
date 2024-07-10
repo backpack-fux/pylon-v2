@@ -218,7 +218,7 @@ export class BridgeService {
       }
     );
 
-    return await response.json();
+    return (await response.json()).data;
   }
 
   private buildRequestHeaders(

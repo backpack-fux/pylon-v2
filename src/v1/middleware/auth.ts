@@ -6,6 +6,7 @@ import { UserService } from '../services/User';
 import { FastifyReplyTypebox, FastifyRequestTypebox } from '../types/fastify';
 import { ValidateFarcasterJWTSchema } from '../schemas/auth';
 import jwt from 'jsonwebtoken';
+import { BridgePrefundedAccountBalanceSchema } from '../schemas/bridge';
 
 const userService = UserService.getInstance();
 
@@ -60,8 +61,14 @@ export const validateAPIKey = async (
 };
 
 export const validateFarcasterUser = async (
-  req: FastifyRequestTypebox<typeof ValidateFarcasterJWTSchema>,
-  rep: FastifyReplyTypebox<typeof ValidateFarcasterJWTSchema>
+  req: FastifyRequestTypebox<
+    | typeof ValidateFarcasterJWTSchema
+    | typeof BridgePrefundedAccountBalanceSchema
+  >,
+  rep: FastifyReplyTypebox<
+    | typeof ValidateFarcasterJWTSchema
+    | typeof BridgePrefundedAccountBalanceSchema
+  >
 ) => {
   const { token } = req.body;
 
