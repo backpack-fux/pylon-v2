@@ -1,16 +1,17 @@
 import { Config } from '@/config';
 import { headers, methods } from '@/helpers/constants';
 import { ERRORS } from '@/helpers/errors';
-import { UUID } from 'crypto';
 import {
-  BridgeComplianceType,
   BridgeCurrencyTypeSrc,
   BridgeCurrencyTypeDst,
   BridgePaymentRailTypeSrc,
   BridgePaymentRailTypeDst,
   BridgePrefundedAccountBalance,
-} from '@/v1/types/bridge';
+} from '@/v1/types/bridge/preFundedAccount';
+import { BridgeComplianceType } from '@/v1/types/bridge/compliance';
+import { UUID } from 'crypto';
 import { Hex } from 'viem';
+import { BridgeError } from '../Error';
 
 export class BridgeService {
   private static instance: BridgeService;
@@ -30,8 +31,8 @@ export class BridgeService {
   };
 
   private constructor() {
-    this.baseUrl = Config.bridgeApiURI;
-    this.apiKey = Config.bridgeApiKey;
+    this.baseUrl = Config.bridge.apiUrl;
+    this.apiKey = Config.bridge.apiKey;
   }
 
   /** @dev avoid multiple instances; allow one global, reusable instance */
@@ -68,11 +69,17 @@ export class BridgeService {
     try {
       const response = await fetch(`${this.baseUrl}${url}`, mergedOptions);
       if (!response.ok) {
-        throw new Error(ERRORS.http.error(response.status));
+        const res = await response.json();
+        console.error(res);
+        throw new BridgeError(response.status, res.message, res.code);
       }
       return response;
     } catch (error: any) {
-      throw new Error(ERRORS.fetch.error(error.message));
+      if (error instanceof BridgeError) {
+        throw error;
+      } else {
+        throw new Error('SendRequest: Something went wrong ');
+      }
     }
   }
 
@@ -211,7 +218,7 @@ export class BridgeService {
       }
     );
 
-    return await response.json();
+    return (await response.json()).data;
   }
 
   private buildRequestHeaders(

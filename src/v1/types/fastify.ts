@@ -9,6 +9,16 @@ import {
 import { RouteGenericInterface } from 'fastify/types/route';
 import { FastifySchema } from 'fastify/types/schema';
 import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
+import { PrismaUser } from './prisma';
+
+// extends FastifyJWT to include custom user type
+declare module '@fastify/jwt' {
+  interface FastifyJWT {
+    user: PrismaUser & {
+      credential?: string;
+    };
+  }
+}
 
 export type FastifyRequestTypebox<TSchema extends FastifySchema> =
   FastifyRequest<

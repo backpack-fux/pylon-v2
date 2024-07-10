@@ -1,22 +1,16 @@
-import { FastifyRequestTypebox, FastifyReplyTypebox } from '@/v1/types/fastify';
-import { ERRORS } from '@/helpers/errors';
+import { ERROR404 } from '@/helpers/constants';
+import { utils } from '@/helpers/utils';
+import { errorResponse, successResponse } from '@/responses';
 import {
   BridgePrefundedAccountBalanceSchema,
   BridgeWebhookSchema,
-} from '../schemas/bridge';
-import {
-  DISCORD,
-  ERROR400,
-  ERROR404,
-  ERROR500,
-  STANDARD,
-} from '@/helpers/constants';
-import { BridgeService } from '../services/external/Bridge';
-import { DiscordService } from '../services/external/Discord';
-import { errorResponse, successResponse } from '@/responses';
-import { BridgeWebhookPayload_KycLink } from '../types/bridge';
-import { ComplianceService } from '../services/Compliance';
-import { utils } from '@/helpers/utils';
+} from '@/v1/schemas/bridge';
+import { ComplianceService } from '@/v1/services/Compliance';
+import { BridgeError } from '@/v1/services/Error';
+import { BridgeService } from '@/v1/services/external/Bridge';
+import { DiscordService } from '@/v1/services/external/Discord';
+import { BridgeWebhookPayload_KycLink } from '@/v1/types/bridge/webhooks';
+import { FastifyReplyTypebox, FastifyRequestTypebox } from '@/v1/types/fastify';
 
 const discordService = DiscordService.getInstance();
 const bridgeService = BridgeService.getInstance();
@@ -29,12 +23,37 @@ export async function getPrefundedAccountBalance(
 ): Promise<void> {
   try {
     const balance = await bridgeService.getPrefundedAccountBalance();
-    const res = await discordService.send(
-      DISCORD.channelId,
-      balance.available_balance
-    );
-    console.log(res);
-    successResponse(rep, res);
+    // const msg = await discordService.send(
+    //   DISCORD.channelId,
+    //   balance.data[0].available_balance
+    // );
+    // console.log(msg);
+    successResponse(rep, balance);
+  } catch (error) {
+    if (error instanceof BridgeError) {
+      return errorResponse(req, rep, error.statusCode, error.message);
+    } else {
+      console.error(error);
+      const errorMessage =
+        'An error occurred fetching the prefunded account balance';
+      return errorResponse(req, rep, ERROR404.statusCode, errorMessage);
+    }
+  }
+}
+
+export async function createPrefundedAccountTransfer(
+  req: FastifyRequestTypebox<typeof BridgePrefundedAccountBalanceSchema>,
+  rep: FastifyReplyTypebox<typeof BridgePrefundedAccountBalanceSchema>
+): Promise<void> {
+  try {
+    req.body;
+    // const balance = await bridgeService.createPrefundedAccountTransfer();
+    // const res = await discordService.send(
+    //   DISCORD.channelId,
+    //   balance.available_balance
+    // );
+    // console.log(res);
+    // successResponse(rep, res);
   } catch (error) {
     console.error(error);
     const errorMessage =

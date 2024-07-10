@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
+    "module": "NodeNext",
     "outDir": "build",
     "incremental": true,
-    "target": "es6",
-    "module": "commonjs",
+    "target": "ESNext",
+    "moduleResolution": "NodeNext",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -12,5 +13,10 @@
     "paths": {
       "@/*": ["src/*", "prisma/*"]
     }
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts"],
+  "exclude": ["node_modules", "build"],
+  "ts-node": {
+    "files": true
   }
 }
