@@ -34,7 +34,7 @@
     "@fastify/redis": "^6.2.0",
     "@fastify/swagger": "^8.14.0",
     "@fastify/swagger-ui": "^4.0.0",
-    "@neynar/nodejs-sdk": "^1.37.1",
+    "@neynar/nodejs-sdk": "^0.11.4",
     "@passwordless-id/webauthn": "^1.6.1",
     "@prisma/client": "^5.11.0",
     "aws-sdk": "^2.1646.0",
