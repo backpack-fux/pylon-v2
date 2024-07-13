@@ -1,23 +1,16 @@
-import { FastifyRequestTypebox, FastifyReplyTypebox } from '@/v1/types/fastify';
-import { ERRORS } from '@/helpers/errors';
+import { ERROR404 } from '@/helpers/constants';
+import { utils } from '@/helpers/utils';
+import { errorResponse, successResponse } from '@/responses';
 import {
   BridgePrefundedAccountBalanceSchema,
   BridgeWebhookSchema,
-} from '../schemas/bridge';
-import {
-  DISCORD,
-  ERROR400,
-  ERROR404,
-  ERROR500,
-  STANDARD,
-} from '@/helpers/constants';
-import { BridgeService } from '../services/external/Bridge';
-import { DiscordService } from '../services/external/Discord';
-import { errorResponse, successResponse } from '@/responses';
-import { BridgeWebhookPayload_KycLink } from '../types/bridge/webhooks';
-import { ComplianceService } from '../services/Compliance';
-import { utils } from '@/helpers/utils';
-import { BridgeError } from '../services/Error';
+} from '@/v1/schemas/bridge';
+import { ComplianceService } from '@/v1/services/Compliance';
+import { BridgeError } from '@/v1/services/Error';
+import { BridgeService } from '@/v1/services/external/Bridge';
+import { DiscordService } from '@/v1/services/external/Discord';
+import { BridgeWebhookPayload_KycLink } from '@/v1/types/bridge/webhooks';
+import { FastifyReplyTypebox, FastifyRequestTypebox } from '@/v1/types/fastify';
 
 const discordService = DiscordService.getInstance();
 const bridgeService = BridgeService.getInstance();

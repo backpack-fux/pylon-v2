@@ -1,22 +1,32 @@
-import { IssueOTPSchema, VerifyOTPSchema } from '../schemas/auth';
-import { OTPService } from '../services/OTP';
+import { Config } from '@/config';
+import {
+  ERROR400,
+  ERROR401,
+  ERROR403,
+  ERROR404,
+  ERROR500,
+} from '@/helpers/constants';
+import { ERRORS, parseError } from '@/helpers/errors';
 import { errorResponse, successResponse } from '@/responses';
 import {
   AuthenticatePasskeySchema,
   BaseResponseSchema,
+  GenerateFarcasterJWTSchema,
   InitiateRegisterPasskeyForUserSchema,
+  IssueOTPSchema,
   RegisterPasskeyForExistingUserSchema,
   RegisterPasskeySchema,
   RemovePasskeySchema,
   SendWebAuthnChallengeSchema,
-} from '../schemas/auth';
-import { PasskeyService } from '../services/Passkey';
-import { FastifyReplyTypebox, FastifyRequestTypebox } from '@/v1/types/fastify';
-import { parseError } from '@/helpers/errors';
-import { Config } from '@/config';
-import { AuthenticationChecks } from '../types/auth';
+  VerifyOTPSchema,
+} from '@/v1/schemas/auth';
+import { OTPService } from '@/v1/services/OTP';
+import { PasskeyService } from '@/v1/services/Passkey';
 import { UserService } from '@/v1/services/User';
-import { ERROR400, ERROR404, ERROR500 } from '@/helpers/constants';
+import { AuthenticationChecks } from '@/v1/types/auth';
+import { FastifyReplyTypebox, FastifyRequestTypebox } from '@/v1/types/fastify';
+import jwt from 'jsonwebtoken';
+import { NeynarAPIClient } from '@neynar/nodejs-sdk';
 
 const passkeyService = PasskeyService.getInstance();
 const userService = UserService.getInstance();
@@ -220,5 +230,68 @@ export async function verifyOTPHandler(
   } catch (error) {
     console.error(error);
     return errorResponse(req, rep, ERROR500.statusCode, 'Failed to verify OTP');
+  }
+}
+
+export async function generateFarcasterJWT(
+  req: FastifyRequestTypebox<typeof GenerateFarcasterJWTSchema>,
+  rep: FastifyReplyTypebox<typeof GenerateFarcasterJWTSchema>
+) {
+  try {
+    const { fid, signerUuid } = req.body;
+
+    if (!fid || !signerUuid) {
+      return rep.code(ERROR401.statusCode).send({
+        statusCode: ERROR401.statusCode,
+        data: ERRORS.auth.farcaster.missingFidOrSignerUuid,
+      });
+    }
+
+    const neynarAPIClient = new NeynarAPIClient(Config.neynarApiKey);
+    const signer = await neynarAPIClient.lookupSigner(signerUuid);
+
+    if (!signer) {
+      return rep.code(ERROR401.statusCode).send({
+        statusCode: ERROR401.statusCode,
+        data: ERRORS.auth.farcaster.signerNotFound,
+      });
+    }
+
+    const { fid: signerFid, status } = signer;
+
+    if (status !== 'approved') {
+      return rep.code(ERROR401.statusCode).send({
+        statusCode: ERROR401.statusCode,
+        data: ERRORS.auth.farcaster.signerNotApproved,
+      });
+    }
+
+    if (signerFid !== fid) {
+      return rep.code(ERROR401.statusCode).send({
+        statusCode: ERROR401.statusCode,
+        data: ERRORS.auth.farcaster.signerFidMismatch,
+      });
+    }
+
+    if (!Config.fidAdmins.includes(signerFid.toString())) {
+      return rep.code(ERROR403.statusCode).send({
+        statusCode: ERROR403.statusCode,
+        data: ERRORS.auth.farcaster.userNotAllowed,
+      });
+    }
+
+    const token = jwt.sign({ signerFid, signerUuid }, Config.jwtSecret, {
+      expiresIn: '1d',
+    });
+
+    return successResponse(rep, { message: token });
+  } catch (error) {
+    console.error(error);
+    return errorResponse(
+      req,
+      rep,
+      ERROR500.statusCode,
+      'Failed to generate JWT'
+    );
   }
 }

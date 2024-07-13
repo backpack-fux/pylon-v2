@@ -1,5 +1,9 @@
 import { Type as t } from '@sinclair/typebox';
-import { BridgePrefundedAccountBalanceSchema } from './bridge';
+import {
+  BridgePrefundedAccountBalanceSchema,
+  BridgePrefundedAccountTransferSchema,
+  BridgeWebhookSchema,
+} from './bridge';
 import { MerchantCreateSchema } from './merchant';
 import { TransactionProcessSchema } from './transaction';
 
@@ -28,5 +32,6 @@ export const BaseResponse = {
 export type CustomSchemas =
   | typeof BridgePrefundedAccountBalanceSchema
   | typeof MerchantCreateSchema
-  | typeof TransactionProcessSchema;
-
+  | typeof TransactionProcessSchema
+  | typeof BridgePrefundedAccountTransferSchema
+  | typeof BridgeWebhookSchema;

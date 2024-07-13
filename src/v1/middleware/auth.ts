@@ -1,9 +1,13 @@
 import { Config } from '@/config';
-import { ERROR401 } from '@/helpers/constants';
+import { ERROR401, ERROR403 } from '@/helpers/constants';
 import { ERRORS } from '@/helpers/errors';
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { UserService } from '../services/User';
 import { prisma } from '@/db';
+import { FastifyReplyTypebox, FastifyRequestTypebox } from '../types/fastify';
+import { ValidateFarcasterJWTSchema } from '../schemas/auth';
+import jwt from 'jsonwebtoken';
+import { BridgePrefundedAccountBalanceSchema } from '../schemas/bridge';
 
 const userService = UserService.getInstance();
 
@@ -62,6 +66,7 @@ export const validateMerchant = async (
   rep: FastifyReply
 ) => {
   const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1];
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return rep.code(401).send({ error: 'No token provided' });
@@ -81,7 +86,7 @@ export const validateMerchant = async (
     return rep.code(401).send({ error: 'Merchant not found' });
   }
 
-  const signature = await req.jwtVerify({ verify: merchant.id });
+  const signature = jwt.verify(decoded, merchant.id as unknown as jwt.Secret);
   if (!signature) {
     return rep.code(401).send({ error: 'Invalid signature' });
   }
@@ -92,3 +97,63 @@ async function getMerchant(id: number) {
     where: { id },
   });
 }
+export const validateFarcasterUser = async (
+  req: FastifyRequestTypebox<
+    | typeof ValidateFarcasterJWTSchema
+    | typeof BridgePrefundedAccountBalanceSchema
+  >,
+  rep: FastifyReplyTypebox<
+    | typeof ValidateFarcasterJWTSchema
+    | typeof BridgePrefundedAccountBalanceSchema
+  >
+) => {
+  const { token } = req.body;
+
+  const isVerified = jwt.verify(token, Config.jwtSecret, { complete: true });
+  if (!isVerified) {
+    return rep.code(ERROR401.statusCode).send({
+      statusCode: ERROR401.statusCode,
+      data: ERRORS.auth.invalidJWT,
+    });
+  }
+
+  const decoded = jwt.decode(token, { complete: true });
+  if (!decoded) {
+    return rep.code(ERROR401.statusCode).send({
+      statusCode: ERROR401.statusCode,
+      data: ERRORS.auth.invalidJWT,
+    });
+  }
+
+  const { payload } = decoded;
+  if (
+    typeof payload !== 'object' ||
+    payload === null ||
+    payload.exp === undefined ||
+    payload.iat === undefined
+  ) {
+    return rep.code(ERROR401.statusCode).send({
+      statusCode: ERROR401.statusCode,
+      data: ERRORS.auth.invalidJWT,
+    });
+  }
+
+  const fid = (payload?.fid as any).toString();
+  const currentTime = Math.floor(Date.now() / 1000);
+
+  if (!Config.fidAdmins.includes(fid)) {
+    return rep.code(ERROR403.statusCode).send({
+      statusCode: ERROR403.statusCode,
+      data: ERRORS.auth.farcaster.userNotAllowed,
+    });
+  }
+
+  if (payload.exp < currentTime || payload.iat > currentTime) {
+    return rep.code(ERROR401.statusCode).send({
+      statusCode: ERROR401.statusCode,
+      data: ERRORS.auth.invalidJWT,
+    });
+  }
+
+  return;
+};

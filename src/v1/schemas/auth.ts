@@ -1,5 +1,5 @@
+import { SWAGGER_TAG } from '@/v1/types/swagger';
 import { Type as t } from '@sinclair/typebox';
-import { SWAGGER_TAG } from '../types/swagger';
 
 const BaseResponse = {
   response: {
@@ -124,6 +124,21 @@ export const IssueOTPSchema = {
   tags: [SWAGGER_TAG.Authentication],
   body: t.Object({
     email: t.String({ format: 'email' }),
+  }),
+  ...BaseResponse,
+};
+
+export const GenerateFarcasterJWTSchema = {
+  body: t.Object({
+    fid: t.Number(),
+    signerUuid: t.String(),
+  }),
+  ...BaseResponse,
+};
+
+export const ValidateFarcasterJWTSchema = {
+  body: t.Object({
+    token: t.String(),
   }),
   ...BaseResponse,
 };
