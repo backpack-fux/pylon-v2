@@ -1,15 +1,15 @@
 import { Config } from '@/config';
 import { headers, methods } from '@/helpers/constants';
 import { ERRORS } from '@/helpers/errors';
-import {
-  BridgeCurrencyTypeSrc,
-  BridgeCurrencyTypeDst,
-  BridgePaymentRailTypeSrc,
-  BridgePaymentRailTypeDst,
-  BridgePrefundedAccountBalance,
-} from '@/v1/types/bridge/preFundedAccount';
 import { BridgeComplianceType } from '@/v1/types/bridge/compliance';
-import { UUID } from 'crypto';
+import {
+  BridgeCurrencyTypeDst,
+  BridgeCurrencyTypeSrc,
+  BridgePaymentRailTypeDst,
+  BridgePaymentRailTypeSrc,
+  BridgePrefundedAccountBalance,
+  BridgeUUID,
+} from '@/v1/types/bridge/preFundedAccount';
 import { Hex } from 'viem';
 import { BridgeError } from '../Error';
 
@@ -127,7 +127,7 @@ export class BridgeService {
 
   /** @docs https://apidocs.bridge.xyz/docs/kyc-links  */
   async createComplianceLinks(
-    idempotencyKey: UUID,
+    idempotencyKey: BridgeUUID,
     fullName: string,
     type: BridgeComplianceType,
     email: string
@@ -175,13 +175,13 @@ export class BridgeService {
     dst_currency,
     dst_to_address,
   }: {
-    idempotencyKey: UUID;
+    idempotencyKey: BridgeUUID;
     amount: number | string;
-    on_behalf_of: UUID;
+    on_behalf_of: BridgeUUID;
     developer_fee: number | string | undefined;
     src_payment_rail: BridgePaymentRailTypeSrc;
     src_currency: BridgeCurrencyTypeSrc;
-    prefunded_account_id: UUID;
+    prefunded_account_id: BridgeUUID;
     dst_payment_rail: BridgePaymentRailTypeDst;
     dst_currency: BridgeCurrencyTypeDst;
     dst_to_address: Hex;

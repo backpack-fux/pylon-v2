@@ -1,7 +1,7 @@
 import { methods } from '@/helpers/constants';
 import {
-  getPrefundedAccountBalance,
   createPrefundedAccountTransfer,
+  getPrefundedAccountBalance,
   processWebhooksHandler,
 } from '@/v1/handlers/bridge';
 import {
@@ -10,8 +10,8 @@ import {
   BridgeWebhookSchema,
 } from '@/v1/schemas/bridge';
 import { FastifyInstance } from 'fastify';
-import { validateBridgeWebhook } from '../middleware/webhook';
 import { validateFarcasterUser } from '../middleware/auth';
+import { validateBridgeWebhook } from '../middleware/webhook';
 
 const Bridge = async (app: FastifyInstance) => {
   app

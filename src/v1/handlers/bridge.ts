@@ -10,6 +10,12 @@ import { ComplianceService } from '@/v1/services/Compliance';
 import { BridgeError } from '@/v1/services/Error';
 import { BridgeService } from '@/v1/services/external/Bridge';
 import { DiscordService } from '@/v1/services/external/Discord';
+import {
+  BridgeDestinationObject,
+  BridgePrefundedAccountTransferParams,
+  BridgeSourceObject,
+  BridgeUUID,
+} from '@/v1/types/bridge/preFundedAccount';
 import { BridgeWebhookPayload_KycLink } from '@/v1/types/bridge/webhooks';
 import { FastifyReplyTypebox, FastifyRequestTypebox } from '@/v1/types/fastify';
 import {
@@ -69,6 +75,15 @@ export async function createPrefundedAccountTransfer(
       to_address: destinationPrefundedAccountId,
     } = destination;
 
+    // const params: BridgePrefundedAccountTransferParams = {
+    //   idempotencyKey: req.signerUuid! as BridgeUUID,
+    //   amount: amount.toString(),
+    //   on_behalf_of: on_behalf_of as BridgeUUID,
+    //   developer_fee: developer_fee ?? undefined,
+    //   source: source as BridgeSourceObject,
+    //   destination: destination as BridgeDestinationObject,
+    // };
+
     const balance = await bridgeService.createPrefundedAccountTransfer({
       idempotencyKey: req.signerUuid!,
       amount,
@@ -76,11 +91,12 @@ export async function createPrefundedAccountTransfer(
       developer_fee,
       src_payment_rail: sourcePaymentRail as BridgePaymentRailTypeSrc,
       src_currency: sourceCurrency as BridgeCurrencyTypeSrc,
-      prefunded_account_id: sosurcePrefundedAccountId as UUID,
+      prefunded_account_id: sosurcePrefundedAccountId as BridgeUUID,
       dst_payment_rail: destinationPaymentRail as BridgePaymentRailTypeDst,
       dst_currency: destinationCurrency as BridgeCurrencyTypeDst,
       dst_to_address: destinationPrefundedAccountId as Hex,
     });
+
     console.log(balance);
     successResponse(rep, balance);
   } catch (error) {
