@@ -10,6 +10,12 @@ import { ComplianceService } from '@/v1/services/Compliance';
 import { BridgeError } from '@/v1/services/Error';
 import { BridgeService } from '@/v1/services/external/Bridge';
 import { DiscordService } from '@/v1/services/external/Discord';
+import {
+  BridgeDestinationObject,
+  BridgePrefundedAccountTransferParams,
+  BridgeSourceObject,
+  BridgeUUID
+} from '@/v1/types/bridge/preFundedAccount';
 import { BridgeWebhookPayload_KycLink } from '@/v1/types/bridge/webhooks';
 import { FastifyReplyTypebox, FastifyRequestTypebox } from '@/v1/types/fastify';
 
@@ -50,25 +56,24 @@ export async function createPrefundedAccountTransfer(
     const { token, amount, on_behalf_of, developer_fee, source, destination } =
       req.body;
 
-    const {
-      payment_rail: sourcePaymentRail,
-      currency: sourceCurrency,
-      prefunded_account_id: sourcePrefundedAccountId,
-    } = source;
-    const {
-      payment_rail: destinationPaymentRail,
-      currency: destinationCurrency,
-      to_address: destinationPrefundedAccountId,
-    } = destination;
-
-    const balance = await bridgeService.createPrefundedAccountTransfer(
-      token,
-      amount,
-      on_behalf_of,
-      developer_fee,
-      source,
-      destination
-    );
+      const params: BridgePrefundedAccountTransferParams = {
+        idempotencyKey: token as BridgeUUID,
+        amount,
+        on_behalf_of: on_behalf_of as BridgeUUID,
+        developer_fee,
+        source: source as BridgeSourceObject,
+        destination: destination as BridgeDestinationObject
+      };
+  
+      const balance = await bridgeService.createPrefundedAccountTransfer(
+        params.idempotencyKey,
+        params.amount,
+        params.on_behalf_of,
+        params.developer_fee,
+        params.source,
+        params.destination
+      );
+      
     console.log(balance);
     successResponse(rep, balance);
   } catch (error) {

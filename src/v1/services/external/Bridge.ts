@@ -1,14 +1,14 @@
 import { Config } from '@/config';
 import { headers, methods } from '@/helpers/constants';
 import { ERRORS } from '@/helpers/errors';
+import { BridgeComplianceType } from '@/v1/types/bridge/compliance';
 import {
-  BridgeCurrencyTypeSrc,
   BridgeCurrencyTypeDst,
-  BridgePaymentRailTypeSrc,
+  BridgeCurrencyTypeSrc,
   BridgePaymentRailTypeDst,
+  BridgePaymentRailTypeSrc,
   BridgePrefundedAccountBalance,
 } from '@/v1/types/bridge/preFundedAccount';
-import { BridgeComplianceType } from '@/v1/types/bridge/compliance';
 import { UUID } from 'crypto';
 import { Hex } from 'viem';
 import { BridgeError } from '../Error';
@@ -165,21 +165,25 @@ export class BridgeService {
   /** @docs https://withbridge.notion.site/Prefunded-API-Documentation-0635292e3c754640819ada98fe2a1c69 */
   async createPrefundedAccountTransfer(
     idempotencyKey: UUID,
-    amount: number,
+    amount: string,
     on_behalf_of: UUID,
-    developer_fee: number | undefined,
-    src_payment_rail: BridgePaymentRailTypeSrc,
-    src_currency: BridgeCurrencyTypeSrc,
-    prefunded_account_id: UUID,
-    dst_payment_rail: BridgePaymentRailTypeDst,
-    dst_currency: BridgeCurrencyTypeDst,
-    dst_to_address: Hex
+    developer_fee: string,
+    source: {
+      payment_rail: BridgePaymentRailTypeSrc,
+      currency: BridgeCurrencyTypeSrc,
+      prefunded_account_id: UUID,
+    },
+    destination: {
+      payment_rail: BridgePaymentRailTypeDst,
+      currency: BridgeCurrencyTypeDst,
+      to_address: Hex,
+    }
   ) {
     const headers = this.buildRequestHeaders({
       'Idempotency-Key': idempotencyKey,
       accept: 'application/json',
     });
-
+  
     const response = await this.sendRequest(
       this.endpoints.createPrefundedAccountTransfer,
       {
@@ -189,16 +193,8 @@ export class BridgeService {
           amount,
           on_behalf_of,
           developer_fee,
-          source: {
-            payment_rail: src_payment_rail,
-            currency: src_currency,
-            prefunded_account_id,
-          },
-          destination: {
-            payment_rail: dst_payment_rail,
-            currency: dst_currency,
-            to_address: dst_to_address,
-          },
+          source,
+          destination,
         }),
       }
     );
