@@ -239,6 +239,12 @@ export async function generateFarcasterJWT(
 ) {
   try {
     const { fid, signerUuid } = req.body;
+    const ipAddress =
+      req.headers['x-forwarded-for'] ||
+      req.connection.remoteAddress ||
+      req.socket.remoteAddress ||
+      req.ip;
+    const userAgent = req.headers['user-agent'];
 
     if (!fid || !signerUuid) {
       return rep.code(ERROR401.statusCode).send({
@@ -280,9 +286,13 @@ export async function generateFarcasterJWT(
       });
     }
 
-    const token = jwt.sign({ signerFid, signerUuid }, Config.jwtSecret, {
-      expiresIn: '1d',
-    });
+    const token = jwt.sign(
+      { signerFid, signerUuid, ipAddress, userAgent },
+      Config.jwtSecret,
+      {
+        expiresIn: '1d',
+      }
+    );
 
     return successResponse(rep, { message: token });
   } catch (error) {
