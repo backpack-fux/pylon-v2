@@ -1,6 +1,7 @@
 import { methods } from '@/helpers/constants';
 import {
   getPrefundedAccountBalance,
+  createPrefundedAccountTransfer,
   processWebhooksHandler,
 } from '@/v1/handlers/bridge';
 import {
@@ -27,7 +28,7 @@ const Bridge = async (app: FastifyInstance) => {
       url: '/prefunded-account-transfer',
       schema: BridgePrefundedAccountTransferSchema,
       preHandler: [validateFarcasterUser],
-      handler: getPrefundedAccountBalance,
+      handler: createPrefundedAccountTransfer,
     })
 
     .route({

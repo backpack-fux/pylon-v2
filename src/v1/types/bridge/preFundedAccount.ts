@@ -1,10 +1,10 @@
 type BridgePaymentRailType =
-  | 'Polygon'
-  | 'Arbitrum'
-  | 'Avalanche'
-  | 'Optimism'
-  | 'Solana'
-  | 'Stellar'
+  | 'polygon'
+  | 'arbitrum'
+  | 'avalanche'
+  | 'optimism'
+  | 'solana'
+  | 'stellar'
   | 'ach'
   | 'wire'
   | 'ach_push'
@@ -21,7 +21,7 @@ export type BridgePaymentRailTypeDst = Exclude<
   BridgePaymentRailTypeSrc
 >;
 
-type BridgeCurrencyType = 'usd' | 'usdc';
+type BridgeCurrencyType = 'usd' | 'usdc' | 'usdt' | 'dai';
 
 export type BridgeCurrencyTypeSrc = 'usd';
 export type BridgeCurrencyTypeDst = Exclude<

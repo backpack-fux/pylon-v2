@@ -3,6 +3,7 @@ import { utils } from '@/helpers/utils';
 import { errorResponse, successResponse } from '@/responses';
 import {
   BridgePrefundedAccountBalanceSchema,
+  BridgePrefundedAccountTransferSchema,
   BridgeWebhookSchema,
 } from '@/v1/schemas/bridge';
 import { ComplianceService } from '@/v1/services/Compliance';
@@ -42,18 +43,34 @@ export async function getPrefundedAccountBalance(
 }
 
 export async function createPrefundedAccountTransfer(
-  req: FastifyRequestTypebox<typeof BridgePrefundedAccountBalanceSchema>,
-  rep: FastifyReplyTypebox<typeof BridgePrefundedAccountBalanceSchema>
+  req: FastifyRequestTypebox<typeof BridgePrefundedAccountTransferSchema>,
+  rep: FastifyReplyTypebox<typeof BridgePrefundedAccountTransferSchema>
 ): Promise<void> {
   try {
-    req.body;
-    // const balance = await bridgeService.createPrefundedAccountTransfer();
-    // const res = await discordService.send(
-    //   DISCORD.channelId,
-    //   balance.available_balance
-    // );
-    // console.log(res);
-    // successResponse(rep, res);
+    const { token, amount, on_behalf_of, developer_fee, source, destination } =
+      req.body;
+
+    const {
+      payment_rail: sourcePaymentRail,
+      currency: sourceCurrency,
+      prefunded_account_id: sourcePrefundedAccountId,
+    } = source;
+    const {
+      payment_rail: destinationPaymentRail,
+      currency: destinationCurrency,
+      to_address: destinationPrefundedAccountId,
+    } = destination;
+
+    const balance = await bridgeService.createPrefundedAccountTransfer(
+      token,
+      amount,
+      on_behalf_of,
+      developer_fee,
+      source,
+      destination
+    );
+    console.log(balance);
+    successResponse(rep, balance);
   } catch (error) {
     console.error(error);
     const errorMessage =

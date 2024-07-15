@@ -11,18 +11,20 @@ export const BridgePrefundedAccountBalanceSchema = {
 export const BridgePrefundedAccountTransferSchema = {
   body: t.Object({
     token: t.String(),
-    amount: t.String(),
-    on_behalf_of: t.String(),
+    amount: t.String({ minLength: 20 }), // Bridge requires $20 minimum
+    on_behalf_of: t.String({ format: 'uuid' }),
     developer_fee: t.String(),
     source: t.Object({
       payment_rail: t.String(),
       currency: t.String(),
-      prefunded_account_id: t.String(),
+      prefunded_account_id: t.String({ format: 'uuid' }),
     }),
     destination: t.Object({
       payment_rail: t.String(),
       currency: t.String(),
-      to_address: t.String(),
+      to_address: t.String({
+        pattern: '^0x[a-fA-F0-9]{40}$',
+      }),
     }),
   }),
   ...BaseResponse,
