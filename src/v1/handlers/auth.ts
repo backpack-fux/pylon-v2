@@ -250,7 +250,7 @@ export async function generateFarcasterJWT(
     const neynarAPIClient = new NeynarAPIClient(Config.neynarApiKey);
     const signer = await neynarAPIClient.lookupSigner(signerUuid);
 
-    if (!signer) {
+    if (!signer || !signer.fid || !signer.status) {
       return rep.code(ERROR401.statusCode).send({
         statusCode: ERROR401.statusCode,
         data: ERRORS.auth.farcaster.signerNotFound,
@@ -266,7 +266,7 @@ export async function generateFarcasterJWT(
       });
     }
 
-    if (signerFid !== fid) {
+    if (Number(signerFid) !== fid) {
       return rep.code(ERROR401.statusCode).send({
         statusCode: ERROR401.statusCode,
         data: ERRORS.auth.farcaster.signerFidMismatch,
