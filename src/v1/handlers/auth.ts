@@ -282,7 +282,7 @@ export async function generateFarcasterJWT(
     if (!Config.fidAdmins.includes(signerFid.toString())) {
       return rep.code(ERROR403.statusCode).send({
         statusCode: ERROR403.statusCode,
-        data: ERRORS.auth.farcaster.userNotAllowed,
+        data: ERRORS.auth.farcaster.userForbidden,
       });
     }
 

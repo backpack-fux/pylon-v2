@@ -163,18 +163,29 @@ export class BridgeService {
   }
 
   /** @docs https://withbridge.notion.site/Prefunded-API-Documentation-0635292e3c754640819ada98fe2a1c69 */
-  async createPrefundedAccountTransfer(
-    idempotencyKey: UUID,
-    amount: number,
-    on_behalf_of: UUID,
-    developer_fee: number | undefined,
-    src_payment_rail: BridgePaymentRailTypeSrc,
-    src_currency: BridgeCurrencyTypeSrc,
-    prefunded_account_id: UUID,
-    dst_payment_rail: BridgePaymentRailTypeDst,
-    dst_currency: BridgeCurrencyTypeDst,
-    dst_to_address: Hex
-  ) {
+  async createPrefundedAccountTransfer({
+    idempotencyKey,
+    amount,
+    on_behalf_of,
+    developer_fee,
+    src_payment_rail,
+    src_currency,
+    prefunded_account_id,
+    dst_payment_rail,
+    dst_currency,
+    dst_to_address,
+  }: {
+    idempotencyKey: UUID;
+    amount: number | string;
+    on_behalf_of: UUID;
+    developer_fee: number | string | undefined;
+    src_payment_rail: BridgePaymentRailTypeSrc;
+    src_currency: BridgeCurrencyTypeSrc;
+    prefunded_account_id: UUID;
+    dst_payment_rail: BridgePaymentRailTypeDst;
+    dst_currency: BridgeCurrencyTypeDst;
+    dst_to_address: Hex;
+  }) {
     const headers = this.buildRequestHeaders({
       'Idempotency-Key': idempotencyKey,
       accept: 'application/json',
@@ -186,9 +197,9 @@ export class BridgeService {
         method: methods.POST,
         headers: headers,
         body: JSON.stringify({
-          amount,
+          amount: String(amount),
           on_behalf_of,
-          developer_fee,
+          developer_fee: String(developer_fee),
           source: {
             payment_rail: src_payment_rail,
             currency: src_currency,

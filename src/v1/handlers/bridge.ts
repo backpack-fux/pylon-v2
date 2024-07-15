@@ -12,6 +12,14 @@ import { BridgeService } from '@/v1/services/external/Bridge';
 import { DiscordService } from '@/v1/services/external/Discord';
 import { BridgeWebhookPayload_KycLink } from '@/v1/types/bridge/webhooks';
 import { FastifyReplyTypebox, FastifyRequestTypebox } from '@/v1/types/fastify';
+import {
+  BridgeCurrencyTypeDst,
+  BridgeCurrencyTypeSrc,
+  BridgePaymentRailTypeDst,
+  BridgePaymentRailTypeSrc,
+} from '../types/bridge/preFundedAccount';
+import { Hex } from 'viem';
+import { UUID } from 'crypto';
 
 const discordService = DiscordService.getInstance();
 const bridgeService = BridgeService.getInstance();
@@ -47,13 +55,13 @@ export async function createPrefundedAccountTransfer(
   rep: FastifyReplyTypebox<typeof BridgePrefundedAccountTransferSchema>
 ): Promise<void> {
   try {
-    const { token, amount, on_behalf_of, developer_fee, source, destination } =
+    const { amount, on_behalf_of, developer_fee, source, destination } =
       req.body;
 
     const {
       payment_rail: sourcePaymentRail,
       currency: sourceCurrency,
-      prefunded_account_id: sourcePrefundedAccountId,
+      prefunded_account_id: sosurcePrefundedAccountId,
     } = source;
     const {
       payment_rail: destinationPaymentRail,
@@ -61,14 +69,18 @@ export async function createPrefundedAccountTransfer(
       to_address: destinationPrefundedAccountId,
     } = destination;
 
-    const balance = await bridgeService.createPrefundedAccountTransfer(
-      token,
+    const balance = await bridgeService.createPrefundedAccountTransfer({
+      idempotencyKey: req.signerUuid!,
       amount,
-      on_behalf_of,
+      on_behalf_of: on_behalf_of as UUID,
       developer_fee,
-      source,
-      destination
-    );
+      src_payment_rail: sourcePaymentRail as BridgePaymentRailTypeSrc,
+      src_currency: sourceCurrency as BridgeCurrencyTypeSrc,
+      prefunded_account_id: sosurcePrefundedAccountId as UUID,
+      dst_payment_rail: destinationPaymentRail as BridgePaymentRailTypeDst,
+      dst_currency: destinationCurrency as BridgeCurrencyTypeDst,
+      dst_to_address: destinationPrefundedAccountId as Hex,
+    });
     console.log(balance);
     successResponse(rep, balance);
   } catch (error) {

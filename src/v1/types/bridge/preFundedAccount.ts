@@ -1,29 +1,49 @@
+export enum BridgePaymentRailEnum {
+  POLYGON = 'polygon',
+  ARBITRUM = 'arbitrum',
+  AVALANCHE = 'avalanche',
+  OPTIMISM = 'optimism',
+  SOLANA = 'solana',
+  STELLAR = 'stellar',
+  ACH = 'ach',
+  WIRE = 'wire',
+  ACH_PUSH = 'ach_push',
+  PREFUNDED = 'prefunded',
+}
+
 type BridgePaymentRailType =
-  | 'polygon'
-  | 'arbitrum'
-  | 'avalanche'
-  | 'optimism'
-  | 'solana'
-  | 'stellar'
-  | 'ach'
-  | 'wire'
-  | 'ach_push'
-  | 'prefunded';
+  | BridgePaymentRailEnum.POLYGON
+  | BridgePaymentRailEnum.ARBITRUM
+  | BridgePaymentRailEnum.AVALANCHE
+  | BridgePaymentRailEnum.OPTIMISM
+  | BridgePaymentRailEnum.SOLANA
+  | BridgePaymentRailEnum.STELLAR
+  | BridgePaymentRailEnum.ACH
+  | BridgePaymentRailEnum.WIRE
+  | BridgePaymentRailEnum.ACH_PUSH
+  | BridgePaymentRailEnum.PREFUNDED;
 
 export type BridgePaymentRailTypeSrc =
-  | 'ach'
-  | 'wire'
-  | 'ach_push'
-  | 'prefunded';
+  | BridgePaymentRailEnum.ACH
+  | BridgePaymentRailEnum.WIRE
+  | BridgePaymentRailEnum.ACH_PUSH
+  | BridgePaymentRailEnum.PREFUNDED;
 
 export type BridgePaymentRailTypeDst = Exclude<
   BridgePaymentRailType,
   BridgePaymentRailTypeSrc
 >;
 
-type BridgeCurrencyType = 'usd' | 'usdc' | 'usdt' | 'dai';
+export enum BridgeCurrencyEnum {
+  USD = 'usd',
+  USDC = 'usdc',
+  USDT = 'usdt',
+  DAI = 'dai',
+}
 
-export type BridgeCurrencyTypeSrc = 'usd';
+type BridgeCurrencyType = BridgeCurrencyEnum;
+
+export type BridgeCurrencyTypeSrc = BridgeCurrencyEnum.USD;
 export type BridgeCurrencyTypeDst = Exclude<
   BridgeCurrencyType,
   BridgeCurrencyTypeSrc

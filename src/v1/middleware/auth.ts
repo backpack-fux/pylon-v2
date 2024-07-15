@@ -7,6 +7,7 @@ import { FastifyReplyTypebox, FastifyRequestTypebox } from '../types/fastify';
 import { ValidateFarcasterJWTSchema } from '../schemas/auth';
 import jwt from 'jsonwebtoken';
 import { BridgePrefundedAccountBalanceSchema } from '../schemas/bridge';
+import { UUID } from 'crypto';
 
 const userService = UserService.getInstance();
 
@@ -89,6 +90,7 @@ export const validateFarcasterUser = async (
   }
 
   const { payload } = decoded;
+
   if (
     typeof payload !== 'object' ||
     payload === null ||
@@ -101,13 +103,13 @@ export const validateFarcasterUser = async (
     });
   }
 
-  const fid = (payload?.fid as any).toString();
+  const fid = payload.signerFid as number;
   const currentTime = Math.floor(Date.now() / 1000);
 
-  if (!Config.fidAdmins.includes(fid)) {
+  if (!Config.fidAdmins.includes(String(fid))) {
     return rep.code(ERROR403.statusCode).send({
       statusCode: ERROR403.statusCode,
-      data: ERRORS.auth.farcaster.userNotAllowed,
+      data: ERRORS.auth.farcaster.userForbidden,
     });
   }
 
@@ -118,5 +120,6 @@ export const validateFarcasterUser = async (
     });
   }
 
+  req.signerUuid = payload.signerUuid as UUID;
   return;
 };
