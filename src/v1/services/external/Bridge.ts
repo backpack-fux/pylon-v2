@@ -162,7 +162,7 @@ export class BridgeService {
     return await response.json();
   }
 
-  /** @docs https://withbridge.notion.site/Prefunded-API-Documentation-0635292e3c754640819ada98fe2a1c69 */
+  /** @docs https://apidocs.bridge.xyz/reference/get_prefunded-accounts */
   async createPrefundedAccountTransfer({
     idempotencyKey,
     amount,
