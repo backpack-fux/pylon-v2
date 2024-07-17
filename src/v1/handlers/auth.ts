@@ -5,6 +5,7 @@ import {
   ERROR403,
   ERROR404,
   ERROR500,
+  SESSION_EXPIRATION,
 } from '@/helpers/constants';
 import { ERRORS, parseError } from '@/helpers/errors';
 import { errorResponse, successResponse } from '@/responses';
@@ -27,6 +28,7 @@ import { AuthenticationChecks } from '@/v1/types/auth';
 import { FastifyReplyTypebox, FastifyRequestTypebox } from '@/v1/types/fastify';
 import jwt from 'jsonwebtoken';
 import { NeynarAPIClient } from '@neynar/nodejs-sdk';
+import { v4 as uuidv4 } from 'uuid';
 
 const passkeyService = PasskeyService.getInstance();
 const userService = UserService.getInstance();
@@ -286,15 +288,35 @@ export async function generateFarcasterJWT(
       });
     }
 
+    const sessionId = uuidv4();
+    const redisClient = req.server.redis;
+    await redisClient.set(
+      `session:${signerUuid}`,
+      sessionId,
+      'EX',
+      SESSION_EXPIRATION['1D']
+    );
+
+    // TODO: bump algo to RS256 and privateKey issuer
     const token = jwt.sign(
-      { signerFid, signerUuid, ipAddress, userAgent },
+      { signerFid, signerUuid, ipAddress, userAgent, sessionId },
       Config.jwtSecret,
       {
-        expiresIn: '1d',
+        expiresIn: SESSION_EXPIRATION['1D'],
       }
     );
 
-    return successResponse(rep, { message: token });
+    // TODO
+    // rep.setCookie('pyv3_auth_token', token, {
+    //   httpOnly: true,
+    //   secure: Config.isProduction,
+    //   sameSite: Config.isProduction ? 'strict' : 'lax',
+    //   maxAge: SESSION_EXPIRATION['1D'],
+    //   signed: true,
+    //   path: '/',
+    // });
+
+    return successResponse(rep, { message: 'success' });
   } catch (error) {
     console.error(error);
     return errorResponse(

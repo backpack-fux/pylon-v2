@@ -71,6 +71,8 @@ export const validateFarcasterUser = async (
     | typeof BridgePrefundedAccountBalanceSchema
   >
 ) => {
+  const jwtToken = req.cookies.authToken;
+  console.log('jwtToken', jwtToken);
   const { token } = req.body;
 
   const isVerified = jwt.verify(token, Config.jwtSecret, { complete: true });
@@ -117,6 +119,17 @@ export const validateFarcasterUser = async (
     return rep.code(ERROR401.statusCode).send({
       statusCode: ERROR401.statusCode,
       data: ERRORS.auth.invalidJWT,
+    });
+  }
+
+  const redisClient = req.server.redis;
+  const storedSessionId = await redisClient.get(
+    `session:${payload.signerUuid}`
+  );
+  if (storedSessionId !== payload.sessionId) {
+    return rep.code(ERROR401.statusCode).send({
+      statusCode: ERROR401.statusCode,
+      data: ERRORS.auth.expiredJWT,
     });
   }
 

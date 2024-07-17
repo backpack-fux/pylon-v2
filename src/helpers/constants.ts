@@ -107,3 +107,12 @@ export const blacklistedBins = [
   '552433',
   '558341',
 ];
+
+export const SESSION_EXPIRATION = {
+  '1H': 1 * 60 * 60,
+  '4H': 4 * 60 * 60,
+  '6H': 6 * 60 * 60,
+  '12H': 12 * 60 * 60,
+  '1D': 24 * 60 * 60,
+  '7D': 7 * 24 * 60 * 60,
+};

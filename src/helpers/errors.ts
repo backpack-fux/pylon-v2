@@ -4,6 +4,7 @@ import { ERROR500 } from './constants';
 export const ERRORS = {
   auth: {
     invalidJWT: 'Invalid JWT',
+    expiredJWT: 'The session has expired',
     invalidAPIKey: 'Invalid API key',
     missingAuthorizationHeader: 'Missing or invalid authorization header',
     bridge: {
