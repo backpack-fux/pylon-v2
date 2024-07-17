@@ -21,7 +21,9 @@ const startServer = async () => {
       .withTypeProvider<TypeBoxTypeProvider>()
       .register(accepts)
       .register(cors, {
-        origin: Config.isProduction ? 'office.backpack.network' : true, // TODO: allow specific origins
+        origin: Config.isProduction
+          ? ['https://office.backpack.network', 'https://api.pylon.im']
+          : true, // TODO: allow specific origins
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
       })

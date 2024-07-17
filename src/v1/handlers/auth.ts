@@ -309,7 +309,7 @@ export async function generateFarcasterJWT(
     rep.setCookie('pyv2_auth_token', token, {
       httpOnly: true,
       secure: Config.isProduction,
-      sameSite: Config.isProduction ? 'strict' : 'lax',
+      sameSite: Config.isProduction ? 'none' : 'lax',
       maxAge: SESSION_EXPIRATION['1D'],
       signed: true,
       path: '/',
