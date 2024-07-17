@@ -313,7 +313,7 @@ export async function generateFarcasterJWT(
       maxAge: SESSION_EXPIRATION['1D'],
       signed: true,
       path: '/',
-      domain: 'https://back-office-inky.vercel.app/', // TODO: set domain in config or constants
+      domain: Config.isProduction ? 'back-office-inky.vercel.app' : undefined,
     });
 
     return successResponse(rep, { message: 'success' });
