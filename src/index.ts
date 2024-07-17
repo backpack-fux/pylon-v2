@@ -26,6 +26,8 @@ const startServer = async () => {
           : true, // TODO: allow specific origins
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+        exposedHeaders: ['Set-Cookie'],
       })
       .register(formbody)
       .register(helmet)

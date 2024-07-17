@@ -309,12 +309,18 @@ export async function generateFarcasterJWT(
     rep.setCookie('pyv2_auth_token', token, {
       httpOnly: true,
       secure: Config.isProduction,
-      sameSite: Config.isProduction ? 'none' : 'lax',
+      sameSite: Config.isProduction ? 'strict' : 'lax',
       maxAge: SESSION_EXPIRATION['1D'],
       signed: true,
       path: '/',
-      domain: Config.isProduction ? 'office.backpack.network' : undefined,
+      domain: Config.isProduction ? '.backpack.network' : undefined,
     });
+
+    rep.header('Access-Control-Allow-Credentials', 'true');
+    rep.header(
+      'Access-Control-Allow-Origin',
+      Config.isProduction ? 'https://office.backpack.network' : '*'
+    );
 
     return successResponse(rep, { message: 'success' });
   } catch (error) {
