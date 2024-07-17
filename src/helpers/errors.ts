@@ -7,6 +7,8 @@ export const ERRORS = {
     expiredJWT: 'The session has expired',
     invalidCookieSignature: 'Invalid cookie signature',
     invalidAPIKey: 'Invalid API key',
+    invalidUserAgent: 'Invalid user agent',
+    invalidIPAddress: 'Invalid IP address',
     missingAuthorizationHeader: 'Missing or invalid authorization header',
     bridge: {
       malformedSignature: 'Malformed signature header',

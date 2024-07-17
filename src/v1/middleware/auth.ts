@@ -137,6 +137,28 @@ export const validateFarcasterUser = async (
     });
   }
 
+  const ipAddress =
+    req.headers['x-forwarded-for'] ||
+    req.connection.remoteAddress ||
+    req.socket.remoteAddress ||
+    req.ip;
+
+  if (ipAddress !== payload.ipAddress) {
+    return rep.code(ERROR401.statusCode).send({
+      statusCode: ERROR401.statusCode,
+      data: ERRORS.auth.invalidIPAddress,
+    });
+  }
+
+  const userAgent = req.headers['user-agent'];
+
+  if (userAgent !== payload.userAgent) {
+    return rep.code(ERROR401.statusCode).send({
+      statusCode: ERROR401.statusCode,
+      data: ERRORS.auth.invalidUserAgent,
+    });
+  }
+
   const redisClient = req.server.redis;
   const storedSessionId = await redisClient.get(
     `session:${payload.signerUuid}`

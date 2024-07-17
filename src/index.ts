@@ -21,7 +21,7 @@ const startServer = async () => {
       .withTypeProvider<TypeBoxTypeProvider>()
       .register(accepts)
       .register(cors, {
-        origin: true, // TODO: allow specific origins
+        origin: Config.isProduction ? 'office.backpack.network' : true, // TODO: allow specific origins
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
       })
