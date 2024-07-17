@@ -313,7 +313,7 @@ export async function generateFarcasterJWT(
       maxAge: SESSION_EXPIRATION['1D'],
       signed: true,
       path: '/',
-      domain: Config.isProduction ? 'back-office-inky.vercel.app' : undefined,
+      domain: Config.isProduction ? 'office.backpack.network' : undefined,
     });
 
     return successResponse(rep, { message: 'success' });
