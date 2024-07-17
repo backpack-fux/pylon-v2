@@ -71,7 +71,6 @@ export async function createPrefundedAccountTransfer(
       dst_to_address: destination.to_address as Hex,
     });
 
-    console.log(balance);
     successResponse(rep, balance);
   } catch (error) {
     console.error(error);

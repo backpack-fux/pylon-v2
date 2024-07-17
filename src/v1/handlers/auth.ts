@@ -316,8 +316,6 @@ export async function generateFarcasterJWT(
       domain: 'https://back-office-inky.vercel.app/', // TODO: set domain in config or constants
     });
 
-    console.log('Generated token:', token);
-
     return successResponse(rep, { message: 'success' });
   } catch (error) {
     console.error(error);
