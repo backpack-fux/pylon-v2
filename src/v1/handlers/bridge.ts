@@ -10,9 +10,7 @@ import { ComplianceService } from '@/v1/services/Compliance';
 import { BridgeError } from '@/v1/services/Error';
 import { BridgeService } from '@/v1/services/external/Bridge';
 import { DiscordService } from '@/v1/services/external/Discord';
-import {
-  BridgeUUID
-} from '@/v1/types/bridge/preFundedAccount';
+import { BridgeUUID } from '@/v1/types/bridge/preFundedAccount';
 import { BridgeWebhookPayload_KycLink } from '@/v1/types/bridge/webhooks';
 import { FastifyReplyTypebox, FastifyRequestTypebox } from '@/v1/types/fastify';
 import { Hex } from 'viem';
@@ -60,18 +58,18 @@ export async function createPrefundedAccountTransfer(
     const { amount, on_behalf_of, developer_fee, source, destination } =
       req.body;
 
-      const balance = await bridgeService.createPrefundedAccountTransfer({
-        idempotencyKey: req.signerUuid! as BridgeUUID,
-        amount: amount.toString(),
-        on_behalf_of: on_behalf_of as BridgeUUID,
-        developer_fee: developer_fee?.toString() ?? undefined,
-        src_payment_rail: source.payment_rail as BridgePaymentRailTypeSrc,
-        src_currency: source.currency as BridgeCurrencyTypeSrc,
-        prefunded_account_id: source.prefunded_account_id as BridgeUUID,
-        dst_payment_rail: destination.payment_rail as BridgePaymentRailTypeDst,
-        dst_currency: destination.currency as BridgeCurrencyTypeDst,
-        dst_to_address: destination.to_address as Hex,
-      });
+    const balance = await bridgeService.createPrefundedAccountTransfer({
+      idempotencyKey: req.signerUuid! as BridgeUUID,
+      amount: amount.toString(),
+      on_behalf_of: on_behalf_of as BridgeUUID,
+      developer_fee: developer_fee?.toString() ?? undefined,
+      src_payment_rail: source.payment_rail as BridgePaymentRailTypeSrc,
+      src_currency: source.currency as BridgeCurrencyTypeSrc,
+      prefunded_account_id: source.prefunded_account_id as BridgeUUID,
+      dst_payment_rail: destination.payment_rail as BridgePaymentRailTypeDst,
+      dst_currency: destination.currency as BridgeCurrencyTypeDst,
+      dst_to_address: destination.to_address as Hex,
+    });
 
     console.log(balance);
     successResponse(rep, balance);
@@ -83,7 +81,7 @@ export async function createPrefundedAccountTransfer(
   }
 }
 
-/** @docs https://apidocs.bridge.xyz/reference/get_prefunded-accounts */
+/** @docs https://withbridge.notion.site/Bridge-Webhooks-User-Guide-491f603997194c868b0600a5f45051e6 */
 export async function processWebhooksHandler(
   req: FastifyRequestTypebox<typeof BridgeWebhookSchema>,
   rep: FastifyReplyTypebox<typeof BridgeWebhookSchema>
