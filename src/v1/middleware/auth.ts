@@ -71,11 +71,26 @@ export const validateFarcasterUser = async (
     | typeof BridgePrefundedAccountBalanceSchema
   >
 ) => {
-  const jwtToken = req.cookies.authToken;
-  console.log('jwtToken', jwtToken);
-  const { token } = req.body;
+  const signedCookie = req.cookies.pyv2_auth_token;
+  if (!signedCookie) {
+    return rep.code(ERROR401.statusCode).send({
+      statusCode: ERROR401.statusCode,
+      data: ERRORS.auth.missingAuthorizationHeader,
+    });
+  }
+
+  const unsignResult = req.unsignCookie(signedCookie);
+  if (!unsignResult.valid || !unsignResult.value) {
+    return rep.code(ERROR401.statusCode).send({
+      statusCode: ERROR401.statusCode,
+      data: ERRORS.auth.invalidCookieSignature,
+    });
+  }
+
+  const token = unsignResult.value;
 
   const isVerified = jwt.verify(token, Config.jwtSecret, { complete: true });
+
   if (!isVerified) {
     return rep.code(ERROR401.statusCode).send({
       statusCode: ERROR401.statusCode,

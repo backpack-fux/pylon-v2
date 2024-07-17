@@ -5,6 +5,7 @@ export const ERRORS = {
   auth: {
     invalidJWT: 'Invalid JWT',
     expiredJWT: 'The session has expired',
+    invalidCookieSignature: 'Invalid cookie signature',
     invalidAPIKey: 'Invalid API key',
     missingAuthorizationHeader: 'Missing or invalid authorization header',
     bridge: {

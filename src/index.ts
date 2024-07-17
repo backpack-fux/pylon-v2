@@ -21,12 +21,9 @@ const startServer = async () => {
       .withTypeProvider<TypeBoxTypeProvider>()
       .register(accepts)
       .register(cors, {
-        origin: true, // allow all origins
-        methods: ['GET', 'POST', 'PUT', 'DELETE'],
-        allowedHeaders: ['Content-Type', 'Authorization'],
-        exposedHeaders: ['Content-Length', 'X-Kuma-Revision'],
+        origin: true, // TODO: allow specific origins
         credentials: true,
-        maxAge: 600,
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
       })
       .register(formbody)
       .register(helmet)

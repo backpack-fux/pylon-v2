@@ -306,15 +306,16 @@ export async function generateFarcasterJWT(
       }
     );
 
-    // TODO
-    // rep.setCookie('pyv3_auth_token', token, {
-    //   httpOnly: true,
-    //   secure: Config.isProduction,
-    //   sameSite: Config.isProduction ? 'strict' : 'lax',
-    //   maxAge: SESSION_EXPIRATION['1D'],
-    //   signed: true,
-    //   path: '/',
-    // });
+    rep.setCookie('pyv2_auth_token', token, {
+      httpOnly: true,
+      secure: Config.isProduction,
+      sameSite: Config.isProduction ? 'strict' : 'lax',
+      maxAge: SESSION_EXPIRATION['1D'],
+      signed: true,
+      path: '/',
+    });
+
+    console.log('Generated token:', token);
 
     return successResponse(rep, { message: 'success' });
   } catch (error) {
