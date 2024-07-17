@@ -313,6 +313,7 @@ export async function generateFarcasterJWT(
       maxAge: SESSION_EXPIRATION['1D'],
       signed: true,
       path: '/',
+      domain: 'https://back-office-inky.vercel.app/', // TODO: set domain in config or constants
     });
 
     console.log('Generated token:', token);
