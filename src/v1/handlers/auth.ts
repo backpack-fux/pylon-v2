@@ -316,14 +316,6 @@ export async function generateFarcasterJWT(
       domain: Config.isProduction ? '.backpack.network' : undefined,
     });
 
-    rep.setCookie('test_cookie', 'test_value', {
-      httpOnly: false,
-      secure: true,
-      sameSite: 'none',
-      maxAge: 3600000, // 1 hour
-      domain: Config.isProduction ? 'office.backpack.network' : undefined,
-    });
-
     return successResponse(rep, { message: 'success' });
   } catch (error) {
     console.error(error);
