@@ -308,6 +308,17 @@ export async function generateFarcasterJWT(
 
     rep.setCookie('pyv2_auth_token', token);
 
+    rep.header('Access-Control-Allow-Credentials', true);
+    rep.header('Access-Control-Allow-Origin', '*');
+    rep.header(
+      'Access-Control-Allow-Methods',
+      'GET,OPTIONS,PATCH,DELETE,POST,PUT'
+    );
+    rep.header(
+      'Access-Control-Allow-Headers',
+      'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+    );
+
     return successResponse(rep, { message: 'success' });
   } catch (error) {
     console.error(error);
