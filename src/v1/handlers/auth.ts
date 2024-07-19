@@ -309,11 +309,11 @@ export async function generateFarcasterJWT(
     rep.setCookie('pyv2_auth_token', token, {
       httpOnly: true,
       secure: Config.isProduction,
-      sameSite: Config.isProduction ? 'strict' : 'lax',
+      sameSite: Config.isProduction ? 'lax' : 'lax',
       maxAge: SESSION_EXPIRATION['1D'],
       signed: true,
       path: '/',
-      domain: Config.isProduction ? 'office.backpack.network' : undefined,
+      domain: Config.isProduction ? '.backpack.network' : undefined,
     });
 
     rep.setCookie('test_cookie', 'test_value', {
