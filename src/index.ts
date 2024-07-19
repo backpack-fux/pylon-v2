@@ -14,6 +14,7 @@ import swaggerUi from '@fastify/swagger-ui'; // TODO
 
 import { Home, Merchant, Bridge, Transaction, Auth } from './v1/routes/index';
 import { Config } from './config';
+import { SESSION_EXPIRATION } from './helpers/constants';
 
 const startServer = async () => {
   try {
@@ -58,6 +59,15 @@ const startServer = async () => {
       .register(fastifyCookie, {
         secret: Config.cookieSecret,
         hook: 'onRequest',
+        parseOptions: {
+          httpOnly: true,
+          secure: Config.isProduction,
+          sameSite: Config.isProduction ? 'none' : 'lax',
+          maxAge: SESSION_EXPIRATION['1D'],
+          signed: true,
+          path: '/',
+          domain: Config.isProduction ? 'office.backpack.network' : undefined,
+        },
       })
 
       .register(Home)
