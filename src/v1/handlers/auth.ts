@@ -306,18 +306,23 @@ export async function generateFarcasterJWT(
       }
     );
 
-    rep.setCookie('pyv2_auth_token', token);
+    rep.setCookie('pyv2_auth_token', token, {
+      httpOnly: true,
+      secure: Config.isProduction,
+      sameSite: Config.isProduction ? 'none' : 'lax',
+      maxAge: SESSION_EXPIRATION['1D'],
+      signed: true,
+      path: '/',
+      domain: Config.isProduction ? 'office.backpack.network' : undefined,
+    });
 
-    rep.header('Access-Control-Allow-Credentials', true);
-    rep.header('Access-Control-Allow-Origin', '*');
-    rep.header(
-      'Access-Control-Allow-Methods',
-      'GET,OPTIONS,PATCH,DELETE,POST,PUT'
-    );
-    rep.header(
-      'Access-Control-Allow-Headers',
-      'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-    );
+    rep.setCookie('test_cookie', 'test_value', {
+      httpOnly: false,
+      secure: true,
+      sameSite: 'none',
+      maxAge: 3600000, // 1 hour
+      domain: Config.isProduction ? 'office.backpack.network' : undefined,
+    });
 
     return successResponse(rep, { message: 'success' });
   } catch (error) {

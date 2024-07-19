@@ -22,9 +22,7 @@ const startServer = async () => {
       .withTypeProvider<TypeBoxTypeProvider>()
       .register(accepts)
       .register(cors, {
-        origin: Config.isProduction
-          ? ['https://office.backpack.network', 'https://api.pylon.im']
-          : true, // TODO: allow specific origins
+        origin: true,
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
         allowedHeaders: ['Content-Type', 'Authorization'],
@@ -59,15 +57,6 @@ const startServer = async () => {
       .register(fastifyCookie, {
         secret: Config.cookieSecret,
         hook: 'onRequest',
-        parseOptions: {
-          httpOnly: true,
-          secure: Config.isProduction,
-          sameSite: Config.isProduction ? 'none' : 'lax',
-          maxAge: SESSION_EXPIRATION['1D'],
-          signed: true,
-          path: '/',
-          domain: Config.isProduction ? 'office.backpack.network' : undefined,
-        },
       })
 
       .register(Home)
