@@ -316,6 +316,13 @@ export async function generateFarcasterJWT(
       domain: Config.isProduction ? '.backpack.network' : undefined,
     });
 
+    rep.setCookie('test_cookie', 'test_value', {
+      httpOnly: false,
+      secure: true,
+      sameSite: 'none',
+      maxAge: 3600000, // 1 hour
+    });
+
     rep.header('Access-Control-Allow-Credentials', 'true');
     rep.header(
       'Access-Control-Allow-Origin',
