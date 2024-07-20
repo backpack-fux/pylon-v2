@@ -6,6 +6,7 @@ export const ERRORS = {
     invalidJWT: 'Invalid JWT',
     invalidAPIKey: 'Invalid API key',
     missingAuthorizationHeader: 'Missing or invalid authorization header',
+    expiredAPIKey: 'API key has expired',
     bridge: {
       malformedSignature: 'Malformed signature header',
       invalidSignature: 'Invalid signature',

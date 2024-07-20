@@ -28,11 +28,21 @@ export class BridgeService {
     getKycLinks: (kycLinkId: string) => `/kyc_links/${kycLinkId}`,
     createPrefundedAccountTransfer: '/transfers',
     getPrefundedAccountBalance: '/prefunded_accounts',
+    getTransferStatus: (transferId: UUID) => `/transfers/${transferId}`,
   };
 
   private constructor() {
     this.baseUrl = Config.bridge.apiUrl;
     this.apiKey = Config.bridge.apiKey;
+  }
+
+  private buildRequestHeaders(
+    customHeaders: Record<string, string>
+  ): Record<string, string> {
+    return {
+      ...headers,
+      ...customHeaders,
+    };
   }
 
   /** @dev avoid multiple instances; allow one global, reusable instance */
@@ -221,12 +231,14 @@ export class BridgeService {
     return (await response.json()).data;
   }
 
-  private buildRequestHeaders(
-    customHeaders: Record<string, string>
-  ): Record<string, string> {
-    return {
-      ...headers,
-      ...customHeaders,
-    };
+  async getTransferStatus(transferId: UUID): Promise<any> {
+    const response = await this.sendRequest(
+      this.endpoints.getTransferStatus(transferId),
+      {
+        method: methods.GET,
+        headers,
+      }
+    );
+    return await response.json();
   }
 }

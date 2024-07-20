@@ -1,6 +1,9 @@
 import { FastifyRequestTypebox, FastifyReplyTypebox } from '@/v1/types/fastify';
 import { ERRORS } from '@/helpers/errors';
-import { MerchantCreateSchema } from '../schemas/merchant';
+import {
+  MerchantCreateSchema,
+  TransferStatusSchema,
+} from '../schemas/merchant';
 import { ERROR400, ERROR404, ERROR500, STANDARD } from '@/helpers/constants';
 import { BridgeService } from '../services/external/Bridge';
 import { utils } from '@/helpers/utils';
@@ -9,9 +12,11 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { MerchantService } from '../services/Merchant';
 import { ComplianceService } from '../services/Compliance';
 import { PrismaError } from '../services/Error';
+import { UUID } from 'crypto';
 
 const merchantService = MerchantService.getInstance();
 const complianceService = ComplianceService.getInstance();
+const bridgeService = BridgeService.getInstance();
 
 export async function createMerchantHandler(
   req: FastifyRequestTypebox<typeof MerchantCreateSchema>,
@@ -44,5 +49,20 @@ export async function createMerchantHandler(
       const errorMessage = 'An error occurred during partner creation';
       return errorResponse(req, rep, ERROR404.statusCode, errorMessage);
     }
+  }
+}
+
+export async function getTransferStatusHandler(
+  req: FastifyRequestTypebox<typeof TransferStatusSchema>,
+  rep: FastifyReplyTypebox<typeof TransferStatusSchema>
+): Promise<void> {
+  try {
+    const transferId = req.params.transferId as UUID;
+    const transferStatus = await bridgeService.getTransferStatus(transferId);
+    return successResponse(rep, transferStatus);
+  } catch (error) {
+    console.error(error);
+    const errorMessage = 'An error occurred during transfer status retrieval';
+    return errorResponse(req, rep, ERROR404.statusCode, errorMessage);
   }
 }

@@ -27,7 +27,8 @@ model Merchant {
   Compliance          Compliance[]
   registeredAddress   PhysicalAddress    @relation(fields: [addressId], references: [id])
   Order               Transaction[]
-  employees           MerchantEmployee[]
+  Employees           MerchantEmployee[]
+  ApiKeys             ApiKey[]
 
   @@unique([companyNumber, companyJurisdiction])
 }
@@ -126,8 +127,21 @@ model User {
   username          String              @unique @db.VarChar(15)
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
-  registeredPasskey RegisteredPasskey[]
-  merchantEmployee  MerchantEmployee[]
+  RegisteredPasskey RegisteredPasskey[]
+  MerchantEmployee  MerchantEmployee[]
+}
+
+model ApiKey {
+  id         String    @id @default(uuid())
+  key        String    @unique
+  merchantId Int
+  merchant   Merchant  @relation(fields: [merchantId], references: [id])
+  createdAt  DateTime  @default(now())
+  lastUsedAt DateTime?
+  expiresAt  DateTime?
+  isActive   Boolean   @default(true)
+
+  @@index([key])
 }
 
 enum TransactionStatus {

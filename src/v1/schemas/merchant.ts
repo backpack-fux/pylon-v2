@@ -51,3 +51,10 @@ export const MerchantCreateSchema = {
   }),
   ...BaseResponse,
 };
+
+export const TransferStatusSchema = {
+  params: t.Object({
+    transferId: t.String({ format: 'uuid' }),
+  }),
+  ...BaseResponse,
+};

@@ -1,8 +1,12 @@
 import { prisma } from '@/db';
 import { FastifyReplyTypebox, FastifyRequestTypebox } from '../types/fastify';
-import { MerchantCreateSchema } from '../schemas/merchant';
-import { ERROR409 } from '@/helpers/constants';
+import {
+  MerchantCreateSchema,
+  TransferStatusSchema,
+} from '../schemas/merchant';
+import { ERROR401, ERROR409 } from '@/helpers/constants';
 import { ERRORS } from '@/helpers/errors';
+import { FastifyReply, FastifyRequest } from 'fastify';
 
 export const validateMerchantDetails = async (
   req: FastifyRequestTypebox<typeof MerchantCreateSchema>,
@@ -39,6 +43,50 @@ export const validateMerchantDetails = async (
       message: ERRORS.merchant.walletAddressExists(walletAddress),
     });
   }
+
+  return;
+};
+
+export const validateMerchantAPIKey = async (
+  req: FastifyRequest,
+  rep: FastifyReply
+) => {
+  const authHeader = req.headers.authorization;
+  const apiKey = authHeader && authHeader.split(' ')[1];
+
+  if (!apiKey) {
+    return rep.code(ERROR401.statusCode).send({
+      statusCode: ERROR401.statusCode,
+      message: ERRORS.auth.missingAuthorizationHeader,
+    });
+  }
+
+  const merchantApiKey = await prisma.apiKey.findUnique({
+    where: { key: apiKey },
+    include: { merchant: true },
+  });
+
+  if (!merchantApiKey || !merchantApiKey.isActive) {
+    return rep.code(ERROR401.statusCode).send({
+      statusCode: ERROR401.statusCode,
+      message: ERRORS.auth.invalidAPIKey,
+    });
+  }
+
+  if (merchantApiKey.expiresAt && merchantApiKey.expiresAt < new Date()) {
+    return rep.code(ERROR401.statusCode).send({
+      statusCode: ERROR401.statusCode,
+      message: ERRORS.auth.expiredAPIKey,
+    });
+  }
+
+  await prisma.apiKey.update({
+    where: { id: merchantApiKey.id },
+    data: { lastUsedAt: new Date() },
+  });
+
+  // Attach merchant to request for use in route handlers
+  req.merchant = merchantApiKey.merchant;
 
   return;
 };
