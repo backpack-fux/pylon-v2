@@ -6,9 +6,6 @@ import {
 } from '../types/bridge/preFundedAccount';
 
 export const BridgePrefundedAccountBalanceSchema = {
-  cookies: t.Object({
-    pyv2_auth_token: t.String(),
-  }),
   ...BaseResponse,
 };
 
