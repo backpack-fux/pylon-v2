@@ -327,3 +327,21 @@ export async function generateFarcasterJWT(
     );
   }
 }
+
+export async function deleteFarcasterJWT(
+  req: FastifyRequestTypebox<typeof BaseResponseSchema>,
+  rep: FastifyReplyTypebox<typeof BaseResponseSchema>
+) {
+  rep.clearCookie('pyv2_auth_token', {
+    path: '/',
+    domain: Config.isProduction ? '.backpack.network' : undefined,
+  });
+
+  // delete the session from redis
+  if (req.signerUuid) {
+    const redisClient = req.server.redis;
+    await redisClient.del(`session:${req.signerUuid}`);
+  }
+
+  return successResponse(rep, { message: 'Logged out successfully' });
+}

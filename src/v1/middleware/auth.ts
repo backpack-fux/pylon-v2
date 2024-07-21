@@ -3,10 +3,7 @@ import { ERROR401, ERROR403 } from '@/helpers/constants';
 import { ERRORS } from '@/helpers/errors';
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { UserService } from '../services/User';
-import { FastifyReplyTypebox, FastifyRequestTypebox } from '../types/fastify';
-import { ValidateFarcasterJWTSchema } from '../schemas/auth';
 import jwt from 'jsonwebtoken';
-import { BridgePrefundedAccountBalanceSchema } from '../schemas/bridge';
 import { UUID } from 'crypto';
 
 const userService = UserService.getInstance();
@@ -62,16 +59,11 @@ export const validateAPIKey = async (
 };
 
 export const validateFarcasterUser = async (
-  req: FastifyRequestTypebox<
-    | typeof ValidateFarcasterJWTSchema
-    | typeof BridgePrefundedAccountBalanceSchema
-  >,
-  rep: FastifyReplyTypebox<
-    | typeof ValidateFarcasterJWTSchema
-    | typeof BridgePrefundedAccountBalanceSchema
-  >
+  req: FastifyRequest,
+  rep: FastifyReply
 ) => {
   const signedCookie = req.cookies.pyv2_auth_token;
+
   if (!signedCookie) {
     return rep.code(ERROR401.statusCode).send({
       statusCode: ERROR401.statusCode,

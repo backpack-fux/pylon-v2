@@ -1,6 +1,7 @@
 import { methods } from '@/helpers/constants';
 import {
   authenticatePasskey,
+  deleteFarcasterJWT,
   findPasskeysForUser,
   generateChallenge,
   generateFarcasterJWT,
@@ -109,6 +110,13 @@ const Authentication = async (app: FastifyInstance) => {
       url: '/jwt',
       schema: GenerateFarcasterJWTSchema,
       handler: generateFarcasterJWT,
+    })
+
+    .route({
+      method: methods.DELETE,
+      url: '/jwt',
+      schema: BaseResponseSchema,
+      handler: deleteFarcasterJWT,
     });
 };
 

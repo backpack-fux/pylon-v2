@@ -136,11 +136,4 @@ export const GenerateFarcasterJWTSchema = {
   ...BaseResponse,
 };
 
-export const ValidateFarcasterJWTSchema = {
-  body: t.Object({
-    token: t.String(), // TODO: pass nto the auth header
-  }),
-  ...BaseResponse,
-};
-
 export const BaseResponseSchema = BaseResponse;
