@@ -7,6 +7,7 @@ import { FastifyReplyTypebox, FastifyRequestTypebox } from '../types/fastify';
 import { ValidateFarcasterJWTSchema } from '../schemas/auth';
 import jwt from 'jsonwebtoken';
 import { BridgePrefundedAccountBalanceSchema } from '../schemas/bridge';
+import { UserRole, prisma } from '@/db';
 
 const userService = UserService.getInstance();
 
@@ -35,28 +36,6 @@ export const authenticate = async (req: FastifyRequest, rep: FastifyReply) => {
     return rep
       .code(ERROR401.statusCode)
       .send({ unauthorized: ERRORS.auth.invalidJWT });
-  }
-};
-
-export const validateAPIKey = async (
-  req: FastifyRequest,
-  rep: FastifyReply
-) => {
-  const authHeader = req.headers.authorization;
-  const apiKey = authHeader && authHeader.split(' ')[1];
-
-  if (!apiKey) {
-    return rep
-      .code(ERROR401.statusCode)
-      .send({ unauthorized: ERRORS.auth.missingAuthorizationHeader });
-  }
-
-  if (apiKey !== Config.serverApiKey) {
-    return rep
-      .code(ERROR401.statusCode)
-      .send({ unauthorized: ERRORS.auth.invalidAPIKey });
-  } else {
-    return;
   }
 };
 

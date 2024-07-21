@@ -8,7 +8,6 @@ import {
   MerchantCreateSchema,
   TransferStatusSchema,
 } from '../schemas/merchant';
-import { validateAPIKey } from '../middleware/auth';
 import {
   validateMerchantDetails,
   validateMerchantAPIKey,
@@ -24,7 +23,7 @@ const Merchant = async (app: FastifyInstance) => {
       method: methods.POST,
       url: '/create',
       schema: MerchantCreateSchema,
-      preHandler: [validateAPIKey, validateMerchantDetails],
+      preHandler: [validateMerchantDetails], // TODO: validate created entries
       handler: createMerchantHandler,
     })
 

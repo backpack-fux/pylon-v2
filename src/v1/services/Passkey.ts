@@ -9,7 +9,7 @@ import type { AuthenticationChecks, RegistrationChecks } from '@/v1/types/auth';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { PasskeyError, PrismaError } from './Error';
 import { ERROR400, ERROR401, ERROR404, ERROR500 } from '@/helpers/constants';
-import { prisma } from '@/db';
+import { UserRole, prisma } from '@/db';
 import { UserService } from './User';
 import { Config } from '@/config';
 import crypto from 'crypto';
@@ -65,7 +65,7 @@ export class PasskeyService {
 
       //  Create a new user with the verified credentials and the email provided
       const user = await this.userService.createWithRegisteredPasskey(
-        { email, username: verified.username },
+        { email, username: verified.username, role: UserRole.MERCHANT },
         {
           credentialId: verified.credential.id,
           publicKey: verified.credential.publicKey,

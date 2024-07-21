@@ -2,7 +2,6 @@ import { FastifyInstance } from 'fastify';
 import { methods } from '@/helpers/constants';
 import { processTransaction } from '../handlers/transaction';
 import { TransactionProcessSchema } from '../schemas/transaction';
-import { validateAPIKey } from '../middleware/auth';
 
 const Transaction = async (app: FastifyInstance) => {
   app.route({

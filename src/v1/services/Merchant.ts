@@ -5,8 +5,8 @@ import {
 } from '../types/bridge/compliance';
 import { BridgeService } from './external/Bridge';
 import { UUID } from 'crypto';
-import { PrismaMerchant } from '../types/prisma';
-import { AddressType } from '@prisma/client';
+import { PrismaMerchant, PrismaUser } from '../types/prisma';
+import { AddressType, UserRole } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { ERROR400 } from '@/helpers/constants';
 import { PrismaError } from './Error';
@@ -41,11 +41,10 @@ export class MerchantService {
       registeredAddress;
 
     try {
-      const merchant: PrismaMerchant = await prisma.merchant.create({
+      const merchant = await prisma.merchant.create({
         data: {
           name,
           surname,
-          email,
           phoneNumber,
           companyNumber,
           companyJurisdiction,
@@ -60,6 +59,12 @@ export class MerchantService {
               postcode,
               state,
               country,
+            },
+          },
+          user: {
+            create: {
+              role: UserRole.MERCHANT,
+              email,
             },
           },
         },

@@ -40,7 +40,7 @@ export class UserService {
       const user = await prisma.user.create({
         data: {
           ...userData,
-          registeredPasskey: {
+          registeredPasskeys: {
             create: { ...passkeyData },
           },
         },

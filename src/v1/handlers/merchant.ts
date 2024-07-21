@@ -18,6 +18,7 @@ const merchantService = MerchantService.getInstance();
 const complianceService = ComplianceService.getInstance();
 const bridgeService = BridgeService.getInstance();
 
+// TODO: create merchant via merchant dashboard
 export async function createMerchantHandler(
   req: FastifyRequestTypebox<typeof MerchantCreateSchema>,
   rep: FastifyReplyTypebox<typeof MerchantCreateSchema>

@@ -1,4 +1,4 @@
-import { prisma } from '@/db';
+import { UserRole, prisma } from '@/db';
 import { FastifyReplyTypebox, FastifyRequestTypebox } from '../types/fastify';
 import {
   MerchantCreateSchema,
@@ -16,16 +16,20 @@ export const validateMerchantDetails = async (
 
   const merchant = await prisma.merchant.findFirst({
     where: {
-      OR: [{ email }, { phoneNumber }, { walletAddress }],
+      OR: [{ user: { email } }, { phoneNumber }, { walletAddress }],
     },
     select: {
-      email: true,
+      user: {
+        select: {
+          email: true,
+        },
+      },
       phoneNumber: true,
       walletAddress: true,
     },
   });
 
-  if (merchant && merchant.email === email) {
+  if (merchant && merchant.user.email === email) {
     return rep.code(ERROR409.statusCode).send({
       statusCode: ERROR409.statusCode,
       message: ERRORS.merchant.emailExists(email),
@@ -61,19 +65,19 @@ export const validateMerchantAPIKey = async (
     });
   }
 
-  const merchantApiKey = await prisma.apiKey.findUnique({
-    where: { key: apiKey },
-    include: { merchant: true },
+  const userApiKey = await prisma.apiKey.findUnique({
+    where: { key: apiKey, user: { role: UserRole.MERCHANT } },
+    include: { user: { include: { merchantProfile: true } } },
   });
 
-  if (!merchantApiKey || !merchantApiKey.isActive) {
+  if (!userApiKey || !userApiKey.isActive) {
     return rep.code(ERROR401.statusCode).send({
       statusCode: ERROR401.statusCode,
       message: ERRORS.auth.invalidAPIKey,
     });
   }
 
-  if (merchantApiKey.expiresAt && merchantApiKey.expiresAt < new Date()) {
+  if (userApiKey.expiresAt && userApiKey.expiresAt < new Date()) {
     return rep.code(ERROR401.statusCode).send({
       statusCode: ERROR401.statusCode,
       message: ERRORS.auth.expiredAPIKey,
@@ -81,12 +85,11 @@ export const validateMerchantAPIKey = async (
   }
 
   await prisma.apiKey.update({
-    where: { id: merchantApiKey.id },
+    where: { id: userApiKey.id },
     data: { lastUsedAt: new Date() },
   });
 
-  // Attach merchant to request for use in route handlers
-  req.merchant = merchantApiKey.merchant;
+  req.merchant = userApiKey.user.merchantProfile;
 
   return;
 };
