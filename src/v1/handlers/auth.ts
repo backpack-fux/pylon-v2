@@ -5,6 +5,7 @@ import {
   ERROR403,
   ERROR404,
   ERROR500,
+  SESSION_EXPIRATION,
 } from '@/helpers/constants';
 import { ERRORS, parseError } from '@/helpers/errors';
 import { errorResponse, successResponse } from '@/responses';
@@ -27,6 +28,7 @@ import { AuthenticationChecks } from '@/v1/types/auth';
 import { FastifyReplyTypebox, FastifyRequestTypebox } from '@/v1/types/fastify';
 import jwt from 'jsonwebtoken';
 import { NeynarAPIClient } from '@neynar/nodejs-sdk';
+import { v4 as uuidv4 } from 'uuid';
 
 const passkeyService = PasskeyService.getInstance();
 const userService = UserService.getInstance();
@@ -239,6 +241,12 @@ export async function generateFarcasterJWT(
 ) {
   try {
     const { fid, signerUuid } = req.body;
+    const ipAddress =
+      req.headers['x-forwarded-for'] ||
+      req.connection.remoteAddress ||
+      req.socket.remoteAddress ||
+      req.ip;
+    const userAgent = req.headers['user-agent'];
 
     if (!fid || !signerUuid) {
       return rep.code(ERROR401.statusCode).send({
@@ -250,7 +258,7 @@ export async function generateFarcasterJWT(
     const neynarAPIClient = new NeynarAPIClient(Config.neynarApiKey);
     const signer = await neynarAPIClient.lookupSigner(signerUuid);
 
-    if (!signer) {
+    if (!signer || !signer.fid || !signer.status) {
       return rep.code(ERROR401.statusCode).send({
         statusCode: ERROR401.statusCode,
         data: ERRORS.auth.farcaster.signerNotFound,
@@ -266,7 +274,7 @@ export async function generateFarcasterJWT(
       });
     }
 
-    if (signerFid !== fid) {
+    if (Number(signerFid) !== fid) {
       return rep.code(ERROR401.statusCode).send({
         statusCode: ERROR401.statusCode,
         data: ERRORS.auth.farcaster.signerFidMismatch,
@@ -276,15 +284,39 @@ export async function generateFarcasterJWT(
     if (!Config.fidAdmins.includes(signerFid.toString())) {
       return rep.code(ERROR403.statusCode).send({
         statusCode: ERROR403.statusCode,
-        data: ERRORS.auth.farcaster.userNotAllowed,
+        data: ERRORS.auth.farcaster.userForbidden,
       });
     }
 
-    const token = jwt.sign({ signerFid, signerUuid }, Config.jwtSecret, {
-      expiresIn: '1d',
+    const sessionId = uuidv4();
+    const redisClient = req.server.redis;
+    await redisClient.set(
+      `session:${signerUuid}`,
+      sessionId,
+      'EX',
+      SESSION_EXPIRATION['1D']
+    );
+
+    // TODO: bump algo to RS256 and privateKey issuer
+    const token = jwt.sign(
+      { signerFid, signerUuid, ipAddress, userAgent, sessionId },
+      Config.jwtSecret,
+      {
+        expiresIn: SESSION_EXPIRATION['1D'],
+      }
+    );
+
+    rep.setCookie('pyv2_auth_token', token, {
+      httpOnly: true,
+      secure: Config.isProduction,
+      sameSite: Config.isProduction ? 'lax' : 'lax',
+      maxAge: SESSION_EXPIRATION['1D'],
+      signed: true,
+      path: '/',
+      domain: Config.isProduction ? '.backpack.network' : undefined,
     });
 
-    return successResponse(rep, { message: token });
+    return successResponse(rep, { message: 'success' });
   } catch (error) {
     console.error(error);
     return errorResponse(

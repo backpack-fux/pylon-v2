@@ -8,18 +8,26 @@ import rateLimit from '@fastify/rate-limit';
 import jwt from '@fastify/jwt';
 import rawBody from 'fastify-raw-body';
 import fastifyRedis from '@fastify/redis';
+import fastifyCookie from '@fastify/cookie';
 import swagger from '@fastify/swagger'; // TODO
 import swaggerUi from '@fastify/swagger-ui'; // TODO
 
 import { Home, Merchant, Bridge, Transaction, Auth } from './v1/routes/index';
 import { Config } from './config';
+import { SESSION_EXPIRATION } from './helpers/constants';
 
 const startServer = async () => {
   try {
     const server: FastifyInstance = fastify()
       .withTypeProvider<TypeBoxTypeProvider>()
       .register(accepts)
-      .register(cors)
+      .register(cors, {
+        origin: true,
+        credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+        exposedHeaders: ['Set-Cookie'],
+      })
       .register(formbody)
       .register(helmet)
       .register(rateLimit)
@@ -45,6 +53,10 @@ const startServer = async () => {
         host: Config.redis.host,
         port: Config.redis.port,
         password: Config.redis.password,
+      })
+      .register(fastifyCookie, {
+        secret: Config.cookieSecret,
+        hook: 'onRequest',
       })
 
       .register(Home)

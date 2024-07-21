@@ -100,7 +100,7 @@ export class WorldpayService {
       const response = await fetch(`${this.baseUrl}${url}`, mergedOptions);
       if (!response.ok && response.status !== 409) {
         const wpResponse = await response.json();
-        console.log(wpResponse);
+
         throw new WorldpayError(
           response.status,
           wpResponse.message,
@@ -141,14 +141,12 @@ export class WorldpayService {
           return responseData as WorldpayVerifiedTokenResponse;
         case 206:
           // TODO
-          console.log(responseData);
           throw new WorldpayError(
             status,
             'The supplied payload could not be verified. An unverified token has been created/matched.'
           );
         case 409:
           // TODO
-          console.log(responseData);
           throw new WorldpayError(
             status,
             'Conflicts with an existing token for cardOnFile transactions using a verified token or card session created by the access checkout SDK.'

@@ -4,7 +4,11 @@ import { ERROR500 } from './constants';
 export const ERRORS = {
   auth: {
     invalidJWT: 'Invalid JWT',
+    expiredJWT: 'The session has expired',
+    invalidCookieSignature: 'Invalid cookie signature',
     invalidAPIKey: 'Invalid API key',
+    invalidUserAgent: 'Invalid user agent',
+    invalidIPAddress: 'Invalid IP address',
     missingAuthorizationHeader: 'Missing or invalid authorization header',
     expiredAPIKey: 'API key has expired',
     bridge: {
@@ -14,7 +18,7 @@ export const ERRORS = {
     },
     farcaster: {
       missingFidOrSignerUuid: 'Missing fid or signerUuid',
-      userNotAllowed: 'User not allowed to generate JWT',
+      userForbidden: 'Forbidden access',
       signerNotFound: 'Signer not found',
       signerNotApproved: 'Signer not approved',
       signerFidMismatch: 'Signer FID does not match',

@@ -1,15 +1,15 @@
 import { Config } from '@/config';
 import { headers, methods } from '@/helpers/constants';
 import { ERRORS } from '@/helpers/errors';
-import {
-  BridgeCurrencyTypeSrc,
-  BridgeCurrencyTypeDst,
-  BridgePaymentRailTypeSrc,
-  BridgePaymentRailTypeDst,
-  BridgePrefundedAccountBalance,
-} from '@/v1/types/bridge/preFundedAccount';
 import { BridgeComplianceType } from '@/v1/types/bridge/compliance';
-import { UUID } from 'crypto';
+import {
+  BridgeCurrencyTypeDst,
+  BridgeCurrencyTypeSrc,
+  BridgePaymentRailTypeDst,
+  BridgePaymentRailTypeSrc,
+  BridgePrefundedAccountBalance,
+  BridgeUUID,
+} from '@/v1/types/bridge/preFundedAccount';
 import { Hex } from 'viem';
 import { BridgeError } from '../Error';
 
@@ -28,7 +28,7 @@ export class BridgeService {
     getKycLinks: (kycLinkId: string) => `/kyc_links/${kycLinkId}`,
     createPrefundedAccountTransfer: '/transfers',
     getPrefundedAccountBalance: '/prefunded_accounts',
-    getTransferStatus: (transferId: UUID) => `/transfers/${transferId}`,
+    getTransferStatus: (transferId: BridgeUUID) => `/transfers/${transferId}`,
   };
 
   private constructor() {
@@ -137,7 +137,7 @@ export class BridgeService {
 
   /** @docs https://apidocs.bridge.xyz/docs/kyc-links  */
   async createComplianceLinks(
-    idempotencyKey: UUID,
+    idempotencyKey: BridgeUUID,
     fullName: string,
     type: BridgeComplianceType,
     email: string
@@ -172,19 +172,30 @@ export class BridgeService {
     return await response.json();
   }
 
-  /** @docs https://withbridge.notion.site/Prefunded-API-Documentation-0635292e3c754640819ada98fe2a1c69 */
-  async createPrefundedAccountTransfer(
-    idempotencyKey: UUID,
-    amount: number,
-    on_behalf_of: UUID,
-    developer_fee: number | undefined,
-    src_payment_rail: BridgePaymentRailTypeSrc,
-    src_currency: BridgeCurrencyTypeSrc,
-    prefunded_account_id: UUID,
-    dst_payment_rail: BridgePaymentRailTypeDst,
-    dst_currency: BridgeCurrencyTypeDst,
-    dst_to_address: Hex
-  ) {
+  /** @docs https://apidocs.bridge.xyz/reference/get_prefunded-accounts */
+  async createPrefundedAccountTransfer({
+    idempotencyKey,
+    amount,
+    on_behalf_of,
+    developer_fee,
+    src_payment_rail,
+    src_currency,
+    prefunded_account_id,
+    dst_payment_rail,
+    dst_currency,
+    dst_to_address,
+  }: {
+    idempotencyKey: BridgeUUID;
+    amount: number | string;
+    on_behalf_of: BridgeUUID;
+    developer_fee: number | string | undefined;
+    src_payment_rail: BridgePaymentRailTypeSrc;
+    src_currency: BridgeCurrencyTypeSrc;
+    prefunded_account_id: BridgeUUID;
+    dst_payment_rail: BridgePaymentRailTypeDst;
+    dst_currency: BridgeCurrencyTypeDst;
+    dst_to_address: Hex;
+  }) {
     const headers = this.buildRequestHeaders({
       'Idempotency-Key': idempotencyKey,
       accept: 'application/json',
@@ -196,9 +207,9 @@ export class BridgeService {
         method: methods.POST,
         headers: headers,
         body: JSON.stringify({
-          amount,
+          amount: String(amount),
           on_behalf_of,
-          developer_fee,
+          developer_fee: String(developer_fee),
           source: {
             payment_rail: src_payment_rail,
             currency: src_currency,
@@ -231,7 +242,7 @@ export class BridgeService {
     return (await response.json()).data;
   }
 
-  async getTransferStatus(transferId: UUID): Promise<any> {
+  async getTransferStatus(transferId: BridgeUUID): Promise<any> {
     const response = await this.sendRequest(
       this.endpoints.getTransferStatus(transferId),
       {

@@ -60,7 +60,6 @@ export class TransactionService {
       authorizePaymentPayload.instruction.paymentInstrument.tokenHref =
         tokenUrl;
       fraudSightPayload.instruction.paymentInstrument.href = tokenUrl;
-      console.log(fraudSightPayload);
 
       const riskAssessment =
         await this.worldpayService.getRiskAssessment(fraudSightPayload);

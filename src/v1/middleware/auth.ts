@@ -7,7 +7,7 @@ import { FastifyReplyTypebox, FastifyRequestTypebox } from '../types/fastify';
 import { ValidateFarcasterJWTSchema } from '../schemas/auth';
 import jwt from 'jsonwebtoken';
 import { BridgePrefundedAccountBalanceSchema } from '../schemas/bridge';
-import { UserRole, prisma } from '@/db';
+import { UUID } from 'crypto';
 
 const userService = UserService.getInstance();
 
@@ -49,9 +49,26 @@ export const validateFarcasterUser = async (
     | typeof BridgePrefundedAccountBalanceSchema
   >
 ) => {
-  const { token } = req.body;
+  const signedCookie = req.cookies.pyv2_auth_token;
+  if (!signedCookie) {
+    return rep.code(ERROR401.statusCode).send({
+      statusCode: ERROR401.statusCode,
+      data: ERRORS.auth.missingAuthorizationHeader,
+    });
+  }
+
+  const unsignResult = req.unsignCookie(signedCookie);
+  if (!unsignResult.valid || !unsignResult.value) {
+    return rep.code(ERROR401.statusCode).send({
+      statusCode: ERROR401.statusCode,
+      data: ERRORS.auth.invalidCookieSignature,
+    });
+  }
+
+  const token = unsignResult.value;
 
   const isVerified = jwt.verify(token, Config.jwtSecret, { complete: true });
+
   if (!isVerified) {
     return rep.code(ERROR401.statusCode).send({
       statusCode: ERROR401.statusCode,
@@ -68,6 +85,7 @@ export const validateFarcasterUser = async (
   }
 
   const { payload } = decoded;
+
   if (
     typeof payload !== 'object' ||
     payload === null ||
@@ -80,13 +98,13 @@ export const validateFarcasterUser = async (
     });
   }
 
-  const fid = (payload?.fid as any).toString();
+  const fid = payload.signerFid as number;
   const currentTime = Math.floor(Date.now() / 1000);
 
-  if (!Config.fidAdmins.includes(fid)) {
+  if (!Config.fidAdmins.includes(String(fid))) {
     return rep.code(ERROR403.statusCode).send({
       statusCode: ERROR403.statusCode,
-      data: ERRORS.auth.farcaster.userNotAllowed,
+      data: ERRORS.auth.farcaster.userForbidden,
     });
   }
 
@@ -96,6 +114,41 @@ export const validateFarcasterUser = async (
       data: ERRORS.auth.invalidJWT,
     });
   }
+
+  const ipAddress =
+    req.headers['x-forwarded-for'] ||
+    req.connection.remoteAddress ||
+    req.socket.remoteAddress ||
+    req.ip;
+
+  if (ipAddress !== payload.ipAddress) {
+    return rep.code(ERROR401.statusCode).send({
+      statusCode: ERROR401.statusCode,
+      data: ERRORS.auth.invalidIPAddress,
+    });
+  }
+
+  const userAgent = req.headers['user-agent'];
+
+  if (userAgent !== payload.userAgent) {
+    return rep.code(ERROR401.statusCode).send({
+      statusCode: ERROR401.statusCode,
+      data: ERRORS.auth.invalidUserAgent,
+    });
+  }
+
+  const redisClient = req.server.redis;
+  const storedSessionId = await redisClient.get(
+    `session:${payload.signerUuid}`
+  );
+  if (storedSessionId !== payload.sessionId) {
+    return rep.code(ERROR401.statusCode).send({
+      statusCode: ERROR401.statusCode,
+      data: ERRORS.auth.expiredJWT,
+    });
+  }
+
+  req.signerUuid = payload.signerUuid as UUID;
 
   return;
 };

@@ -3,14 +3,23 @@ import { utils } from '@/helpers/utils';
 import { errorResponse, successResponse } from '@/responses';
 import {
   BridgePrefundedAccountBalanceSchema,
+  BridgePrefundedAccountTransferSchema,
   BridgeWebhookSchema,
 } from '@/v1/schemas/bridge';
 import { ComplianceService } from '@/v1/services/Compliance';
 import { BridgeError } from '@/v1/services/Error';
 import { BridgeService } from '@/v1/services/external/Bridge';
 import { DiscordService } from '@/v1/services/external/Discord';
+import { BridgeUUID } from '@/v1/types/bridge/preFundedAccount';
 import { BridgeWebhookPayload_KycLink } from '@/v1/types/bridge/webhooks';
 import { FastifyReplyTypebox, FastifyRequestTypebox } from '@/v1/types/fastify';
+import { Hex } from 'viem';
+import {
+  BridgeCurrencyTypeDst,
+  BridgeCurrencyTypeSrc,
+  BridgePaymentRailTypeDst,
+  BridgePaymentRailTypeSrc,
+} from '../types/bridge/preFundedAccount';
 
 const discordService = DiscordService.getInstance();
 const bridgeService = BridgeService.getInstance();
@@ -42,18 +51,27 @@ export async function getPrefundedAccountBalance(
 }
 
 export async function createPrefundedAccountTransfer(
-  req: FastifyRequestTypebox<typeof BridgePrefundedAccountBalanceSchema>,
-  rep: FastifyReplyTypebox<typeof BridgePrefundedAccountBalanceSchema>
+  req: FastifyRequestTypebox<typeof BridgePrefundedAccountTransferSchema>,
+  rep: FastifyReplyTypebox<typeof BridgePrefundedAccountTransferSchema>
 ): Promise<void> {
   try {
-    req.body;
-    // const balance = await bridgeService.createPrefundedAccountTransfer();
-    // const res = await discordService.send(
-    //   DISCORD.channelId,
-    //   balance.available_balance
-    // );
-    // console.log(res);
-    // successResponse(rep, res);
+    const { amount, on_behalf_of, developer_fee, source, destination } =
+      req.body;
+
+    const balance = await bridgeService.createPrefundedAccountTransfer({
+      idempotencyKey: req.signerUuid! as BridgeUUID,
+      amount: amount.toString(),
+      on_behalf_of: on_behalf_of as BridgeUUID,
+      developer_fee: developer_fee?.toString() ?? undefined,
+      src_payment_rail: source.payment_rail as BridgePaymentRailTypeSrc,
+      src_currency: source.currency as BridgeCurrencyTypeSrc,
+      prefunded_account_id: source.prefunded_account_id as BridgeUUID,
+      dst_payment_rail: destination.payment_rail as BridgePaymentRailTypeDst,
+      dst_currency: destination.currency as BridgeCurrencyTypeDst,
+      dst_to_address: destination.to_address as Hex,
+    });
+
+    successResponse(rep, balance);
   } catch (error) {
     console.error(error);
     const errorMessage =
