@@ -59,10 +59,10 @@ export async function createPrefundedAccountTransfer(
       req.body;
 
     const balance = await bridgeService.createPrefundedAccountTransfer({
-      idempotencyKey: req.signerUuid! as BridgeUUID,
+      idempotencyKey: utils.generateUUID(),
       amount: amount.toString(),
       on_behalf_of: on_behalf_of as BridgeUUID,
-      developer_fee: developer_fee?.toString() ?? undefined,
+      developer_fee: developer_fee?.toString() ?? '0',
       src_payment_rail: source.payment_rail as BridgePaymentRailTypeSrc,
       src_currency: source.currency as BridgeCurrencyTypeSrc,
       prefunded_account_id: source.prefunded_account_id as BridgeUUID,
