@@ -1,7 +1,11 @@
 import { Config } from '@/config';
 import { headers, methods } from '@/helpers/constants';
 import { ERRORS } from '@/helpers/errors';
-import { BridgeComplianceType } from '@/v1/types/bridge/compliance';
+import {
+  BridgeComplianceErrorResponse,
+  BridgeComplianceGetAllCustomersResponse,
+  BridgeComplianceType,
+} from '@/v1/types/bridge/compliance';
 import {
   BridgeCurrencyTypeDst,
   BridgeCurrencyTypeSrc,
@@ -22,13 +26,17 @@ export class BridgeService {
     createTos: '/customers/tos_links',
     createCustomer: '/customers',
     createComplianceLinks: '/kyc_links',
+    createPrefundedAccountTransfer: '/transfers',
+    getPrefundedAccountBalance: '/prefunded_accounts',
     createKycUrl: (customerId: string, redirectUri: string) =>
       `/customers/${customerId}/id_verification_link?redirect_uri=${redirectUri}`,
     getCustomer: (customerId: string) => `/customers/${customerId}`,
     getKycLinks: (kycLinkId: string) => `/kyc_links/${kycLinkId}`,
-    createPrefundedAccountTransfer: '/transfers',
-    getPrefundedAccountBalance: '/prefunded_accounts',
     getTransferStatus: (transferId: BridgeUUID) => `/transfers/${transferId}`,
+    getAllCustomers: (limit: number, startingAfter?: string) =>
+      `/customers?limit=${limit}${
+        startingAfter ? `&starting_after=${startingAfter}` : ''
+      }`,
   };
 
   private constructor() {
@@ -251,5 +259,29 @@ export class BridgeService {
       }
     );
     return await response.json();
+  }
+
+  async getAllCustomers(
+    limit: number,
+    startingAfter?: string
+  ): Promise<
+    BridgeComplianceGetAllCustomersResponse | BridgeComplianceErrorResponse
+  > {
+    const response = await this.sendRequest(
+      this.endpoints.getAllCustomers(limit, startingAfter),
+      {
+        method: methods.GET,
+        headers,
+      }
+    );
+
+    if (response.ok) {
+      const data: BridgeComplianceGetAllCustomersResponse =
+        await response.json();
+      return data;
+    } else {
+      const errorData: BridgeComplianceErrorResponse = await response.json();
+      return errorData;
+    }
   }
 }

@@ -21,7 +21,8 @@
     "db:status": "prisma migrate status",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "test": "jest"
+    "test": "jest",
+    "sync-kyc-data": "ts-node -r tsconfig-paths/register src/v1/scripts/syncBridgeKycData.ts"
   },
   "dependencies": {
     "@fastify/accepts": "4.3.0",

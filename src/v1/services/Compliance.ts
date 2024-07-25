@@ -1,6 +1,12 @@
 import { UUID } from 'crypto';
 import { PrismaSelectedCompliance } from '../types/prisma';
-import { BridgeComplianceLinksResponse } from '../types/bridge/compliance';
+import {
+  BridgeComplianceCustomer,
+  BridgeComplianceKycStatus,
+  BridgeComplianceLinksResponse,
+  BridgeComplianceTosStatus,
+  BridgeComplianceType,
+} from '../types/bridge/compliance';
 import { prisma } from '@/db';
 import { Merchant } from '@prisma/client';
 import { AccountType, TosStatus, VerificationStatus } from '@prisma/client';
@@ -10,6 +16,54 @@ import { PrismaError } from './Error';
 
 export class ComplianceService {
   private static instance: ComplianceService;
+
+  private mapKycStatus = (
+    status: BridgeComplianceKycStatus
+  ): VerificationStatus => {
+    switch (status) {
+      case BridgeComplianceKycStatus.NotStarted:
+        return VerificationStatus.NOT_STARTED;
+      case BridgeComplianceKycStatus.Pending:
+        return VerificationStatus.PENDING;
+      case BridgeComplianceKycStatus.Incomplete:
+        return VerificationStatus.INCOMPLETE;
+      case BridgeComplianceKycStatus.AwaitingUbo:
+        return VerificationStatus.AWAITING_UBO;
+      case BridgeComplianceKycStatus.ManualReview:
+        return VerificationStatus.MANUAL_REVIEW;
+      case BridgeComplianceKycStatus.UnderReview:
+        return VerificationStatus.UNDER_REVIEW;
+      case BridgeComplianceKycStatus.Approved:
+      case BridgeComplianceKycStatus.Active:
+        return VerificationStatus.APPROVED;
+      case BridgeComplianceKycStatus.Rejected:
+        return VerificationStatus.REJECTED;
+      default:
+        throw new Error(`Unknown KYC status: ${status}`);
+    }
+  };
+
+  private mapTosStatus = (status: BridgeComplianceTosStatus): TosStatus => {
+    switch (status) {
+      case BridgeComplianceTosStatus.Pending:
+        return TosStatus.PENDING;
+      case BridgeComplianceTosStatus.Approved:
+        return TosStatus.APPROVED;
+      default:
+        throw new Error(`Unknown TOS status: ${status}`);
+    }
+  };
+
+  private mapAccountType = (type: BridgeComplianceType): AccountType => {
+    switch (type) {
+      case BridgeComplianceType.Individual:
+        return AccountType.INDIVIDUAL;
+      case BridgeComplianceType.Business:
+        return AccountType.BUSINESS;
+      default:
+        throw new Error(`Unknown account type: ${type}`);
+    }
+  };
 
   public static getInstance(): ComplianceService {
     if (!ComplianceService.instance) {
@@ -82,5 +136,35 @@ export class ComplianceService {
         throw error;
       }
     }
+  }
+
+  public async createOrUpdateCustomer(customer: BridgeComplianceCustomer) {
+    const compliance = await prisma.compliance.upsert({
+      where: {
+        merchantId: customer.id, // TODO
+      },
+      update: {
+        type: this.mapAccountType(customer.type),
+        verificationStatus: this.mapKycStatus(customer.status),
+        termsOfServiceStatus: customer.has_accepted_terms_of_service
+          ? TosStatus.APPROVED
+          : TosStatus.PENDING,
+        updatedAt: new Date(customer.updated_at),
+        // Add more fields to update as needed
+      },
+      create: {
+        buyerId: BigInt(customer.id),
+        type: this.mapAccountType(customer.type),
+        verificationStatus: this.mapKycStatus(customer.status),
+        termsOfServiceStatus: customer.has_accepted_terms_of_service
+          ? TosStatus.APPROVED
+          : TosStatus.PENDING,
+        verificationDocumentLink: '', // Set a default value or modify as needed
+        termsOfServiceLink: '', // Set a default value or modify as needed
+        createdAt: new Date(customer.created_at),
+        updatedAt: new Date(customer.updated_at),
+        // Add more fields to create as needed
+      },
+    });
   }
 }
