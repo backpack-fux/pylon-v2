@@ -100,7 +100,7 @@ model RegisteredPasskey {
   id           Int                 @id @default(autoincrement())
   name         String?             @default("") @db.VarChar(255)
   credentialId String              @unique
-  publicKey    String
+  publicKey    String              @db.Text
   algorithm    CredentialAlgorithm @default(ES256)
   userId       Int
   createdAt    DateTime            @default(now())
@@ -123,7 +123,7 @@ model MerchantEmployee {
 model User {
   id                Int                 @id @default(autoincrement())
   email             String              @unique
-  username          String              @unique @db.VarChar(15)
+  username          String              @unique @db.VarChar(255)
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   registeredPasskey RegisteredPasskey[]

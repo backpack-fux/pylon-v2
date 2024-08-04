@@ -26,8 +26,8 @@ import { PasskeyService } from '@/v1/services/Passkey';
 import { UserService } from '@/v1/services/User';
 import { AuthenticationChecks } from '@/v1/types/auth';
 import { FastifyReplyTypebox, FastifyRequestTypebox } from '@/v1/types/fastify';
-import jwt from 'jsonwebtoken';
 import { NeynarAPIClient } from '@neynar/nodejs-sdk';
+import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 
 const passkeyService = PasskeyService.getInstance();
@@ -55,11 +55,13 @@ export async function registerPasskey(
     const registration = req.body;
     const email = req.body.email;
     const passkeyName = req.body.passkeyName;
+    console.log('registration', registration);
 
     const expected = {
       challenge: req.body.challenge,
       origin: Config.clientHost,
     };
+    console.log('expected', expected);
 
     const user = await passkeyService.registerPasskey(
       registration,
@@ -67,17 +69,20 @@ export async function registerPasskey(
       email,
       passkeyName
     );
+    console.log('user', user);
 
     const token = await rep.jwtSign({
       user,
       credential: registration.credential.id,
     });
+    console.log('token', token);
 
     return successResponse(rep, {
       user,
       token,
     });
   } catch (error) {
+    console.error('Error in registerPasskey:', error);
     const parsedError = parseError(error);
     return errorResponse(req, rep, parsedError.statusCode, parsedError.message);
   }
@@ -313,8 +318,8 @@ export async function generateFarcasterJWT(
       maxAge: SESSION_EXPIRATION['1D'],
       signed: true,
       path: '/',
-      domain: Config.isProduction ? '.backpack.network' : undefined,
-    });
+      domain: Config.isProduction ? 'localhost' : undefined,
+    }); 
 
     return successResponse(rep, { message: 'success' });
   } catch (error) {

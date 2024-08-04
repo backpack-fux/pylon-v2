@@ -14,7 +14,7 @@ function loadEnvironmentVariable(
 }
 
 export const Config = {
-  port: Number(loadEnvironmentVariable('PORT', 5000)),
+  port: Number(loadEnvironmentVariable('PORT', 8000)),
   jwtSecret: loadEnvironmentVariable('JWT_SECRET'),
   jwtExpires: Number(loadEnvironmentVariable('JWT_EXPIRES', 24)),
   serverApiKey: loadEnvironmentVariable('SERVER_API_KEY'),

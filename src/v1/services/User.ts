@@ -1,10 +1,10 @@
 import { prisma } from '@/db';
+import { ERROR400 } from '@/helpers/constants';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { CreatePasskey } from '../types/auth';
 import { PrismaUser } from '../types/prisma';
 import { CreateUser } from '../types/user';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { PrismaError } from './Error';
-import { ERROR400 } from '@/helpers/constants';
-import { CreatePasskey } from '../types/auth';
 
 export class UserService {
   private static instance: UserService;
@@ -37,6 +37,9 @@ export class UserService {
     passkeyData: Omit<CreatePasskey, 'userId'>
   ): Promise<PrismaUser> {
     try {
+      console.log('user data:', JSON.stringify(userData, null, 2  ));
+      console.log('passkey data:', JSON.stringify(passkeyData, null, 2));
+      
       const user = await prisma.user.create({
         data: {
           ...userData,
@@ -48,7 +51,12 @@ export class UserService {
 
       return user;
     } catch (error) {
+      console.log('Error:', error);
       if (error instanceof PrismaClientKnownRequestError) {
+        console.log('Prisma error code:', error.code);
+        console.log('Prisma error message:', error.message);
+        console.log('Prisma error meta:', error.meta);
+        
         throw new PrismaError(ERROR400.statusCode, error.message);
       } else {
         throw error;

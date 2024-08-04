@@ -1,18 +1,20 @@
+
+import { Config } from '@/config';
+import { prisma } from '@/db';
+import { ERROR400, ERROR401, ERROR404, ERROR500 } from '@/helpers/constants';
 import type {
+  AuthenticationChecks,
   AuthenticationEncoded,
   CreatePasskey,
   CredentialKey,
   PasswordlessServer,
+  RegistrationChecks,
   RegistrationEncoded,
 } from '@/v1/types/auth';
-import type { AuthenticationChecks, RegistrationChecks } from '@/v1/types/auth';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { PasskeyError, PrismaError } from './Error';
-import { ERROR400, ERROR401, ERROR404, ERROR500 } from '@/helpers/constants';
-import { prisma } from '@/db';
-import { UserService } from './User';
-import { Config } from '@/config';
 import crypto from 'crypto';
+import { PasskeyError, PrismaError } from './Error';
+import { UserService } from './User';
 
 export class PasskeyService {
   private static instance: PasskeyService;
@@ -38,18 +40,28 @@ export class PasskeyService {
   }
 
   private async initialize() {
-    this.server = (await import(
-      '@passwordless-id/webauthn/dist/esm/index.js'
-    )) as any as PasswordlessServer;
+    try {
+      const server = await import('@passwordless-id/webauthn');
+      this.server = {
+        verifyRegistration: server.server.verifyRegistration,
+        verifyAuthentication: server.server.verifyAuthentication,
+        verifySignature: server.server.verifySignature
+      };
+    } catch (error) {
+      console.error('Error initializing PasswordlessServer:', error);
+    }
   }
 
   public async registerPasskey(
     registration: RegistrationEncoded,
     expected: RegistrationChecks,
     email: string,
-    passKeyName?: string
+    passKeyName?: string,
   ) {
     try {
+      console.log('Registration data:', JSON.stringify(registration, null, 2));
+      console.log('Expected data:', JSON.stringify(expected, null, 2));
+      
       if (!this.server) {
         throw new PasskeyError(
           ERROR500.statusCode,
@@ -75,9 +87,15 @@ export class PasskeyService {
       );
       return user;
     } catch (error) {
+      console.log('Error:', error);
       if (error instanceof PrismaClientKnownRequestError) {
+        console.log('Prisma error code:', error.code);
+        console.log('Prisma error message:', error.message);
+        console.log('Prisma error meta:', error.meta);
+
         throw new PrismaError(ERROR400.statusCode, error.message);
       } else {
+        console.log('Error:', error);
         throw new PasskeyError(ERROR400.statusCode, (error as Error).message);
       }
     }
