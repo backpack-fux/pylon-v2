@@ -1,15 +1,16 @@
 import { prisma } from '@/db';
 import {
   BridgeComplianceLinksResponse,
-  BridgeComplianceTypeEnum,
+  BridgeComplianceType,
 } from '../types/bridge/compliance';
 import { BridgeService } from './external/Bridge';
 import { UUID } from 'crypto';
-import { PrismaMerchant, PrismaUser } from '../types/prisma';
-import { AddressType, UserRole } from '@prisma/client';
+import { PrismaMerchant } from '../types/prisma';
+import { AddressType, EmployeeRole } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { ERROR400 } from '@/helpers/constants';
 import { PrismaError } from './Error';
+import { MerchantCreateBody } from '../types/merchant';
 
 const bridgeService = BridgeService.getInstance();
 
@@ -24,14 +25,15 @@ export class MerchantService {
   }
 
   /** @dev create partner */
-  public async createPartner(partnerData: any): Promise<PrismaMerchant> {
+  public async createPartner(
+    partnerData: MerchantCreateBody
+  ): Promise<PrismaMerchant> {
     const {
-      name,
-      surname,
-      email,
-      phoneNumber,
-      companyNumber,
-      companyJurisdiction,
+      name: representativeName,
+      surname: representativeSurname,
+      email: representativeEmail,
+      phoneNumber: representativePhoneNumber,
+      company,
       fee,
       walletAddress,
       registeredAddress,
@@ -40,31 +42,44 @@ export class MerchantService {
     const { street1, street2, city, postcode, state, country } =
       registeredAddress;
 
+    const { name: companyName, number: companyNumber } = company;
+
     try {
       const merchant = await prisma.merchant.create({
         data: {
-          name,
-          surname,
-          phoneNumber,
-          companyNumber,
-          companyJurisdiction,
           fee,
-          walletAddress,
-          registeredAddress: {
+          company: {
             create: {
-              type: AddressType.REGISTERED,
-              street1,
-              street2,
-              city,
-              postcode,
-              state,
-              country,
+              name: companyName,
+              number: companyNumber,
+              repName: representativeName,
+              repSurname: representativeSurname,
+              email: representativeEmail,
+              registeredAddress: {
+                create: {
+                  type: AddressType.REGISTERED,
+                  street1,
+                  street2,
+                  city,
+                  postcode,
+                  state,
+                  country,
+                },
+              },
             },
           },
-          user: {
+          Employees: {
             create: {
-              role: UserRole.MERCHANT,
-              email,
+              name: representativeName,
+              surname: representativeSurname,
+              role: EmployeeRole.OWNER,
+              user: {
+                create: {
+                  email: representativeEmail,
+                  phoneNumber: representativePhoneNumber,
+                  walletAddress,
+                },
+              },
             },
           },
         },
@@ -91,7 +106,7 @@ export class MerchantService {
         await bridgeService.createComplianceLinks(
           merchantUuid,
           fullName,
-          BridgeComplianceTypeEnum.Business,
+          BridgeComplianceType.Business,
           email
         );
 

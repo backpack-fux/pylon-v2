@@ -24,7 +24,8 @@ export async function createMerchantHandler(
   rep: FastifyReplyTypebox<typeof MerchantCreateSchema>
 ): Promise<void> {
   try {
-    const merchant = await merchantService.createPartner(req.body);
+    const partnerData = req.body;
+    const merchant = await merchantService.createPartner(partnerData);
 
     const complianceUuid = utils.generateUUID();
     const fullName = utils.getFullName(req.body.name, req.body.surname);

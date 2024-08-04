@@ -1,4 +1,4 @@
-import { UserRole, prisma } from '@/db';
+import { EmployeeRole, prisma } from '@/db';
 import { FastifyReplyTypebox, FastifyRequestTypebox } from '../types/fastify';
 import {
   MerchantCreateSchema,
@@ -14,22 +14,24 @@ export const validateMerchantDetails = async (
 ): Promise<void> => {
   const { email, phoneNumber, walletAddress } = req.body;
 
-  const merchant = await prisma.merchant.findFirst({
+  const merchant = await prisma.user.findFirst({
     where: {
-      OR: [{ user: { email } }, { phoneNumber }, { walletAddress }],
+      merchantId: {
+        not: null,
+      },
+      merchantProfile: {
+        isNot: null,
+      },
+      OR: [{ email }, { phoneNumber }, { walletAddress }],
     },
     select: {
-      user: {
-        select: {
-          email: true,
-        },
-      },
+      email: true,
       phoneNumber: true,
       walletAddress: true,
     },
   });
 
-  if (merchant && merchant.user.email === email) {
+  if (merchant && merchant.email === email) {
     return rep.code(ERROR409.statusCode).send({
       statusCode: ERROR409.statusCode,
       message: ERRORS.merchant.emailExists(email),
@@ -66,7 +68,7 @@ export const validateMerchantAPIKey = async (
   }
 
   const userApiKey = await prisma.apiKey.findUnique({
-    where: { key: apiKey, user: { role: UserRole.MERCHANT } },
+    where: { key: apiKey },
     include: { user: { include: { merchantProfile: true } } },
   });
 

@@ -37,6 +37,10 @@ export class BridgeService {
       `/customers?limit=${limit}${
         startingAfter ? `&starting_after=${startingAfter}` : ''
       }`,
+    getComplianceLinks: (limit: number, startingAfter?: string) =>
+      `/kyc_links?limit=${limit}${
+        startingAfter ? `&starting_after=${startingAfter}` : ''
+      }`,
   };
 
   private constructor() {
@@ -164,6 +168,20 @@ export class BridgeService {
           email,
           type,
         }),
+      }
+    );
+    return await response.json();
+  }
+
+  async getComplianceLinks(
+    limit: number,
+    startingAfter?: string
+  ): Promise<any> {
+    const response = await this.sendRequest(
+      this.endpoints.getComplianceLinks(limit, startingAfter),
+      {
+        method: methods.GET,
+        headers,
       }
     );
     return await response.json();

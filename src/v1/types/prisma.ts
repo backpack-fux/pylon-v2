@@ -3,7 +3,7 @@ import type {
   Compliance as BaseCompliance,
   User as BaseUser,
   RegisteredPasskey as BaseRegisteredPasskey,
-  Buyer as BaseBuyer,
+  Customer as BaseCustomer,
   ApiKey as BaseApiKey,
 } from '@prisma/client';
 
@@ -13,7 +13,7 @@ export type PrismaSelectedCompliance = Pick<
 >;
 
 export type PrismaMerchant = BaseMerchant;
-export type PrismaBuyer = BaseBuyer;
+export type PrismaCustomer = BaseCustomer;
 export type PrismaUser = BaseUser;
 export type PrismaRegisteredPasskey = BaseRegisteredPasskey;
 export type PrismaApiKey = BaseApiKey;

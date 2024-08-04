@@ -9,39 +9,28 @@ datasource db {
 }
 
 model Merchant {
-  id                  Int                @id @default(autoincrement())
-  name                String             @db.VarChar(255)
-  surname             String             @db.VarChar(255)
-  companyNumber       String?
-  companyJurisdiction String?            @db.Char(2)
-  fee                 Decimal            @default(6.50) @db.Decimal(4, 2)
-  walletAddress       String             @unique
-  phoneNumber         String?            @unique
-  rainId              String?
-  createdAt           DateTime           @default(now())
-  updatedAt           DateTime           @updatedAt
-  userId              Int                @unique
-  addressId           BigInt
-  registeredAddress   PhysicalAddress    @relation(fields: [addressId], references: [id])
-  user                User               @relation(fields: [userId], references: [id])
-  Buyers              Buyer[]
-  Compliance          Compliance[]
-  Orders              Transaction[]
-  Employees           MerchantEmployee[]
-
-  @@unique([companyNumber, companyJurisdiction])
+  id         Int           @id @default(autoincrement())
+  fee        Decimal       @default(6.50) @db.Decimal(4, 2)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  companyId  BigInt
+  company    Company       @relation(fields: [companyId], references: [id])
+  Customers  Customer[]
+  Compliance Compliance[]
+  Orders     Transaction[]
+  Employees  Employee[]
+  User       User[]
 }
 
-model Buyer {
+model Customer {
   id             BigInt           @id @default(autoincrement())
   name           String           @db.VarChar(255)
-  walletAddress  String?          @unique
-  phoneNumber    String
+  surname        String?          @db.VarChar(255)
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   merchantId     Int
   addressId      BigInt?
-  userId         Int              @unique
+  userId         BigInt           @unique
   user           User             @relation(fields: [userId], references: [id])
   billingAddress PhysicalAddress? @relation(fields: [addressId], references: [id])
   merchant       Merchant         @relation(fields: [merchantId], references: [id])
@@ -60,7 +49,7 @@ model Compliance {
   updatedAt                DateTime           @updatedAt
   buyerId                  BigInt?
   merchantId               Int?
-  buyer                    Buyer?             @relation(fields: [buyerId], references: [id])
+  customer                 Customer?          @relation(fields: [buyerId], references: [id])
   merchant                 Merchant?          @relation(fields: [merchantId], references: [id])
 }
 
@@ -78,7 +67,7 @@ model Transaction {
   merchantId       Int
   addressId        BigInt?
   shippingAddress  PhysicalAddress?  @relation(fields: [addressId], references: [id])
-  buyer            Buyer             @relation(fields: [buyerId], references: [id])
+  customer         Customer          @relation(fields: [buyerId], references: [id])
   merchant         Merchant          @relation(fields: [merchantId], references: [id])
 }
 
@@ -91,9 +80,9 @@ model PhysicalAddress {
   state       String?       @db.Char(2)
   country     String        @db.Char(2)
   type        AddressType
-  Buyer       Buyer[]
-  Merchant    Merchant[]
+  Customer    Customer[]
   Transaction Transaction[]
+  Company     Company[]
 }
 
 model RegisteredPasskey {
@@ -102,36 +91,40 @@ model RegisteredPasskey {
   credentialId String              @unique
   publicKey    String
   algorithm    CredentialAlgorithm @default(ES256)
-  userId       Int
+  userId       BigInt
   createdAt    DateTime            @default(now())
   updatedAt    DateTime            @updatedAt
   user         User                @relation(fields: [userId], references: [id])
 }
 
-model MerchantEmployee {
-  id         Int      @id @default(autoincrement())
-  rain       String?  @unique @db.VarChar(36)
-  owner      Boolean  @default(false)
+model Employee {
+  id         Int          @id @default(autoincrement())
+  name       String       @db.VarChar(255)
+  surname    String       @db.VarChar(255)
+  role       EmployeeRole
   merchantId Int
-  userId     Int
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  user       User     @relation(fields: [userId], references: [id])
-  merchant   Merchant @relation(fields: [merchantId], references: [id])
+  userId     BigInt
+  rainId     String?      @unique @db.VarChar(36)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  user       User         @relation(fields: [userId], references: [id])
+  merchant   Merchant     @relation(fields: [merchantId], references: [id])
 }
 
 model User {
-  id                 Int                 @id @default(autoincrement())
+  id                 BigInt              @id @default(autoincrement())
   email              String              @unique
+  phoneNumber        String?             @unique
+  walletAddress      String?             @unique
   username           String?             @unique @db.VarChar(15)
-  role               UserRole
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   registeredPasskeys RegisteredPasskey[]
-  merchantProfile    Merchant?
-  buyerProfile       Buyer?
+  merchantProfile    Merchant?           @relation(fields: [merchantId], references: [id])
+  customerProfile    Customer?
   apiKeys            ApiKey[]
-  employeeProfiles   MerchantEmployee[]
+  employees          Employee[]
+  merchantId         Int?
 }
 
 model ApiKey {
@@ -141,16 +134,24 @@ model ApiKey {
   lastUsedAt DateTime?
   expiresAt  DateTime?
   isActive   Boolean   @default(true)
-  userId     Int
+  userId     BigInt
   user       User      @relation(fields: [userId], references: [id])
 
   @@index([key])
 }
 
-enum UserRole {
-  ADMIN
-  MERCHANT
-  BUYER
+model Company {
+  id                BigInt          @id @default(autoincrement())
+  name              String          @unique @db.VarChar(255)
+  number            String          @unique @db.VarChar(255)
+  repName           String          @db.VarChar(255)
+  repSurname        String          @db.VarChar(255)
+  email             String          @unique @db.VarChar(255)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  addressId         BigInt
+  registeredAddress PhysicalAddress @relation(fields: [addressId], references: [id])
+  Merchant          Merchant[]
 }
 
 enum TransactionStatus {
@@ -190,4 +191,10 @@ enum AccountType {
 enum CredentialAlgorithm {
   RS256
   ES256
+}
+
+enum EmployeeRole {
+  OWNER
+  BOOKKEEPER
+  DEVELOPER
 }

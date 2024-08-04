@@ -9,21 +9,13 @@ export const MerchantCreateSchema = {
     phoneNumber: t.String({
       pattern: '^[+]?[(]?[0-9]{3}[)]?[-s.]?[0-9]{3}[-s.]?[0-9]{4,6}$',
     }),
-    companyNumber: t.Optional(
-      t.String({
-        pattern: '^[a-zA-Z0-9]*$',
-      })
-    ),
-    companyJurisdiction: t.Optional(
-      t.String({
-        minLength: 2,
-        maxLength: 2,
-        pattern: '^[a-zA-Z0-9]{2}$',
-      })
-    ),
     fee: t.Optional(t.Number({ minimum: 3, maximum: 100 })),
     walletAddress: t.String({
       pattern: '^0x[a-fA-F0-9]{40}$',
+    }),
+    company: t.Object({
+      name: t.String({ minLength: 1, maxLength: 255 }),
+      number: t.String({ pattern: '^[a-zA-Z0-9]*$' }),
     }),
     registeredAddress: t.Object({
       street1: t.String({ maxLength: 50 }),

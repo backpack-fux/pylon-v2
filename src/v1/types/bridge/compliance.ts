@@ -94,6 +94,21 @@ export type BridgeComplianceCustomer = {
   endorsements: BridgeComplianceEndorsement[];
 };
 
+export type BridgeComplianceCustomerResponse = {
+  id: UUID;
+  full_name: string;
+  email: string;
+  type: BridgeComplianceType;
+  kyc_link: string;
+  tos_link: string;
+  kyc_status: BridgeComplianceKycStatus;
+  rejection_reasons: BridgeComplianceRejectionReason[];
+  tos_status: BridgeComplianceTosStatus;
+  created_at: string;
+  customer_id: UUID;
+  persona_inquiry_type: string;
+};
+
 export type BridgeComplianceGetAllCustomersResponse = {
   count: number;
   data: BridgeComplianceCustomer[];

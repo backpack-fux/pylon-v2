@@ -2,6 +2,7 @@ import { UUID } from 'crypto';
 import { PrismaSelectedCompliance } from '../types/prisma';
 import {
   BridgeComplianceCustomer,
+  BridgeComplianceCustomerResponse,
   BridgeComplianceKycStatus,
   BridgeComplianceLinksResponse,
   BridgeComplianceTosStatus,
@@ -138,33 +139,28 @@ export class ComplianceService {
     }
   }
 
-  public async createOrUpdateCustomer(customer: BridgeComplianceCustomer) {
-    const compliance = await prisma.compliance.upsert({
-      where: {
-        merchantId: customer.id, // TODO
-      },
-      update: {
-        type: this.mapAccountType(customer.type),
-        verificationStatus: this.mapKycStatus(customer.status),
-        termsOfServiceStatus: customer.has_accepted_terms_of_service
-          ? TosStatus.APPROVED
-          : TosStatus.PENDING,
-        updatedAt: new Date(customer.updated_at),
-        // Add more fields to update as needed
-      },
-      create: {
-        buyerId: BigInt(customer.id),
-        type: this.mapAccountType(customer.type),
-        verificationStatus: this.mapKycStatus(customer.status),
-        termsOfServiceStatus: customer.has_accepted_terms_of_service
-          ? TosStatus.APPROVED
-          : TosStatus.PENDING,
-        verificationDocumentLink: '', // Set a default value or modify as needed
-        termsOfServiceLink: '', // Set a default value or modify as needed
-        createdAt: new Date(customer.created_at),
-        updatedAt: new Date(customer.updated_at),
-        // Add more fields to create as needed
-      },
-    });
+  public async createOrUpdateCustomer(
+    customer: BridgeComplianceCustomerResponse
+  ) {
+    if (customer.type === BridgeComplianceType.Business) {
+      const compliance = await prisma.compliance.upsert({
+        where: {
+          id: customer.id,
+        },
+        update: {
+          verificationStatus: this.mapKycStatus(customer.kyc_status),
+          termsOfServiceStatus: this.mapTosStatus(customer.tos_status),
+        },
+        create: {
+          buyerId: BigInt(customer.id),
+          type: this.mapAccountType(customer.type),
+          verificationStatus: this.mapKycStatus(customer.kyc_status),
+          termsOfServiceStatus: this.mapTosStatus(customer.tos_status),
+          verificationDocumentLink: customer.kyc_link,
+          termsOfServiceLink: customer.tos_link,
+          createdAt: new Date(customer.created_at),
+        },
+      });
+    }
   }
 }

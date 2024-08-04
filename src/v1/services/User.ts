@@ -72,7 +72,7 @@ export class UserService {
     }
   }
 
-  public async findOneById(id: number): Promise<PrismaUser | null> {
+  public async findOneById(id: bigint): Promise<PrismaUser | null> {
     try {
       return await prisma.user.findFirst({
         where: {

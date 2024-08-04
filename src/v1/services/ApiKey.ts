@@ -50,11 +50,30 @@ export class ApiKeyService {
     });
   }
 
-  // Get keys by userId
-  public async getKeysByUserId(userId: number): Promise<PrismaApiKey[]> {
+  // Get active keys by userId
+  public async getKeysByUserId(
+    userId: number
+  ): Promise<Pick<PrismaApiKey, 'key'>[]> {
     return await prisma.apiKey.findMany({
       where: {
         userId,
+        isActive: true,
+      },
+      select: {
+        key: true,
+      },
+    });
+  }
+
+  // Get active keys by key
+  public async getKeysByKey(key: string): Promise<Pick<PrismaApiKey, 'key'>[]> {
+    return await prisma.apiKey.findMany({
+      where: {
+        key,
+        isActive: true,
+      },
+      select: {
+        key: true,
       },
     });
   }

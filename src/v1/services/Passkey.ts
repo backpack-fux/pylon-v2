@@ -9,7 +9,7 @@ import type { AuthenticationChecks, RegistrationChecks } from '@/v1/types/auth';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { PasskeyError, PrismaError } from './Error';
 import { ERROR400, ERROR401, ERROR404, ERROR500 } from '@/helpers/constants';
-import { UserRole, prisma } from '@/db';
+import { prisma } from '@/db';
 import { UserService } from './User';
 import { Config } from '@/config';
 import crypto from 'crypto';
@@ -65,7 +65,7 @@ export class PasskeyService {
 
       //  Create a new user with the verified credentials and the email provided
       const user = await this.userService.createWithRegisteredPasskey(
-        { email, username: verified.username, role: UserRole.MERCHANT },
+        { email, username: verified.username },
         {
           credentialId: verified.credential.id,
           publicKey: verified.credential.publicKey,
@@ -89,7 +89,7 @@ export class PasskeyService {
     expected,
     passKeyName,
   }: {
-    id: number;
+    id: number | bigint;
     registration: RegistrationEncoded;
     expected: RegistrationChecks;
     passKeyName?: string;
@@ -106,7 +106,7 @@ export class PasskeyService {
       );
 
       //  Create a new user with the verified credentials and the email provided
-      const user = await this.userService.findOneById(id);
+      const user = await this.userService.findOneById(BigInt(id));
 
       if (!user) {
         throw new PrismaError(ERROR404.statusCode, 'User not found');
@@ -185,7 +185,7 @@ export class PasskeyService {
     credential,
   }: {
     id: number;
-    userId: number;
+    userId: bigint;
     credential: string;
   }) {
     try {
@@ -233,7 +233,7 @@ export class PasskeyService {
   }
 
   public async addPasskeyForExistingUser(
-    id: number,
+    id: bigint,
     passkeyData: Omit<CreatePasskey, 'userId'>
   ) {
     try {
@@ -264,7 +264,7 @@ export class PasskeyService {
     }
   }
 
-  public async findPasskeyByUserId(userId: number) {
+  public async findPasskeyByUserId(userId: bigint) {
     try {
       return await prisma.registeredPasskey.findMany({
         where: {

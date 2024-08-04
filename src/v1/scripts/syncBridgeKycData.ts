@@ -1,6 +1,10 @@
 import { BridgeService } from '../services/external/Bridge';
 import { ComplianceService } from '../services/Compliance';
-import { BridgeComplianceErrorResponse } from '../types/bridge/compliance';
+import {
+  BridgeComplianceErrorResponse,
+  BridgeComplianceKycStatus,
+  BridgeComplianceType,
+} from '../types/bridge/compliance';
 
 // Type guard
 const isBridgeComplianceErrorResponse = (
@@ -11,6 +15,9 @@ const isBridgeComplianceErrorResponse = (
   );
 };
 
+/**
+ * Syncs KYC data from Bridge to Compliance Table
+ */
 const syncBridgeKycData = async () => {
   const bridgeService = BridgeService.getInstance();
   const complianceService = ComplianceService.getInstance();
@@ -21,7 +28,7 @@ const syncBridgeKycData = async () => {
 
   while (hasMoreCustomers) {
     // Fetch customers from Bridge with query parameters
-    const resp = await bridgeService.getAllCustomers(limit, startingAfter);
+    const resp = await bridgeService.getComplianceLinks(limit, startingAfter);
 
     if (isBridgeComplianceErrorResponse(resp)) {
       return;
@@ -31,16 +38,23 @@ const syncBridgeKycData = async () => {
 
     for (const customer of customers) {
       // Store each customer in your database
-      await complianceService.createOrUpdateCustomer(customer);
+      if (customer.kyc_status === BridgeComplianceKycStatus.Approved) {
+        if (customer.type === BridgeComplianceType.Business) {
+          // await complianceService.createOrUpdateCustomer(customer);
+          console.log(customer);
+        } else if (customer.type === BridgeComplianceType.Individual) {
+          await complianceService.createOrUpdateCustomer(customer);
+          console.log(customer);
+        }
+      }
     }
-    console.log(customers);
 
     console.log(`Processed ${customers.length} customers`);
 
     if (customers.length < limit) {
       hasMoreCustomers = false;
     } else {
-      startingAfter = customers[customers.length - 1].id;
+      startingAfter = customers[customers.length - 1].customer_id;
     }
   }
 
