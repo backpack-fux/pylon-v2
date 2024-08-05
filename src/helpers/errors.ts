@@ -10,6 +10,7 @@ export const ERRORS = {
     invalidUserAgent: 'Invalid user agent',
     invalidIPAddress: 'Invalid IP address',
     missingAuthorizationHeader: 'Missing or invalid authorization header',
+    expiredAPIKey: 'API key has expired',
     bridge: {
       malformedSignature: 'Malformed signature header',
       invalidSignature: 'Invalid signature',
@@ -33,16 +34,16 @@ export const ERRORS = {
   fetch: {
     error: (message: string) => `Fetch error: ${message}`,
   },
-  merchant: {
-    exists: 'Already exists',
-    notExists: 'Does not exist',
-    notRegistered: 'Is not registered',
-    emailExists: (email: string) =>
-      `A merchant with email ${email} already exists.`,
-    phoneNumberExists: (phoneNumber: string) =>
-      `A merchant with phone number ${phoneNumber} already exists.`,
-    walletAddressExists: (walletAddress: string) =>
-      `The wallet address ${walletAddress} is already in use.`,
+  general: {
+    exists: (field: string) => `${field} already exists`,
+    notExists: (field: string) => `${field} does not exist`,
+    notRegistered: (field: string) => `${field} is not registered`,
+    emailExists: (field: string, email: string) =>
+      `A ${field} with email ${email} already exists.`,
+    phoneNumberExists: (field: string, phoneNumber: string) =>
+      `A ${field} with phone number ${phoneNumber} already exists.`,
+    walletAddressExists: (field: string, walletAddress: string) =>
+      `The ${field} wallet address ${walletAddress} is already in use.`,
   },
 };
 

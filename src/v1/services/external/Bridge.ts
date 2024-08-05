@@ -1,7 +1,13 @@
 import { Config } from '@/config';
 import { headers, methods } from '@/helpers/constants';
 import { ERRORS } from '@/helpers/errors';
-import { BridgeComplianceType } from '@/v1/types/bridge/compliance';
+import {
+  BridgeComplianceGetAllComplianceLinksResponse,
+  BridgeComplianceGetAllCustomersResponse,
+  BridgeComplianceType,
+} from '@/v1/types/bridge/compliance';
+import { BridgeErrorResponse } from '@/v1/types/bridge/error';
+import { BridgeTransferGetStatusResponse } from '@/v1/types/bridge/transfer';
 import {
   BridgeCurrencyTypeDst,
   BridgeCurrencyTypeSrc,
@@ -22,17 +28,56 @@ export class BridgeService {
     createTos: '/customers/tos_links',
     createCustomer: '/customers',
     createComplianceLinks: '/kyc_links',
+    createPrefundedAccountTransfer: '/transfers',
+    getPrefundedAccountBalance: '/prefunded_accounts',
     createKycUrl: (customerId: string, redirectUri: string) =>
       `/customers/${customerId}/id_verification_link?redirect_uri=${redirectUri}`,
     getCustomer: (customerId: string) => `/customers/${customerId}`,
     getKycLinks: (kycLinkId: string) => `/kyc_links/${kycLinkId}`,
-    createPrefundedAccountTransfer: '/transfers',
-    getPrefundedAccountBalance: '/prefunded_accounts',
+    getTransferStatus: (transferId: BridgeUUID) => `/transfers/${transferId}`,
+    getAllCustomers: (limit: number, startingAfter?: string) =>
+      `/customers?limit=${limit}${
+        startingAfter ? `&starting_after=${startingAfter}` : ''
+      }`,
+    getComplianceLinks: (limit: number, startingAfter?: string) =>
+      `/kyc_links?limit=${limit}${
+        startingAfter ? `&starting_after=${startingAfter}` : ''
+      }`,
   };
 
   private constructor() {
     this.baseUrl = Config.bridge.apiUrl;
     this.apiKey = Config.bridge.apiKey;
+  }
+
+  private buildRequestHeaders(
+    customHeaders: Record<string, string>
+  ): Record<string, string> {
+    return {
+      ...headers,
+      ...customHeaders,
+    };
+  }
+
+  private mapBridgeErrorToHttpStatus(bridgeErrorCode: string): number {
+    switch (bridgeErrorCode) {
+      case 'not_found':
+        return 404;
+      case 'unauthorized':
+        return 401;
+      case 'forbidden':
+        return 403;
+      case 'bad_request':
+        return 400;
+      default:
+        return 500;
+    }
+  }
+
+  private isBridgeErrorResponse(data: any): data is BridgeErrorResponse {
+    return (
+      data && typeof data.code === 'string' && typeof data.message === 'string'
+    );
   }
 
   /** @dev avoid multiple instances; allow one global, reusable instance */
@@ -68,11 +113,23 @@ export class BridgeService {
 
     try {
       const response = await fetch(`${this.baseUrl}${url}`, mergedOptions);
+      const res = await response.json();
+
       if (!response.ok) {
-        const res = await response.json();
         console.error(res);
         throw new BridgeError(response.status, res.message, res.code);
       }
+
+      if (this.isBridgeErrorResponse(res)) {
+        const httpStatusCode = this.mapBridgeErrorToHttpStatus(res.code);
+        throw new BridgeError(
+          httpStatusCode,
+          res.message,
+          res.code,
+          'BridgeAPIError'
+        );
+      }
+
       return response;
     } catch (error: any) {
       if (error instanceof BridgeError) {
@@ -146,6 +203,20 @@ export class BridgeService {
           email,
           type,
         }),
+      }
+    );
+    return await response.json();
+  }
+
+  async getComplianceLinks(
+    limit: number,
+    startingAfter?: string
+  ): Promise<BridgeComplianceGetAllComplianceLinksResponse> {
+    const response = await this.sendRequest(
+      this.endpoints.getComplianceLinks(limit, startingAfter),
+      {
+        method: methods.GET,
+        headers,
       }
     );
     return await response.json();
@@ -232,12 +303,31 @@ export class BridgeService {
     return (await response.json()).data;
   }
 
-  private buildRequestHeaders(
-    customHeaders: Record<string, string>
-  ): Record<string, string> {
-    return {
-      ...headers,
-      ...customHeaders,
-    };
+  async getTransferStatus(
+    transferId: BridgeUUID
+  ): Promise<BridgeErrorResponse> {
+    const response = await this.sendRequest(
+      this.endpoints.getTransferStatus(transferId),
+      {
+        method: methods.GET,
+        headers,
+      }
+    );
+    return await response.json();
+  }
+
+  async getAllCustomers(
+    limit: number,
+    startingAfter?: string
+  ): Promise<BridgeComplianceGetAllCustomersResponse> {
+    const response = await this.sendRequest(
+      this.endpoints.getAllCustomers(limit, startingAfter),
+      {
+        method: methods.GET,
+        headers,
+      }
+    );
+
+    return await response.json();
   }
 }

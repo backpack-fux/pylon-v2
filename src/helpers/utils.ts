@@ -4,6 +4,7 @@ import { UUID, createHash, createVerify, KeyLike, generateKey } from 'crypto';
 import { TosStatus, VerificationStatus } from '@prisma/client';
 import { TransactionProcessor } from '@/v1/types/transaction';
 import { MerchantIdentifier } from '@/v1/types/merchant';
+import { BridgeErrorResponse } from '@/v1/types/bridge/error';
 
 export const utils = {
   isJSON: (data: string) => {

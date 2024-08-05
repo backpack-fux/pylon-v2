@@ -1,15 +1,16 @@
 import { prisma } from '@/db';
 import {
   BridgeComplianceLinksResponse,
-  BridgeComplianceTypeEnum,
+  BridgeComplianceType,
 } from '../types/bridge/compliance';
 import { BridgeService } from './external/Bridge';
 import { UUID } from 'crypto';
-import { PrismaMerchant } from '../types/prisma';
-import { AddressType } from '@prisma/client';
+import { PrismaEmployee, PrismaMerchant, PrismaUser } from '../types/prisma';
+import { AddressType, EmployeeRole } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { ERROR400 } from '@/helpers/constants';
 import { PrismaError } from './Error';
+import { MerchantCreateBody } from '../types/merchant';
 
 const bridgeService = BridgeService.getInstance();
 
@@ -24,42 +25,59 @@ export class MerchantService {
   }
 
   /** @dev create partner */
-  public async createPartner(partnerData: any): Promise<PrismaMerchant> {
-    const {
-      name,
-      surname,
-      email,
-      phoneNumber,
-      companyNumber,
-      companyJurisdiction,
-      fee,
-      walletAddress,
-      registeredAddress,
-    } = partnerData;
+  public async createPartner(
+    partnerData: MerchantCreateBody
+  ): Promise<PrismaMerchant & { Employees: Pick<PrismaEmployee, 'userId'>[] }> {
+    const { representatives, company, fee, walletAddress } = partnerData;
 
-    const { street1, street2, city, postcode, state, country } =
-      registeredAddress;
+    const {
+      name: companyName,
+      number: companyNumber,
+      email: companyEmail,
+      registeredAddress: { street1, street2, city, postcode, state, country },
+    } = company;
 
     try {
-      const merchant: PrismaMerchant = await prisma.merchant.create({
+      const merchant = await prisma.merchant.create({
         data: {
-          name,
-          surname,
-          email,
-          phoneNumber,
-          companyNumber,
-          companyJurisdiction,
           fee,
-          walletAddress,
-          registeredAddress: {
+          walletAddress: walletAddress,
+          company: {
             create: {
-              type: AddressType.REGISTERED,
-              street1,
-              street2,
-              city,
-              postcode,
-              state,
-              country,
+              name: companyName,
+              number: companyNumber,
+              email: companyEmail,
+              registeredAddress: {
+                create: {
+                  type: AddressType.REGISTERED,
+                  street1,
+                  street2,
+                  city,
+                  postcode,
+                  state,
+                  country,
+                },
+              },
+            },
+          },
+          Employees: {
+            create: representatives.map((rep) => ({
+              name: rep.name,
+              surname: rep.surname,
+              role: EmployeeRole.OWNER,
+              user: {
+                create: {
+                  email: rep.email,
+                  phoneNumber: rep.phoneNumber,
+                },
+              },
+            })),
+          },
+        },
+        include: {
+          Employees: {
+            select: {
+              userId: true,
             },
           },
         },
@@ -78,16 +96,16 @@ export class MerchantService {
   /** @dev register kyb partner via compliance partner */
   public async registerCompliancePartner(
     merchantUuid: UUID,
-    fullName: string,
-    email: string
+    companyName: string,
+    companyEmail: string
   ): Promise<BridgeComplianceLinksResponse> {
     try {
       const registered: BridgeComplianceLinksResponse =
         await bridgeService.createComplianceLinks(
           merchantUuid,
-          fullName,
-          BridgeComplianceTypeEnum.Business,
-          email
+          companyName,
+          BridgeComplianceType.Business,
+          companyEmail
         );
 
       return registered;

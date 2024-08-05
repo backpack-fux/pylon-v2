@@ -43,11 +43,10 @@ export class BridgeError extends Error {
   constructor(
     public readonly statusCode: number,
     message: string,
-    public readonly errorName?: string | undefined
+    public readonly bridgeErrorCode: string,
+    public readonly errorName?: string
   ) {
     super(message);
     this.name = 'BridgeError';
-    this.errorName = errorName;
-    this.statusCode = statusCode;
   }
 }

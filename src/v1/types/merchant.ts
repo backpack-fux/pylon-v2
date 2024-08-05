@@ -1,3 +1,6 @@
+import { Static } from '@sinclair/typebox';
+import { MerchantCreateSchema } from '../schemas/merchant';
+
 export enum MerchantIdentifier {
   BACKPACK_DAO = 1,
   BUCKET_LABS = 2,
@@ -6,3 +9,5 @@ export enum MerchantIdentifier {
   REUP = 4,
   // Add Merchant Identifiers
 }
+
+export type MerchantCreateBody = Static<(typeof MerchantCreateSchema)['body']>;

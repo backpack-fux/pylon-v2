@@ -20,7 +20,11 @@
     "db:deploy": "prisma migrate deploy",
     "db:status": "prisma migrate status",
     "db:push": "prisma db push",
+    "db:reset": "prisma migrate reset --force",
     "db:studio": "prisma studio",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:delete": "docker-compose down -v --remove-orphans",
     "test": "jest"
   },
   "dependencies": {

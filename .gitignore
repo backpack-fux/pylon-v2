@@ -33,3 +33,7 @@ yarn-error.log*
 
 # out dir
 dist/
+
+# docker
+docker-compose.yml
+docker-compose.yaml

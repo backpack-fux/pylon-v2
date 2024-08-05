@@ -5,6 +5,7 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { PrismaError } from './Error';
 import { ERROR400 } from '@/helpers/constants';
 import { CreatePasskey } from '../types/auth';
+import { UUID } from 'crypto';
 
 export class UserService {
   private static instance: UserService;
@@ -40,7 +41,7 @@ export class UserService {
       const user = await prisma.user.create({
         data: {
           ...userData,
-          registeredPasskey: {
+          registeredPasskeys: {
             create: { ...passkeyData },
           },
         },
@@ -72,7 +73,7 @@ export class UserService {
     }
   }
 
-  public async findOneById(id: number): Promise<PrismaUser | null> {
+  public async findOneById(id: UUID): Promise<PrismaUser | null> {
     try {
       return await prisma.user.findFirst({
         where: {
