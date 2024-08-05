@@ -1,13 +1,13 @@
 import { Config } from '@/config';
 import { ERROR401, ERROR403 } from '@/helpers/constants';
 import { ERRORS } from '@/helpers/errors';
-import { FastifyRequest, FastifyReply } from 'fastify';
+import { UUID } from 'crypto';
+import { FastifyReply, FastifyRequest } from 'fastify';
+import jwt from 'jsonwebtoken';
+import { ValidateFarcasterJWTSchema } from '../schemas/auth';
+import { BridgePrefundedAccountBalanceSchema } from '../schemas/bridge';
 import { UserService } from '../services/User';
 import { FastifyReplyTypebox, FastifyRequestTypebox } from '../types/fastify';
-import { ValidateFarcasterJWTSchema } from '../schemas/auth';
-import jwt from 'jsonwebtoken';
-import { BridgePrefundedAccountBalanceSchema } from '../schemas/bridge';
-import { UUID } from 'crypto';
 
 const userService = UserService.getInstance();
 
@@ -43,22 +43,29 @@ export const validateAPIKey = async (
   req: FastifyRequest,
   rep: FastifyReply
 ) => {
+  console.log('Received headers:', req.headers);
   const authHeader = req.headers.authorization;
+  console.log('Auth header:', authHeader);
   const apiKey = authHeader && authHeader.split(' ')[1];
+  console.log('Extracted API key:', apiKey);
+  console.log('Expected API key:', Config.serverApiKey);
 
   if (!apiKey) {
+    console.log('API key is missing');
     return rep
       .code(ERROR401.statusCode)
       .send({ unauthorized: ERRORS.auth.missingAuthorizationHeader });
   }
 
   if (apiKey !== Config.serverApiKey) {
+    console.log('API key is invalid');
     return rep
       .code(ERROR401.statusCode)
       .send({ unauthorized: ERRORS.auth.invalidAPIKey });
-  } else {
-    return;
   }
+
+  console.log('API key is valid');
+  return;
 };
 
 export const validateFarcasterUser = async (
