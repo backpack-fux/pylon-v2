@@ -1,4 +1,4 @@
-import { UUID } from "crypto";
+import { UUID } from 'crypto';
 
 export enum BridgePaymentRailEnum {
   POLYGON = 'polygon',
@@ -38,6 +38,7 @@ export type BridgePaymentRailTypeDst = Exclude<
 
 export enum BridgeCurrencyEnum {
   USD = 'usd',
+  EUR = 'eur',
   USDC = 'usdc',
   USDT = 'usdt',
   DAI = 'dai',

@@ -109,14 +109,12 @@ export type BridgeComplianceCustomerResponse = {
   persona_inquiry_type: string;
 };
 
+export type BridgeComplianceGetAllComplianceLinksResponse = {
+  count: number;
+  data: BridgeComplianceCustomerResponse[];
+};
+
 export type BridgeComplianceGetAllCustomersResponse = {
   count: number;
   data: BridgeComplianceCustomer[];
-};
-
-export type BridgeComplianceErrorResponse = {
-  code: string;
-  location?: string;
-  name?: string;
-  message: string;
 };

@@ -90,10 +90,9 @@ export const validateMerchantAPIKey = async (
   req: FastifyRequest,
   rep: FastifyReply
 ) => {
-  const authHeader = req.headers.authorization;
-  const apiKey = authHeader && authHeader.split(' ')[1];
+  const apiKey = req.headers['x-bp-api-key'];
 
-  if (!apiKey) {
+  if (!apiKey || typeof apiKey !== 'string') {
     return rep.code(ERROR401.statusCode).send({
       statusCode: ERROR401.statusCode,
       message: ERRORS.auth.missingAuthorizationHeader,

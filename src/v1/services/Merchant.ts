@@ -28,16 +28,13 @@ export class MerchantService {
   public async createPartner(
     partnerData: MerchantCreateBody
   ): Promise<PrismaMerchant & { Employees: Pick<PrismaEmployee, 'userId'>[] }> {
-    const { representatives, company, fee, walletAddress, registeredAddress } =
-      partnerData;
-
-    const { street1, street2, city, postcode, state, country } =
-      registeredAddress;
+    const { representatives, company, fee, walletAddress } = partnerData;
 
     const {
       name: companyName,
       number: companyNumber,
       email: companyEmail,
+      registeredAddress: { street1, street2, city, postcode, state, country },
     } = company;
 
     try {

@@ -1,14 +1,4 @@
 import { BridgeService } from '../services/external/Bridge';
-import { BridgeComplianceErrorResponse } from '../types/bridge/compliance';
-
-// Type guard
-const isBridgeComplianceErrorResponse = (
-  data: any
-): data is BridgeComplianceErrorResponse => {
-  return (
-    data && typeof data.code === 'string' && typeof data.message === 'string'
-  );
-};
 
 /**
  * Syncs KYC data from Bridge to Compliance Table
@@ -23,10 +13,6 @@ const syncBridgeKycData = async () => {
   while (hasMoreCustomers) {
     // Fetch customers from Bridge with query parameters
     const resp = await bridgeService.getComplianceLinks(limit, startingAfter);
-
-    if (isBridgeComplianceErrorResponse(resp)) {
-      return;
-    }
 
     const { data: customers } = resp;
 

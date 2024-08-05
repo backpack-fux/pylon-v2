@@ -10,13 +10,13 @@ import { utils } from '@/helpers/utils';
 import { errorResponse, successResponse } from '@/responses';
 import { MerchantService } from '../services/Merchant';
 import { ComplianceService } from '../services/Compliance';
-import { PrismaError } from '../services/Error';
+import { BridgeError, PrismaError } from '../services/Error';
 import { UUID } from 'crypto';
 import {
   BridgeComplianceLinksResponse,
   BridgeComplianceType,
 } from '../types/bridge/compliance';
-import { PrismaApiKey, PrismaSelectedCompliance } from '../types/prisma';
+import { PrismaSelectedCompliance } from '../types/prisma';
 import { ApiKeyService } from '../services/ApiKey';
 
 const merchantService = MerchantService.getInstance();
@@ -77,7 +77,9 @@ export async function createMerchantHandler(
 
     return successResponse(rep, { compliance, apiKey });
   } catch (error) {
-    if (error instanceof PrismaError) {
+    if (error instanceof BridgeError) {
+      return errorResponse(req, rep, error.statusCode, error.message);
+    } else if (error instanceof PrismaError) {
       return errorResponse(req, rep, error.statusCode, error.message);
     } else {
       console.error(error);
@@ -97,8 +99,12 @@ export async function getTransferStatusHandler(
     const transferStatus = await bridgeService.getTransferStatus(transferId);
     return successResponse(rep, transferStatus);
   } catch (error) {
-    console.error(error);
-    const errorMessage = 'An error occurred during transfer status retrieval';
-    return errorResponse(req, rep, ERROR404.statusCode, errorMessage);
+    if (error instanceof BridgeError) {
+      return errorResponse(req, rep, error.statusCode, error.message);
+    } else {
+      console.error(error);
+      const errorMessage = 'An error occurred during transfer status retrieval';
+      return errorResponse(req, rep, ERROR404.statusCode, errorMessage);
+    }
   }
 }

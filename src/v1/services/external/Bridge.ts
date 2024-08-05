@@ -2,10 +2,12 @@ import { Config } from '@/config';
 import { headers, methods } from '@/helpers/constants';
 import { ERRORS } from '@/helpers/errors';
 import {
-  BridgeComplianceErrorResponse,
+  BridgeComplianceGetAllComplianceLinksResponse,
   BridgeComplianceGetAllCustomersResponse,
   BridgeComplianceType,
 } from '@/v1/types/bridge/compliance';
+import { BridgeErrorResponse } from '@/v1/types/bridge/error';
+import { BridgeTransferGetStatusResponse } from '@/v1/types/bridge/transfer';
 import {
   BridgeCurrencyTypeDst,
   BridgeCurrencyTypeSrc,
@@ -57,6 +59,27 @@ export class BridgeService {
     };
   }
 
+  private mapBridgeErrorToHttpStatus(bridgeErrorCode: string): number {
+    switch (bridgeErrorCode) {
+      case 'not_found':
+        return 404;
+      case 'unauthorized':
+        return 401;
+      case 'forbidden':
+        return 403;
+      case 'bad_request':
+        return 400;
+      default:
+        return 500;
+    }
+  }
+
+  private isBridgeErrorResponse(data: any): data is BridgeErrorResponse {
+    return (
+      data && typeof data.code === 'string' && typeof data.message === 'string'
+    );
+  }
+
   /** @dev avoid multiple instances; allow one global, reusable instance */
   public static getInstance(): BridgeService {
     if (!BridgeService.instance) {
@@ -90,11 +113,23 @@ export class BridgeService {
 
     try {
       const response = await fetch(`${this.baseUrl}${url}`, mergedOptions);
+      const res = await response.json();
+
       if (!response.ok) {
-        const res = await response.json();
         console.error(res);
         throw new BridgeError(response.status, res.message, res.code);
       }
+
+      if (this.isBridgeErrorResponse(res)) {
+        const httpStatusCode = this.mapBridgeErrorToHttpStatus(res.code);
+        throw new BridgeError(
+          httpStatusCode,
+          res.message,
+          res.code,
+          'BridgeAPIError'
+        );
+      }
+
       return response;
     } catch (error: any) {
       if (error instanceof BridgeError) {
@@ -176,7 +211,7 @@ export class BridgeService {
   async getComplianceLinks(
     limit: number,
     startingAfter?: string
-  ): Promise<any> {
+  ): Promise<BridgeComplianceGetAllComplianceLinksResponse> {
     const response = await this.sendRequest(
       this.endpoints.getComplianceLinks(limit, startingAfter),
       {
@@ -268,7 +303,9 @@ export class BridgeService {
     return (await response.json()).data;
   }
 
-  async getTransferStatus(transferId: BridgeUUID): Promise<any> {
+  async getTransferStatus(
+    transferId: BridgeUUID
+  ): Promise<BridgeErrorResponse> {
     const response = await this.sendRequest(
       this.endpoints.getTransferStatus(transferId),
       {
@@ -282,9 +319,7 @@ export class BridgeService {
   async getAllCustomers(
     limit: number,
     startingAfter?: string
-  ): Promise<
-    BridgeComplianceGetAllCustomersResponse | BridgeComplianceErrorResponse
-  > {
+  ): Promise<BridgeComplianceGetAllCustomersResponse> {
     const response = await this.sendRequest(
       this.endpoints.getAllCustomers(limit, startingAfter),
       {
@@ -293,13 +328,6 @@ export class BridgeService {
       }
     );
 
-    if (response.ok) {
-      const data: BridgeComplianceGetAllCustomersResponse =
-        await response.json();
-      return data;
-    } else {
-      const errorData: BridgeComplianceErrorResponse = await response.json();
-      return errorData;
-    }
+    return await response.json();
   }
 }
