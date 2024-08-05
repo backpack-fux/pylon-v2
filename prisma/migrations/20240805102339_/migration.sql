@@ -9,8 +9,9 @@
   - You are about to drop the column `phoneNumber` on the `Merchant` table. All the data in the column will be lost.
   - You are about to drop the column `surname` on the `Merchant` table. All the data in the column will be lost.
   - You are about to drop the column `tokenAuth` on the `Merchant` table. All the data in the column will be lost.
-  - You are about to drop the column `walletAddress` on the `Merchant` table. All the data in the column will be lost.
+  - You are about to alter the column `walletAddress` on the `Merchant` table. The data in that column could be lost. The data in that column will be cast from `Text` to `Char(42)`.
   - You are about to drop the `Buyer` table. If the table is not empty, all the data it contains will be lost.
+  - You are about to drop the `PhysicalAddress` table. If the table is not empty, all the data it contains will be lost.
   - Added the required column `companyId` to the `Merchant` table without a default value. This is not possible if the table is not empty.
 
 */
@@ -33,6 +34,9 @@ ALTER TABLE "Compliance" DROP CONSTRAINT "Compliance_buyerId_fkey";
 ALTER TABLE "Merchant" DROP CONSTRAINT "Merchant_addressId_fkey";
 
 -- DropForeignKey
+ALTER TABLE "Transaction" DROP CONSTRAINT "Transaction_addressId_fkey";
+
+-- DropForeignKey
 ALTER TABLE "Transaction" DROP CONSTRAINT "Transaction_buyerId_fkey";
 
 -- DropIndex
@@ -44,9 +48,6 @@ DROP INDEX "Merchant_email_key";
 -- DropIndex
 DROP INDEX "Merchant_phoneNumber_key";
 
--- DropIndex
-DROP INDEX "Merchant_walletAddress_key";
-
 -- AlterTable
 ALTER TABLE "Merchant" DROP COLUMN "addressId",
 DROP COLUMN "companyJurisdiction",
@@ -56,18 +57,21 @@ DROP COLUMN "name",
 DROP COLUMN "phoneNumber",
 DROP COLUMN "surname",
 DROP COLUMN "tokenAuth",
-DROP COLUMN "walletAddress",
-ADD COLUMN     "companyId" BIGINT NOT NULL;
+ADD COLUMN     "companyId" BIGINT NOT NULL,
+ALTER COLUMN "walletAddress" SET DATA TYPE CHAR(42);
 
 -- DropTable
 DROP TABLE "Buyer";
+
+-- DropTable
+DROP TABLE "PhysicalAddress";
 
 -- CreateTable
 CREATE TABLE "Company" (
     "id" BIGSERIAL NOT NULL,
     "name" VARCHAR(255) NOT NULL,
-    "number" VARCHAR(255) NOT NULL,
     "email" VARCHAR(255) NOT NULL,
+    "number" VARCHAR(255) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "addressId" BIGINT NOT NULL,
@@ -109,13 +113,26 @@ CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "phoneNumber" TEXT,
-    "walletAddress" TEXT,
+    "walletAddress" CHAR(42),
     "username" VARCHAR(15),
-    "merchantId" INTEGER,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Address" (
+    "id" BIGSERIAL NOT NULL,
+    "street1" VARCHAR(50) NOT NULL,
+    "street2" VARCHAR(50),
+    "city" VARCHAR(50) NOT NULL,
+    "postcode" VARCHAR(25),
+    "state" CHAR(2),
+    "country" CHAR(2) NOT NULL,
+    "type" "AddressType" NOT NULL,
+
+    CONSTRAINT "Address_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -140,7 +157,7 @@ CREATE TABLE "ApiKey" (
     "lastUsedAt" TIMESTAMP(3),
     "expiresAt" TIMESTAMP(3),
     "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "userId" TEXT NOT NULL,
+    "merchantId" INTEGER NOT NULL,
 
     CONSTRAINT "ApiKey_pkey" PRIMARY KEY ("id")
 );
@@ -149,16 +166,19 @@ CREATE TABLE "ApiKey" (
 CREATE UNIQUE INDEX "Company_name_key" ON "Company"("name");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Company_email_key" ON "Company"("email");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Company_number_key" ON "Company"("number");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Company_email_key" ON "Company"("email");
+CREATE UNIQUE INDEX "Employee_userId_key" ON "Employee"("userId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Employee_rainId_key" ON "Employee"("rainId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Customer_userId_key" ON "Customer"("userId");
+CREATE UNIQUE INDEX "Customer_userId_merchantId_key" ON "Customer"("userId", "merchantId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
@@ -182,7 +202,7 @@ CREATE UNIQUE INDEX "ApiKey_key_key" ON "ApiKey"("key");
 CREATE INDEX "ApiKey_key_idx" ON "ApiKey"("key");
 
 -- AddForeignKey
-ALTER TABLE "Company" ADD CONSTRAINT "Company_addressId_fkey" FOREIGN KEY ("addressId") REFERENCES "PhysicalAddress"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Company" ADD CONSTRAINT "Company_addressId_fkey" FOREIGN KEY ("addressId") REFERENCES "Address"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Merchant" ADD CONSTRAINT "Merchant_companyId_fkey" FOREIGN KEY ("companyId") REFERENCES "Company"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -197,16 +217,16 @@ ALTER TABLE "Employee" ADD CONSTRAINT "Employee_merchantId_fkey" FOREIGN KEY ("m
 ALTER TABLE "Customer" ADD CONSTRAINT "Customer_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Customer" ADD CONSTRAINT "Customer_addressId_fkey" FOREIGN KEY ("addressId") REFERENCES "PhysicalAddress"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Customer" ADD CONSTRAINT "Customer_addressId_fkey" FOREIGN KEY ("addressId") REFERENCES "Address"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Customer" ADD CONSTRAINT "Customer_merchantId_fkey" FOREIGN KEY ("merchantId") REFERENCES "Merchant"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "User" ADD CONSTRAINT "User_merchantId_fkey" FOREIGN KEY ("merchantId") REFERENCES "Merchant"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Compliance" ADD CONSTRAINT "Compliance_buyerId_fkey" FOREIGN KEY ("buyerId") REFERENCES "Customer"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Compliance" ADD CONSTRAINT "Compliance_buyerId_fkey" FOREIGN KEY ("buyerId") REFERENCES "Customer"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_addressId_fkey" FOREIGN KEY ("addressId") REFERENCES "Address"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_buyerId_fkey" FOREIGN KEY ("buyerId") REFERENCES "Customer"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -215,4 +235,4 @@ ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_buyerId_fkey" FOREIGN KEY 
 ALTER TABLE "RegisteredPasskey" ADD CONSTRAINT "RegisteredPasskey_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ApiKey" ADD CONSTRAINT "ApiKey_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ApiKey" ADD CONSTRAINT "ApiKey_merchantId_fkey" FOREIGN KEY ("merchantId") REFERENCES "Merchant"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

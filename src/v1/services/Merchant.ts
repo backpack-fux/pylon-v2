@@ -28,21 +28,17 @@ export class MerchantService {
   public async createPartner(
     partnerData: MerchantCreateBody
   ): Promise<PrismaMerchant & { Employees: Pick<PrismaEmployee, 'userId'>[] }> {
-    const {
-      name: representativeName,
-      surname: representativeSurname,
-      email: representativeEmail,
-      phoneNumber: representativePhoneNumber,
-      company,
-      fee,
-      walletAddress,
-      registeredAddress,
-    } = partnerData;
+    const { representatives, company, fee, walletAddress, registeredAddress } =
+      partnerData;
 
     const { street1, street2, city, postcode, state, country } =
       registeredAddress;
 
-    const { name: companyName, number: companyNumber } = company;
+    const {
+      name: companyName,
+      number: companyNumber,
+      email: companyEmail,
+    } = company;
 
     try {
       const merchant = await prisma.merchant.create({
@@ -53,6 +49,7 @@ export class MerchantService {
             create: {
               name: companyName,
               number: companyNumber,
+              email: companyEmail,
               registeredAddress: {
                 create: {
                   type: AddressType.REGISTERED,
@@ -67,26 +64,20 @@ export class MerchantService {
             },
           },
           Employees: {
-            create: {
-              name: representativeName,
-              surname: representativeSurname,
+            create: representatives.map((rep) => ({
+              name: rep.name,
+              surname: rep.surname,
               role: EmployeeRole.OWNER,
               user: {
                 create: {
-                  email: representativeEmail,
-                  phoneNumber: representativePhoneNumber,
+                  email: rep.email,
+                  phoneNumber: rep.phoneNumber,
                 },
               },
-            },
+            })),
           },
         },
-        select: {
-          id: true,
-          walletAddress: true,
-          fee: true,
-          createdAt: true,
-          updatedAt: true,
-          companyId: true,
+        include: {
           Employees: {
             select: {
               userId: true,
@@ -108,16 +99,16 @@ export class MerchantService {
   /** @dev register kyb partner via compliance partner */
   public async registerCompliancePartner(
     merchantUuid: UUID,
-    fullName: string,
-    email: string
+    companyName: string,
+    companyEmail: string
   ): Promise<BridgeComplianceLinksResponse> {
     try {
       const registered: BridgeComplianceLinksResponse =
         await bridgeService.createComplianceLinks(
           merchantUuid,
-          fullName,
+          companyName,
           BridgeComplianceType.Business,
-          email
+          companyEmail
         );
 
       return registered;

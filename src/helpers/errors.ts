@@ -34,16 +34,16 @@ export const ERRORS = {
   fetch: {
     error: (message: string) => `Fetch error: ${message}`,
   },
-  user: {
-    exists: 'User already exists',
-    notExists: 'User does not exist',
-    notRegistered: 'User is not registered',
-    emailExists: (email: string) =>
-      `A user with email ${email} already exists.`,
-    phoneNumberExists: (phoneNumber: string) =>
-      `A user with phone number ${phoneNumber} already exists.`,
-    walletAddressExists: (walletAddress: string) =>
-      `The wallet address ${walletAddress} is already in use.`,
+  general: {
+    exists: (field: string) => `${field} already exists`,
+    notExists: (field: string) => `${field} does not exist`,
+    notRegistered: (field: string) => `${field} is not registered`,
+    emailExists: (field: string, email: string) =>
+      `A ${field} with email ${email} already exists.`,
+    phoneNumberExists: (field: string, phoneNumber: string) =>
+      `A ${field} with phone number ${phoneNumber} already exists.`,
+    walletAddressExists: (field: string, walletAddress: string) =>
+      `The ${field} wallet address ${walletAddress} is already in use.`,
   },
 };
 

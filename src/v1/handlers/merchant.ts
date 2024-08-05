@@ -16,7 +16,7 @@ import {
   BridgeComplianceLinksResponse,
   BridgeComplianceType,
 } from '../types/bridge/compliance';
-import { PrismaSelectedCompliance } from '../types/prisma';
+import { PrismaApiKey, PrismaSelectedCompliance } from '../types/prisma';
 import { ApiKeyService } from '../services/ApiKey';
 
 const merchantService = MerchantService.getInstance();
@@ -59,11 +59,11 @@ export async function createMerchantHandler(
     } else {
       // New merchant flow
       const complianceUuid = utils.generateUUID();
-      const fullName = utils.getFullName(partnerData.name, partnerData.surname);
+
       const registered = await merchantService.registerCompliancePartner(
         complianceUuid,
-        fullName,
-        partnerData.email
+        partnerData.company.name,
+        partnerData.company.email
       );
 
       compliance = await complianceService.createComplianceLinksForMerchant(
@@ -73,7 +73,9 @@ export async function createMerchantHandler(
       );
     }
 
-    return successResponse(rep, compliance);
+    const apiKey = await apiKeyService.createKey(merchant.id);
+
+    return successResponse(rep, { compliance, apiKey });
   } catch (error) {
     if (error instanceof PrismaError) {
       return errorResponse(req, rep, error.statusCode, error.message);

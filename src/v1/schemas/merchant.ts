@@ -7,20 +7,25 @@ import {
 
 export const MerchantCreateSchema = {
   body: t.Object({
-    name: t.String({ minLength: 1, maxLength: 255 }),
-    surname: t.String({ minLength: 1, maxLength: 255 }),
-    email: t.String({ format: 'email' }),
-    phoneNumber: t.String({
-      pattern: '^[+]?[(]?[0-9]{3}[)]?[-s.]?[0-9]{3}[-s.]?[0-9]{4,6}$',
-    }),
     fee: t.Optional(t.Number({ minimum: 3, maximum: 100 })),
     walletAddress: t.String({
       pattern: '^0x[a-fA-F0-9]{40}$',
       minLength: 42,
       maxLength: 42,
     }),
+    representatives: t.Array(
+      t.Object({
+        name: t.String({ minLength: 1, maxLength: 255 }),
+        surname: t.String({ minLength: 1, maxLength: 255 }),
+        email: t.String({ format: 'email' }),
+        phoneNumber: t.String({
+          pattern: '^[+]?[(]?[0-9]{3}[)]?[-s.]?[0-9]{3}[-s.]?[0-9]{4,6}$',
+        }),
+      })
+    ),
     company: t.Object({
       name: t.String({ minLength: 1, maxLength: 255 }),
+      email: t.String({ format: 'email' }),
       number: t.String({ pattern: '^[a-zA-Z0-9]*$' }),
     }),
     registeredAddress: t.Object({

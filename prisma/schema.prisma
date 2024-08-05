@@ -11,6 +11,7 @@ datasource db {
 model Company {
   id                BigInt     @id @default(autoincrement())
   name              String     @unique @db.VarChar(255)
+  email             String     @unique @db.VarChar(255)
   number            String     @unique @db.VarChar(255)
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
@@ -31,6 +32,7 @@ model Merchant {
   Compliance    Compliance[]
   Orders        Transaction[]
   Employees     Employee[]
+  ApiKeys       ApiKey[]
 }
 
 model Employee {
@@ -76,7 +78,6 @@ model User {
   registeredPasskeys RegisteredPasskey[]
   Employee           Employee?
   Customers          Customer[]
-  ApiKeys            ApiKey[]
 }
 
 model Compliance {
@@ -145,8 +146,8 @@ model ApiKey {
   lastUsedAt DateTime?
   expiresAt  DateTime?
   isActive   Boolean   @default(true)
-  userId     String
-  user       User      @relation(fields: [userId], references: [id])
+  merchantId Int
+  merchant   Merchant  @relation(fields: [merchantId], references: [id])
 
   @@index([key])
 }

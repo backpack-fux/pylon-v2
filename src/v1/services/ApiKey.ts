@@ -30,11 +30,11 @@ export class ApiKeyService {
   }
 
   // Create key
-  public async createKey(userId: UUID): Promise<string> {
+  public async createKey(merchantId: number): Promise<string> {
     const key = await prisma.apiKey.create({
       data: {
         key: this.generateKey(),
-        userId,
+        merchantId,
       },
     });
 
@@ -50,13 +50,13 @@ export class ApiKeyService {
     });
   }
 
-  // Get active keys by userId
-  public async getKeysByUserId(
-    userId: UUID
+  // Get all active keys by merchantId
+  public async getKeysByMerchantId(
+    merchantId: number
   ): Promise<Pick<PrismaApiKey, 'key'>[]> {
     return await prisma.apiKey.findMany({
       where: {
-        userId,
+        merchantId,
         isActive: true,
       },
       select: {
@@ -65,7 +65,7 @@ export class ApiKeyService {
     });
   }
 
-  // Get active keys by key
+  // Get all active keys by key
   public async getKeysByKey(key: string): Promise<Pick<PrismaApiKey, 'key'>[]> {
     return await prisma.apiKey.findMany({
       where: {

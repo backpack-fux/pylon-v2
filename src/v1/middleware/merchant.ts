@@ -12,11 +12,30 @@ export const validateMerchantDetails = async (
   req: FastifyRequestTypebox<typeof MerchantCreateSchema>,
   rep: FastifyReplyTypebox<typeof MerchantCreateSchema>
 ): Promise<void> => {
-  const { email, phoneNumber, walletAddress } = req.body;
+  const { email: companyEmail } = req.body.company;
+  const { walletAddress: companyWalletAddress } = req.body;
+  const reps = req.body.representatives;
 
-  const fields = await prisma.user.findFirst({
+  const repEmails = reps.map((rep) => rep.email);
+  const repPhoneNumbers = reps.map((rep) => rep.phoneNumber).filter(Boolean);
+
+  const company = 'company';
+  const representative = 'representative';
+
+  const existingUsers = await prisma.user.findFirst({
     where: {
-      OR: [{ email }, { phoneNumber }, { walletAddress }],
+      OR: [
+        { email: { in: repEmails } },
+        { phoneNumber: { in: repPhoneNumbers } },
+        { walletAddress: companyWalletAddress },
+      ],
+      Employee: {
+        merchant: {
+          company: {
+            email: companyEmail,
+          },
+        },
+      },
     },
     select: {
       email: true,
@@ -25,23 +44,43 @@ export const validateMerchantDetails = async (
     },
   });
 
-  if (fields && fields.email === email) {
-    return rep.code(ERROR409.statusCode).send({
-      statusCode: ERROR409.statusCode,
-      message: ERRORS.user.emailExists(email),
-    });
-  }
-  if (fields && fields.phoneNumber === phoneNumber) {
-    return rep.code(ERROR409.statusCode).send({
-      statusCode: ERROR409.statusCode,
-      message: ERRORS.user.phoneNumberExists(phoneNumber),
-    });
-  }
-  if (fields && fields.walletAddress === walletAddress) {
-    return rep.code(ERROR409.statusCode).send({
-      statusCode: ERROR409.statusCode,
-      message: ERRORS.user.walletAddressExists(walletAddress),
-    });
+  if (existingUsers) {
+    if (existingUsers.email === companyEmail) {
+      return rep.code(ERROR409.statusCode).send({
+        statusCode: ERROR409.statusCode,
+        message: ERRORS.general.emailExists(company, companyEmail),
+      });
+    }
+    if (repEmails.includes(existingUsers.email)) {
+      return rep.code(ERROR409.statusCode).send({
+        statusCode: ERROR409.statusCode,
+        message: ERRORS.general.emailExists(
+          representative,
+          existingUsers.email
+        ),
+      });
+    }
+    if (
+      existingUsers.phoneNumber &&
+      repPhoneNumbers.includes(existingUsers.phoneNumber)
+    ) {
+      return rep.code(ERROR409.statusCode).send({
+        statusCode: ERROR409.statusCode,
+        message: ERRORS.general.phoneNumberExists(
+          representative,
+          existingUsers.phoneNumber
+        ),
+      });
+    }
+    if (existingUsers.walletAddress === companyWalletAddress) {
+      return rep.code(ERROR409.statusCode).send({
+        statusCode: ERROR409.statusCode,
+        message: ERRORS.general.walletAddressExists(
+          company,
+          companyWalletAddress
+        ),
+      });
+    }
   }
 
   return;
@@ -64,7 +103,7 @@ export const validateMerchantAPIKey = async (
   const userApiKey = await prisma.apiKey.findUnique({
     where: { key: apiKey },
     include: {
-      user: { include: { Employee: { include: { merchant: true } } } },
+      merchant: true,
     },
   });
 
@@ -87,7 +126,7 @@ export const validateMerchantAPIKey = async (
     data: { lastUsedAt: new Date() },
   });
 
-  req.merchant = userApiKey.user.Employee?.merchant;
+  req.merchant = userApiKey.merchant;
 
   return;
 };
