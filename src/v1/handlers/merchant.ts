@@ -8,15 +8,21 @@ import { ERROR400, ERROR404, ERROR500, STANDARD } from '@/helpers/constants';
 import { BridgeService } from '../services/external/Bridge';
 import { utils } from '@/helpers/utils';
 import { errorResponse, successResponse } from '@/responses';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { MerchantService } from '../services/Merchant';
 import { ComplianceService } from '../services/Compliance';
 import { PrismaError } from '../services/Error';
 import { UUID } from 'crypto';
+import {
+  BridgeComplianceLinksResponse,
+  BridgeComplianceType,
+} from '../types/bridge/compliance';
+import { PrismaSelectedCompliance } from '../types/prisma';
+import { ApiKeyService } from '../services/ApiKey';
 
 const merchantService = MerchantService.getInstance();
 const complianceService = ComplianceService.getInstance();
 const bridgeService = BridgeService.getInstance();
+const apiKeyService = ApiKeyService.getInstance();
 
 // TODO: create merchant via merchant dashboard
 export async function createMerchantHandler(
@@ -27,19 +33,45 @@ export async function createMerchantHandler(
     const partnerData = req.body;
     const merchant = await merchantService.createPartner(partnerData);
 
-    const complianceUuid = utils.generateUUID();
-    const fullName = utils.getFullName(req.body.name, req.body.surname);
-    const registered = await merchantService.registerCompliancePartner(
-      complianceUuid,
-      fullName,
-      req.body.email
-    );
+    let compliance: PrismaSelectedCompliance;
 
-    const compliance = await complianceService.insertMerchant(
-      complianceUuid,
-      registered,
-      merchant
-    );
+    if (partnerData.compliance) {
+      // Existing merchant flow
+      const { complianceUuid, kycLink, tosLink, kycStatus, tosStatus } =
+        partnerData.compliance;
+
+      const complianceData: Pick<
+        BridgeComplianceLinksResponse,
+        'kyc_link' | 'tos_link' | 'kyc_status' | 'tos_status' | 'type'
+      > = {
+        type: BridgeComplianceType.Business,
+        kyc_link: kycLink,
+        tos_link: tosLink,
+        kyc_status: kycStatus,
+        tos_status: tosStatus,
+      };
+
+      compliance = await complianceService.createComplianceLinksForMerchant(
+        complianceUuid as UUID,
+        complianceData,
+        merchant
+      );
+    } else {
+      // New merchant flow
+      const complianceUuid = utils.generateUUID();
+      const fullName = utils.getFullName(partnerData.name, partnerData.surname);
+      const registered = await merchantService.registerCompliancePartner(
+        complianceUuid,
+        fullName,
+        partnerData.email
+      );
+
+      compliance = await complianceService.createComplianceLinksForMerchant(
+        complianceUuid,
+        registered,
+        merchant
+      );
+    }
 
     return successResponse(rep, compliance);
   } catch (error) {

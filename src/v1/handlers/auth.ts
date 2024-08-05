@@ -29,6 +29,7 @@ import { FastifyReplyTypebox, FastifyRequestTypebox } from '@/v1/types/fastify';
 import jwt from 'jsonwebtoken';
 import { NeynarAPIClient } from '@neynar/nodejs-sdk';
 import { v4 as uuidv4 } from 'uuid';
+import { UUID } from 'crypto';
 
 const passkeyService = PasskeyService.getInstance();
 const userService = UserService.getInstance();
@@ -177,7 +178,7 @@ export async function removePasskey(
 
     await passkeyService.removePasskey({
       id: passkeyId,
-      userId: req.user.id,
+      userId: req.user.id as UUID,
       credential: req.user.credential,
     });
   } catch (error) {
@@ -191,7 +192,9 @@ export async function findPasskeysForUser(
   rep: FastifyReplyTypebox<typeof BaseResponseSchema>
 ) {
   try {
-    const passkeys = await passkeyService.findPasskeyByUserId(req.user.id);
+    const passkeys = await passkeyService.findPasskeyByUserId(
+      req.user.id as UUID
+    );
     return successResponse(rep, { passkeys });
   } catch (error) {
     const parsedError = parseError(error);

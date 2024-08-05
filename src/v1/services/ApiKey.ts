@@ -1,5 +1,5 @@
 import { prisma } from '@/db';
-import { getRandomValues, randomUUID } from 'crypto';
+import { getRandomValues, randomUUID, UUID } from 'crypto';
 import { PrismaApiKey } from '../types/prisma';
 import { bpApiKey } from '../types/apiKey';
 
@@ -30,7 +30,7 @@ export class ApiKeyService {
   }
 
   // Create key
-  public async createKey(userId: number): Promise<string> {
+  public async createKey(userId: UUID): Promise<string> {
     const key = await prisma.apiKey.create({
       data: {
         key: this.generateKey(),
@@ -52,7 +52,7 @@ export class ApiKeyService {
 
   // Get active keys by userId
   public async getKeysByUserId(
-    userId: number
+    userId: UUID
   ): Promise<Pick<PrismaApiKey, 'key'>[]> {
     return await prisma.apiKey.findMany({
       where: {

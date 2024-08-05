@@ -14,14 +14,8 @@ export const validateMerchantDetails = async (
 ): Promise<void> => {
   const { email, phoneNumber, walletAddress } = req.body;
 
-  const merchant = await prisma.user.findFirst({
+  const fields = await prisma.user.findFirst({
     where: {
-      merchantId: {
-        not: null,
-      },
-      merchantProfile: {
-        isNot: null,
-      },
       OR: [{ email }, { phoneNumber }, { walletAddress }],
     },
     select: {
@@ -31,22 +25,22 @@ export const validateMerchantDetails = async (
     },
   });
 
-  if (merchant && merchant.email === email) {
+  if (fields && fields.email === email) {
     return rep.code(ERROR409.statusCode).send({
       statusCode: ERROR409.statusCode,
-      message: ERRORS.merchant.emailExists(email),
+      message: ERRORS.user.emailExists(email),
     });
   }
-  if (merchant && merchant.phoneNumber === phoneNumber) {
+  if (fields && fields.phoneNumber === phoneNumber) {
     return rep.code(ERROR409.statusCode).send({
       statusCode: ERROR409.statusCode,
-      message: ERRORS.merchant.phoneNumberExists(phoneNumber),
+      message: ERRORS.user.phoneNumberExists(phoneNumber),
     });
   }
-  if (merchant && merchant.walletAddress === walletAddress) {
+  if (fields && fields.walletAddress === walletAddress) {
     return rep.code(ERROR409.statusCode).send({
       statusCode: ERROR409.statusCode,
-      message: ERRORS.merchant.walletAddressExists(walletAddress),
+      message: ERRORS.user.walletAddressExists(walletAddress),
     });
   }
 
@@ -69,7 +63,9 @@ export const validateMerchantAPIKey = async (
 
   const userApiKey = await prisma.apiKey.findUnique({
     where: { key: apiKey },
-    include: { user: { include: { merchantProfile: true } } },
+    include: {
+      user: { include: { Employee: { include: { merchant: true } } } },
+    },
   });
 
   if (!userApiKey || !userApiKey.isActive) {
@@ -91,7 +87,7 @@ export const validateMerchantAPIKey = async (
     data: { lastUsedAt: new Date() },
   });
 
-  req.merchant = userApiKey.user.merchantProfile;
+  req.merchant = userApiKey.user.Employee?.merchant;
 
   return;
 };

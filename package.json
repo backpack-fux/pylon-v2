@@ -21,8 +21,10 @@
     "db:status": "prisma migrate status",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "test": "jest",
-    "sync-kyc-data": "ts-node -r tsconfig-paths/register src/v1/scripts/syncBridgeKycData.ts"
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:delete": "docker-compose down -v --remove-orphans",
+    "test": "jest"
   },
   "dependencies": {
     "@fastify/accepts": "4.3.0",

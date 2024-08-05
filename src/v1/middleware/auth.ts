@@ -24,7 +24,7 @@ export const authenticate = async (req: FastifyRequest, rep: FastifyReply) => {
     // Verify the JWT token using the Fastify JWT plugin
     await req.jwtVerify();
 
-    const user = await userService.findOneById(req.user.id);
+    const user = await userService.findOneById(req.user.id as UUID);
     if (!user) {
       return rep
         .code(ERROR401.statusCode)
@@ -149,6 +149,29 @@ export const validateFarcasterUser = async (
   }
 
   req.signerUuid = payload.signerUuid as UUID;
+
+  return;
+};
+
+export const validateAPIKey = async (
+  req: FastifyRequest,
+  rep: FastifyReply
+) => {
+  const apiKey = req.headers['x-api-key'];
+
+  if (!apiKey) {
+    return rep.code(ERROR401.statusCode).send({
+      statusCode: ERROR401.statusCode,
+      data: ERRORS.auth.invalidAPIKey,
+    });
+  }
+
+  if (apiKey !== Config.serverApiKey) {
+    return rep.code(ERROR401.statusCode).send({
+      statusCode: ERROR401.statusCode,
+      data: ERRORS.auth.invalidAPIKey,
+    });
+  }
 
   return;
 };

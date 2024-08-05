@@ -1,10 +1,5 @@
 import { BridgeService } from '../services/external/Bridge';
-import { ComplianceService } from '../services/Compliance';
-import {
-  BridgeComplianceErrorResponse,
-  BridgeComplianceKycStatus,
-  BridgeComplianceType,
-} from '../types/bridge/compliance';
+import { BridgeComplianceErrorResponse } from '../types/bridge/compliance';
 
 // Type guard
 const isBridgeComplianceErrorResponse = (
@@ -20,7 +15,6 @@ const isBridgeComplianceErrorResponse = (
  */
 const syncBridgeKycData = async () => {
   const bridgeService = BridgeService.getInstance();
-  const complianceService = ComplianceService.getInstance();
 
   let startingAfter: string | undefined;
   const limit = 100;
@@ -35,19 +29,6 @@ const syncBridgeKycData = async () => {
     }
 
     const { data: customers } = resp;
-
-    for (const customer of customers) {
-      // Store each customer in your database
-      if (customer.kyc_status === BridgeComplianceKycStatus.Approved) {
-        if (customer.type === BridgeComplianceType.Business) {
-          // await complianceService.createOrUpdateCustomer(customer);
-          console.log(customer);
-        } else if (customer.type === BridgeComplianceType.Individual) {
-          await complianceService.createOrUpdateCustomer(customer);
-          console.log(customer);
-        }
-      }
-    }
 
     console.log(`Processed ${customers.length} customers`);
 

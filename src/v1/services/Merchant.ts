@@ -5,7 +5,7 @@ import {
 } from '../types/bridge/compliance';
 import { BridgeService } from './external/Bridge';
 import { UUID } from 'crypto';
-import { PrismaMerchant } from '../types/prisma';
+import { PrismaEmployee, PrismaMerchant, PrismaUser } from '../types/prisma';
 import { AddressType, EmployeeRole } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { ERROR400 } from '@/helpers/constants';
@@ -27,7 +27,7 @@ export class MerchantService {
   /** @dev create partner */
   public async createPartner(
     partnerData: MerchantCreateBody
-  ): Promise<PrismaMerchant> {
+  ): Promise<PrismaMerchant & { Employees: Pick<PrismaEmployee, 'userId'>[] }> {
     const {
       name: representativeName,
       surname: representativeSurname,
@@ -48,13 +48,11 @@ export class MerchantService {
       const merchant = await prisma.merchant.create({
         data: {
           fee,
+          walletAddress: walletAddress,
           company: {
             create: {
               name: companyName,
               number: companyNumber,
-              repName: representativeName,
-              repSurname: representativeSurname,
-              email: representativeEmail,
               registeredAddress: {
                 create: {
                   type: AddressType.REGISTERED,
@@ -77,9 +75,21 @@ export class MerchantService {
                 create: {
                   email: representativeEmail,
                   phoneNumber: representativePhoneNumber,
-                  walletAddress,
                 },
               },
+            },
+          },
+        },
+        select: {
+          id: true,
+          walletAddress: true,
+          fee: true,
+          createdAt: true,
+          updatedAt: true,
+          companyId: true,
+          Employees: {
+            select: {
+              userId: true,
             },
           },
         },

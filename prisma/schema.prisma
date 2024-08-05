@@ -8,34 +8,75 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Company {
+  id                BigInt     @id @default(autoincrement())
+  name              String     @unique @db.VarChar(255)
+  number            String     @unique @db.VarChar(255)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  addressId         BigInt
+  registeredAddress Address    @relation(fields: [addressId], references: [id])
+  Merchant          Merchant[]
+}
+
 model Merchant {
-  id         Int           @id @default(autoincrement())
-  fee        Decimal       @default(6.50) @db.Decimal(4, 2)
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
-  companyId  BigInt
-  company    Company       @relation(fields: [companyId], references: [id])
-  Customers  Customer[]
-  Compliance Compliance[]
-  Orders     Transaction[]
-  Employees  Employee[]
-  User       User[]
+  id            Int           @id @default(autoincrement())
+  fee           Decimal       @default(6.50) @db.Decimal(4, 2)
+  walletAddress String        @unique @db.Char(42)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  companyId     BigInt
+  company       Company       @relation(fields: [companyId], references: [id])
+  Customers     Customer[]
+  Compliance    Compliance[]
+  Orders        Transaction[]
+  Employees     Employee[]
+}
+
+model Employee {
+  id         Int          @id @default(autoincrement())
+  name       String       @db.VarChar(255)
+  surname    String       @db.VarChar(255)
+  role       EmployeeRole
+  merchantId Int
+  userId     String       @unique
+  rainId     String?      @unique @db.VarChar(36)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  user       User         @relation(fields: [userId], references: [id])
+  merchant   Merchant     @relation(fields: [merchantId], references: [id])
 }
 
 model Customer {
-  id             BigInt           @id @default(autoincrement())
-  name           String           @db.VarChar(255)
-  surname        String?          @db.VarChar(255)
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
+  id             BigInt        @id @default(autoincrement())
+  name           String        @db.VarChar(255)
+  surname        String?       @db.VarChar(255)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
   merchantId     Int
   addressId      BigInt?
-  userId         BigInt           @unique
-  user           User             @relation(fields: [userId], references: [id])
-  billingAddress PhysicalAddress? @relation(fields: [addressId], references: [id])
-  merchant       Merchant         @relation(fields: [merchantId], references: [id])
-  compliance     Compliance[]
-  orders         Transaction[]
+  userId         String
+  user           User          @relation(fields: [userId], references: [id])
+  billingAddress Address?      @relation(fields: [addressId], references: [id])
+  merchant       Merchant      @relation(fields: [merchantId], references: [id])
+  Compliance     Compliance[]
+  Orders         Transaction[]
+
+  @@unique([userId, merchantId])
+}
+
+model User {
+  id                 String              @id @default(uuid())
+  email              String              @unique
+  phoneNumber        String?             @unique
+  walletAddress      String?             @unique @db.Char(42)
+  username           String?             @unique @db.VarChar(15)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  registeredPasskeys RegisteredPasskey[]
+  Employee           Employee?
+  Customers          Customer[]
+  ApiKeys            ApiKey[]
 }
 
 model Compliance {
@@ -66,12 +107,12 @@ model Transaction {
   buyerId          BigInt
   merchantId       Int
   addressId        BigInt?
-  shippingAddress  PhysicalAddress?  @relation(fields: [addressId], references: [id])
+  shippingAddress  Address?          @relation(fields: [addressId], references: [id])
   customer         Customer          @relation(fields: [buyerId], references: [id])
   merchant         Merchant          @relation(fields: [merchantId], references: [id])
 }
 
-model PhysicalAddress {
+model Address {
   id          BigInt        @id @default(autoincrement())
   street1     String        @db.VarChar(50)
   street2     String?       @db.VarChar(50)
@@ -91,40 +132,10 @@ model RegisteredPasskey {
   credentialId String              @unique
   publicKey    String
   algorithm    CredentialAlgorithm @default(ES256)
-  userId       BigInt
+  userId       String
   createdAt    DateTime            @default(now())
   updatedAt    DateTime            @updatedAt
   user         User                @relation(fields: [userId], references: [id])
-}
-
-model Employee {
-  id         Int          @id @default(autoincrement())
-  name       String       @db.VarChar(255)
-  surname    String       @db.VarChar(255)
-  role       EmployeeRole
-  merchantId Int
-  userId     BigInt
-  rainId     String?      @unique @db.VarChar(36)
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
-  user       User         @relation(fields: [userId], references: [id])
-  merchant   Merchant     @relation(fields: [merchantId], references: [id])
-}
-
-model User {
-  id                 BigInt              @id @default(autoincrement())
-  email              String              @unique
-  phoneNumber        String?             @unique
-  walletAddress      String?             @unique
-  username           String?             @unique @db.VarChar(15)
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
-  registeredPasskeys RegisteredPasskey[]
-  merchantProfile    Merchant?           @relation(fields: [merchantId], references: [id])
-  customerProfile    Customer?
-  apiKeys            ApiKey[]
-  employees          Employee[]
-  merchantId         Int?
 }
 
 model ApiKey {
@@ -134,24 +145,10 @@ model ApiKey {
   lastUsedAt DateTime?
   expiresAt  DateTime?
   isActive   Boolean   @default(true)
-  userId     BigInt
+  userId     String
   user       User      @relation(fields: [userId], references: [id])
 
   @@index([key])
-}
-
-model Company {
-  id                BigInt          @id @default(autoincrement())
-  name              String          @unique @db.VarChar(255)
-  number            String          @unique @db.VarChar(255)
-  repName           String          @db.VarChar(255)
-  repSurname        String          @db.VarChar(255)
-  email             String          @unique @db.VarChar(255)
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
-  addressId         BigInt
-  registeredAddress PhysicalAddress @relation(fields: [addressId], references: [id])
-  Merchant          Merchant[]
 }
 
 enum TransactionStatus {

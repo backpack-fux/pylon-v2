@@ -74,33 +74,35 @@ export class ComplianceService {
   }
 
   /**
-   * @param complianceUuid Randomly generated UUID for
+   * @param complianceUuid Randomly generated UUID for compliance
    * @param registered response links from compliance partner
    * @param merchant link compliance table to merchant id
    * @returns Insert merchant into db using information from the compliance partner
    */
-  public async insertMerchant(
+  public async createComplianceLinksForMerchant(
     complianceUuid: UUID,
-    registered: BridgeComplianceLinksResponse,
+    registered: Pick<
+      BridgeComplianceLinksResponse,
+      'kyc_link' | 'tos_link' | 'kyc_status' | 'tos_status' | 'type'
+    >,
     merchant: Merchant
-  ): Promise<PrismaSelectedCompliance | null> {
+  ): Promise<PrismaSelectedCompliance> {
     try {
-      const compliance: PrismaSelectedCompliance =
-        await prisma.compliance.create({
-          data: {
-            id: complianceUuid,
-            type: AccountType.BUSINESS,
-            verificationDocumentLink: registered.kyc_link,
-            termsOfServiceLink: registered.tos_link,
-            verificationStatus: VerificationStatus.NOT_STARTED,
-            termsOfServiceStatus: TosStatus.PENDING,
-            merchantId: merchant.id,
-          },
-          select: {
-            verificationDocumentLink: true,
-            termsOfServiceLink: true,
-          },
-        });
+      const compliance = await prisma.compliance.create({
+        data: {
+          id: complianceUuid,
+          type: this.mapAccountType(registered.type),
+          verificationDocumentLink: registered.kyc_link,
+          termsOfServiceLink: registered.tos_link,
+          verificationStatus: this.mapKycStatus(registered.kyc_status),
+          termsOfServiceStatus: this.mapTosStatus(registered.tos_status),
+          merchantId: merchant.id,
+        },
+        select: {
+          verificationDocumentLink: true,
+          termsOfServiceLink: true,
+        },
+      });
       return compliance;
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
@@ -136,31 +138,6 @@ export class ComplianceService {
       } else {
         throw error;
       }
-    }
-  }
-
-  public async createOrUpdateCustomer(
-    customer: BridgeComplianceCustomerResponse
-  ) {
-    if (customer.type === BridgeComplianceType.Business) {
-      const compliance = await prisma.compliance.upsert({
-        where: {
-          id: customer.id,
-        },
-        update: {
-          verificationStatus: this.mapKycStatus(customer.kyc_status),
-          termsOfServiceStatus: this.mapTosStatus(customer.tos_status),
-        },
-        create: {
-          buyerId: BigInt(customer.id),
-          type: this.mapAccountType(customer.type),
-          verificationStatus: this.mapKycStatus(customer.kyc_status),
-          termsOfServiceStatus: this.mapTosStatus(customer.tos_status),
-          verificationDocumentLink: customer.kyc_link,
-          termsOfServiceLink: customer.tos_link,
-          createdAt: new Date(customer.created_at),
-        },
-      });
     }
   }
 }

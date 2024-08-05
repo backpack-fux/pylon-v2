@@ -34,14 +34,14 @@ export const ERRORS = {
   fetch: {
     error: (message: string) => `Fetch error: ${message}`,
   },
-  merchant: {
-    exists: 'Already exists',
-    notExists: 'Does not exist',
-    notRegistered: 'Is not registered',
+  user: {
+    exists: 'User already exists',
+    notExists: 'User does not exist',
+    notRegistered: 'User is not registered',
     emailExists: (email: string) =>
-      `A merchant with email ${email} already exists.`,
+      `A user with email ${email} already exists.`,
     phoneNumberExists: (phoneNumber: string) =>
-      `A merchant with phone number ${phoneNumber} already exists.`,
+      `A user with phone number ${phoneNumber} already exists.`,
     walletAddressExists: (walletAddress: string) =>
       `The wallet address ${walletAddress} is already in use.`,
   },

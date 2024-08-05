@@ -12,6 +12,7 @@ import {
   validateMerchantDetails,
   validateMerchantAPIKey,
 } from '../middleware/merchant';
+import { validateAPIKey } from '../middleware/auth';
 
 const Merchant = async (app: FastifyInstance) => {
   /**
@@ -23,7 +24,7 @@ const Merchant = async (app: FastifyInstance) => {
       method: methods.POST,
       url: '/create',
       schema: MerchantCreateSchema,
-      preHandler: [validateMerchantDetails], // TODO: validate created entries
+      preHandler: [validateAPIKey, validateMerchantDetails], // TODO: validate created entries
       handler: createMerchantHandler,
     })
 

@@ -1,0 +1,21 @@
+name: pylonv2
+version: '3'
+volumes:
+  psql:
+services:
+  psql:
+    image: postgres
+    container_name: psql # name of the service
+    environment:
+      POSTGRES_USER: pylonv2user
+      POSTGRES_PASSWORD: pylonv2password
+      POSTGRES_DB: localdb
+    volumes:
+      - psql:/var/lib/postgresql/data # save data between restarts
+    ports:
+      - 9999:5432 # binds port 5555 on your computer to the postgres port!
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U pylonv2user -d localdb']
+      interval: 10s
+      timeout: 5s
+      retries: 5
